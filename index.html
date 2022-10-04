@@ -4,12 +4,23 @@
     <p>
 <a href="\bing\rili.html" target="_blank">日历</a>
     <p>
-<form id="form1">
-    <table border="0">
-      <tr>
-        <td>
-          <input id="name" name="name" type="text" />
-        </td>
-      </tr>
-    </table>
-</form>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>bb1026.github.io/bing/</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+<input type="text" id="enterSubmit" value="">
+<script type="text/javascript">
+   window.onload = function(){
+document.getElementById("enterSubmit").onkeyup = function(e){
+           e = e || window.event;
+           var keycode = e.keyCode || e.which ||e.charCode;
+           if(keycode === 13){
+                alert(enterSubmit.value);
+            }
+        }
+    };
+</script>
+</body>
+</html>
