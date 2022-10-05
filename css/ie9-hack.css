@@ -1,0 +1,27 @@
+.choose-date{
+				display:table;
+				border-spacing:5px 0px;
+			}
+
+.choose-year, .holiday-schedule, .go-today{
+				display: table-cell; /*IE9*/
+			}
+.choose-month{
+				display:table-cell;
+			}
+
+.cal-body{
+				dispaly:table;
+				border-spacing:5px 0px;
+			}
+.date-details{
+				display:table-cell;
+				width:200px;
+			}
+.cal-date{
+				display:table-cell;
+				width:70%;
+}
+.suitAndAvoid{
+				margin: 0px 10px 0px 10px;
+			}
