@@ -1,0 +1,132 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="author" content="yupan" />
+		<meta name="description" content="万年历" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link type="text/css" rel="stylesheet" href="css/calendar.css">
+		<!--[if IE 9.0]> 
+			<link type="text/css" rel="stylesheet" href="css/ie9-hack.css">
+		<![endif]-->
+		<title>万年历</title>		
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="cal-wrap">
+				<form name="CalDate">
+					<div class="cal-header">
+						<p>万年历</p>
+						<!--<p class="year-name">丙申年壬辰月己未日</p>-->
+						<div class="choose-date">
+							<div class="choose-year">
+								<select name="selectYear" onchange="changeCaldate();">
+									<script>
+                  						for(i=1901;i<2050;i++) 
+                  							{document.write('<option>'+i+"年"+'</option>');}
+              						</script>									
+								</select>  
+							</div>
+							<div class="choose-month">
+								<a id="prev-month" href="javascript:;">&lt;</a>
+								<a id="next-month" href="javascript:;">&gt;</a>
+								<select name="selectMonth" onchange="changeCaldate();">
+									<script>
+                  						for(i=1;i<=12;i++) 
+                  							{document.write('<option>'+i+"月"+'</option>');}
+              						</script>
+								</select> 
+							</div>
+							
+							<div class="go-today">
+								<input id="back-to-today" type="submit" value="返回今天" />
+							</div>
+							<div class="holiday-schedule">
+								<select name="holidayPlan" onchange="checkHolidayPlan();">
+									<option>假日安排</option>
+									<script>
+										var holiday = ["元旦","春节","清明节","劳动节","端午节","中秋节","国庆节"];
+										
+                  						for(i=0;i<=6;i++) 
+                  							{document.write('<option>'+holiday[i]+'</option>');}
+              						</script>
+								</select> 
+							</div>
+							<div class="time-now" >
+								<span>北京时间：<span id="timeNow"></span></span>
+							</div>
+						</div>
+					</div>
+					<div class="cal-body">
+						<div class="cal-date">
+							<table>
+								<thead>
+									<tr>
+							            <td>日</td>
+							            <td>一</td>
+							            <td>二</td>
+							            <td>三</td>
+							            <td>四</td>
+							            <td>五</td>
+							            <td>六</td>
+							        </tr> 
+								</thead>
+								<tbody>
+									<script>
+								          var dayNum;
+								          for(i=0;i<5;i++) {
+								             document.write('<tr id="row' + (i+1) +'">');//写入表的每一行，一共有5行，共循环5次，i为星期数
+								             for(j=1;j<=7;j++)
+								             {
+								                dayNum = i*7+j;//dayNum为这个月的第几天
+								                document.write('<td id="box' + dayNum +'">'+
+								                	'<div class="calDateNum" id="calD' +dayNum+'"></div>'+
+								                	'<div class="lunarDate" id="lunD' +dayNum+ '"></div>'+
+								                	'<div id="hTran'+dayNum+'">假</div>'+
+								                	'</td>')
+								             }
+								             document.write('</tr>');
+								          }
+							        </script>
+								</tbody>
+							</table>
+						</div>
+
+						<div class="date-details">
+							<div >
+								<span id="dateNow"></span>
+								<span>星期<span id="weekNow"></span></span>
+							</div>
+							<div class="toDay" id="whichDay">
+								
+							</div>
+							<div class="todayDetails">
+								<p>
+									<span id="yearAnimal"></span>
+									<span id="monthXZ"></span>
+								</p>
+								<p>
+									<span id="chineseEra">丙申年壬辰月壬戌日</span>
+								</p>
+								<p>
+									<span id="lunarCal"></span>
+								</p>							
+							</div>
+							<div class="suitAndAvoid">
+								<div class="suit">
+									宜：<span id="suitItems">祭祀 沐浴 解除</span>
+								</div>
+								<div class="avoid">
+									忌：<span id="avoidItems">嫁娶 开市</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<script src="js/calendar.js"></script>
+	</body>
+</html>
