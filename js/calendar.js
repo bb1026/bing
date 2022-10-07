@@ -7,13 +7,13 @@ var yearAnimal = document.getElementById("yearAnimal");
 var monthXZ = document.getElementById("monthXZ");
 var chineseEra = document.getElementById("chineseEra");
 
-var start ={Year:2000,
+var start ={Year:1901,
 			Mon:0,
 			Day:31,
 			SmallColdDay:6,
 			SmallColdHour:2,
 			SmallColdMin:5,} ;//万年历最早能查到的日期
-var end = {Year:2099};//万年历最早能查到的年份
+var end = {Year:2049};//万年历最早能查到的年份
 
 
 var XZLibrary = "摩羯水瓶双鱼白羊金牛双子巨蟹狮子处女天秤天蝎射手";//所有的星座名
