@@ -7,13 +7,13 @@ var yearAnimal = document.getElementById("yearAnimal");
 var monthXZ = document.getElementById("monthXZ");
 var chineseEra = document.getElementById("chineseEra");
 
-var start ={Year:1900,
+var start ={Year:2000,
 			Mon:0,
 			Day:31,
 			SmallColdDay:6,
 			SmallColdHour:2,
 			SmallColdMin:5,} ;//万年历最早能查到的日期
-var end = {Year:2049};//万年历最早能查到的年份
+var end = {Year:2099};//万年历最早能查到的年份
 
 
 var XZLibrary = "摩羯水瓶双鱼白羊金牛双子巨蟹狮子处女天秤天蝎射手";//所有的星座名
@@ -675,7 +675,7 @@ function displayTable(year,month){
 			clickBox(boxObj,i,year,month);
 
   		 	/*显示2016年的休假安排*/
-			if(year == 2016)
+			if(year == TyearNum)
 			{																												
 				for(var j=0;j<7;j++)
 				{	
@@ -768,7 +768,7 @@ function displayTable(year,month){
 
 	}	
 
-	if(year == 2016 && month==4 )
+	if(year == TyearNum && month==4 )
 	{
 		boxObj[35].className = "redBack";
 		hTranObj[35].style.display = "block";
@@ -837,7 +837,7 @@ function checkHolidayPlan(){
 /*根据输入的节日对应的selecedIndex来显示日历中的数据和右边的信息栏*/
 function goHoliday(holN){		
 		var holidayDate = ["0101","0208","0404","0501","0609","0915","1001"]
-		var year = 2016;
+		var year = TyearNum;
 		var month = parseInt(holidayDate[holN].substr(0,2));
 		var day = parseInt(holidayDate[holN].substr(2,2));
 		CalDate.selectYear.selectedIndex = 115;
