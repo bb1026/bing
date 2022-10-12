@@ -38,8 +38,7 @@ document.getElementById("enterSubmit").onkeyup = function(e){
            e = e || window.event;
            var keycode = e.keyCode || e.which ||e.charCode;
            if(keycode === 13){
-                Window.open("http://wa.me/65"+enterSubmit.value); 
-<!-- 另一种方法 location.href="http://wa.me/65"+enterSubmit.value; -->
+           location.href="http://wa.me/65"+enterSubmit.value;
             }
         }
     };
