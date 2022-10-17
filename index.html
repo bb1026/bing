@@ -1,31 +1,30 @@
-    <!DOCTYPE html>
-    <html>
-        <head>
-            <meta charset="utf-8" />
-            <title>Bing的网站</title>
-            <!--网页标题左侧显示-->
-            <link rel="icon" href="imgs/logo.ico" type="image/x-icon">
-            <b--收藏夹显示图标-->
-            <link rel="shortcut icon" href="imgs/logo.ico" type="image/x-icon">
-        </head>
-        <body>
-            
-        </body>
-    </html>
-
-<a href="https://bb1026.github.io/bing/"><img src="imgs\logo.ico" width="100" hight="100" /></a>
+	<!DOCTYPE html>
+	<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<style type="text/css">
+		div{
+			height: 100%;
+			width:100%;
+			background-color:rgba(,);
+			text-align: center; 
+			line-height: 20px;/*文字水平居中*/
+			margin:auto;/*div水平居中*/
+		}
+	</style>
+</head>
+<body>
+	<div class="box1"><a href="https://bb1026.github.io/bing/"><img src="logo.ico" width="100" hight="100" /></a></div>
+	<div class="box1"><a href="\bing\time.html" target="_blank">时钟</a></div>
 	<p>
-<a href="\bing\time.html" target="_blank">时钟</a>
+	<div class="box2"><a href="\bing\calendar.html" target="_blank">万年历</a></div>
 	<p>
-<a href="\bing\calendar.html" target="_blank">万年历</a>
+	<div class="box3"><a href="http://wa.me/6584514014" target="_blank">WhatsApp Me</a></div>
 	<p>
-<a href="http://wa.me/6584514014" target="_blank">WhatsApp Me</a>
-	<p>
-<a>请输入新加坡手机号按回车</a>
-	<br>
+	<div class="box4"><a>请输入新加坡手机号按回车</a></div>
+	<div class="box5">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<title>Bing的网站</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
@@ -36,11 +35,14 @@ document.getElementById("enterSubmit").onkeyup = function(e){
            e = e || window.event;
            var keycode = e.keyCode || e.which ||e.charCode;
            if(keycode === 13){
-           location.href="http://wa.me/65"+enterSubmit.value;
+	location.href="http://wa.me/65"+enterSubmit.value;
             }
         }
     };
 </script>
+</body>
+</html>
+	</div>
 </body>
 </html>
 		
@@ -48,7 +50,7 @@ document.getElementById("enterSubmit").onkeyup = function(e){
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>二维码的动态效果</title>
+    <title>二维码</title>
     <style>
         body {
             margin: 0px;
@@ -67,7 +69,7 @@ document.getElementById("enterSubmit").onkeyup = function(e){
             width: 44px;
             height: 44px;
 
-            background-image: url("imgs/weixin.jpg");
+            background-image: url("weixin.JPG");
             background-repeat: no-repeat;
             background-size: 100%;
 
@@ -83,7 +85,7 @@ document.getElementById("enterSubmit").onkeyup = function(e){
             height: 450px;
             background-color: white;
 
-            background-image: url("imgs/WeChatQR.jpg");
+            background-image: url("WeChatQR.JPG");
             background-repeat: no-repeat;
             background-size: 100%;
 
@@ -93,7 +95,7 @@ document.getElementById("enterSubmit").onkeyup = function(e){
         }
 
         #wechat:hover {
-            background-image: url("imgs/logo.ico");
+            background-image: url("logo.ico");
         }
 
         #wechat:hover>#code{
@@ -106,7 +108,6 @@ document.getElementById("enterSubmit").onkeyup = function(e){
     <div id="box">
         <!-- 用于显示微信图标 -->
         <div id="wechat">
-	<!--span style="float:left;color: #FFFFFF;background-color: rgba(,)">WeChat ID: LOVE1026</span-->
             <!-- 用于显示，隐藏二维码图片 -->
             <div id="code"></div>
         </div>
