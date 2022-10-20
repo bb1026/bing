@@ -1,7 +1,7 @@
-	<!DOCTYPE html>
-	<html lang="en">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-	<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Bing的网站</title>
 	<style type="text/css">
 		div{
@@ -12,49 +12,7 @@
 			line-height: 20px;/*文字水平居中*/
 			margin:auto;/*div水平居中*/
 		}
-	</style>
-</head>
-<body>
-	<div class="box1"><a href="https://bb1026.github.io/bing/"><img src="imgs\logo.ico" width="100" hight="100" /></a></div>
-	<div class="box1"><a href="\bing\time.html" target="_blank">时钟</a></div>
-	<p>
-	<div class="box2"><a href="\bing\calendar.html" target="_blank">万年历</a></div>
-	<p>
-	<div class="box2"><a href="https://www.yikm.net" target="_blank">小霸王游戏机</a></div>
-	<p>
-	<div class="box3"><a href="http://wa.me/6584514014" target="_blank">WhatsApp Me</a></div>
-	<p>
-	<div class="box4"><a>请输入新加坡手机号按回车</a></div>
-	<div class="box5">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head>
-<body>
-<input type="text" id="enterSubmit" value="">
-<script type="text/javascript">
-   window.onload = function(){
-document.getElementById("enterSubmit").onkeyup = function(e){
-           e = e || window.event;
-           var keycode = e.keyCode || e.which ||e.charCode;
-           if(keycode === 13){
-	location.href="http://wa.me/65"+enterSubmit.value;
-            }
-        }
-    };
-</script>
-</body>
-</html>
-	</div>
-</body>
-</html>
-		
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>二维码</title>
-    <style>
+
         body {
             margin: 0px;
         }
@@ -104,9 +62,31 @@ document.getElementById("enterSubmit").onkeyup = function(e){
         #wechat:hover>#code{
             display: block;
         }
-    </style>
+	</style>
 </head>
 <body>
+	<div class="box1"><a href="https://bb1026.github.io/bing/"><img src="logo.ico" width="100" hight="100" /></a></div>
+	<div class="box1"><a href="\bing\time.html" target="_blank">时钟</a></div>
+	<p>
+	<div class="box2"><a href="\bing\calendar.html" target="_blank">万年历</a></div>
+	<p>
+	<div class="box3"><a href="http://wa.me/6584514014" target="_blank">WhatsApp Me</a></div>
+	<p>
+	<div class="box4"><a>请输入新加坡手机号按回车</a></div>
+	<div class="box5">
+	<input type="text" id="enterSubmit" value="">
+	<script type="text/javascript">
+ 	window.onload = function(){
+	document.getElementById("enterSubmit").onkeyup = function(e){
+           e = e || window.event;
+           var keycode = e.keyCode || e.which ||e.charCode;
+           if(keycode === 13){
+	location.href="http://wa.me/65"+enterSubmit.value;
+            }
+        }
+    };
+</script>
+</div>
     <!-- 用于包含二维码所有的内容，显示在页面中的底部 -->
     <div id="box">
         <!-- 用于显示微信图标 -->
