@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>世界时间查询</title>
+    <meta charset="UTF-8">
+    <style>
+      label {
+        display: inline-block;
+        width: 120px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>世界时间查询</h1>
+    <form>
+      <label for="city">选择城市:</label>
+      <select id="city" name="city">
+        <option value="北京">北京</option>
+        <option value="伦敦">伦敦</option>
+        <option value="纽约">纽约</option>
+        <option value="东京">东京</option>
+        <option value="悉尼">悉尼</option>
+      </select>
+      <br><br>
+      <label for="time">当前时间:</label>
+      <span id="time"></span>
+    </form>
+
+    <script>
+      function updateTime() {
+        // 获取选择的城市
+        var city = document.getElementById('city').value;
+        
+        // 获取该城市的当前时间
+        var time;
+        if (city === '北京') {
+          time = new Date();
+        } else if (city === '伦敦') {
+          time = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/London' }));
+        } else if (city === '纽约') {
+          time = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+        } else if (city === '东京') {
+          time = new Date(new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }));
+        } else if (city === '悉尼') {
+          time = new Date(new Date().toLocaleString('en-AU', { timeZone: 'Australia/Sydney' }));
+        }
+        
+        // 格式化时间字符串
+        var timeString = time.toLocaleString();
+        
+        // 更新页面中的时间显示
+        document.getElementById('time').textContent = timeString;
+      }
+      
+      // 初始化页面时间
+      updateTime();
+      
+      // 当城市选择发生变化时更新时间
+      document.getElementById('city').addEventListener('change', updateTime);
+    </script>
+  </body>
+</html>
