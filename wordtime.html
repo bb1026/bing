@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>世界时间大全</title>
+    <meta charset="UTF-8">
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      
+      th, td {
+        text-align: left;
+        padding: 8px;
+        border: 1px solid #ddd;
+      }
+      
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+      
+      th {
+        background-color: #4CAF50;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>世界时间大全</h1>
+    <table>
+      <tr>
+        <th>城市</th>
+        <th>当前时间</th>
+      </tr>
+      <tr>
+        <td>伦敦</td>
+        <td id="london-time"></td>
+      </tr>
+      <tr>
+        <td>纽约</td>
+        <td id="new-york-time"></td>
+      </tr>
+      <tr>
+        <td>东京</td>
+        <td id="tokyo-time"></td>
+      </tr>
+      <tr>
+        <td>悉尼</td>
+        <td id="sydney-time"></td>
+      </tr>
+    </table>
+
+    <script>
+      function updateTime() {
+        // 获取当前北京时间
+        var beijingTime = new Date();
+        
+        // 计算不同城市的时间差
+        var londonTime = new Date(beijingTime.getTime() + 8 * 60 * 60 * 1000 - 1 * 60 * 60 * 1000);
+        var newYorkTime = new Date(beijingTime.getTime() + 8 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000);
+        var tokyoTime = new Date(beijingTime.getTime() + 8 * 60 * 60 * 1000 + 1 * 60 * 60 * 1000);
+        var sydneyTime = new Date(beijingTime.getTime() + 8 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000);
+        
+        // 格式化时间字符串
+        var londonTimeString = londonTime.toLocaleString('en-US', { timeZone: 'Europe/London' });
+        var newYorkTimeString = newYorkTime.toLocaleString('en-US', { timeZone: 'America/New_York' });
+        var tokyoTimeString = tokyoTime.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+        var sydneyTimeString = sydneyTime.toLocaleString('en-AU', { timeZone: 'Australia/Sydney' });
+        
+        // 更新表格中的时间显示
+        document.getElementById('london-time').textContent = londonTimeString;
+        document.getElementById('new-york-time').textContent = newYorkTimeString;
+        document.getElementById('tokyo-time').textContent = tokyoTimeString;
+        document.getElementById('sydney-time').textContent = sydneyTimeString;
+      }
+      
+      // 每秒更新一次时间
+      setInterval(updateTime, 1000);
+    </script>
+  </body>
+</html>
