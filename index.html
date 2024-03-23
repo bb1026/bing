@@ -22,7 +22,7 @@
             var pageFrame = document.getElementById("pageFrame");
 
             // 发送请求到JSON文件以获取值
-            fetch('\multiple_content.json') // 使用绝对路径
+            fetch('multiple_content.json') // 使用绝对路径
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('网络响应不正确');
@@ -36,6 +36,11 @@
                         pageFrame.src = url; // 在 iframe 中加载对应网页
                     } else {
                         alert("键不存在！");
+                    }
+
+                    // 检查值是否包含特定的链接
+                    if (data[key].includes("www.icloud.com/shortcuts/")) {
+                        window.location.href = data[key]; // 打开链接
                     }
                 })
                 .catch(error => {
