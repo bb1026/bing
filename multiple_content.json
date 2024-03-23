@@ -1,5 +1,6 @@
 {
-  "音乐": "music.json",
-  "日历": "calendar.html",
-  "书签": "sq.html"
+  "音乐": "https://bb1026.github.io/bing/music.json",
+  "日历": "https://bb1026.github.io/bing/calendar.html",
+  "书签": "https://bb1026.github.io/bing/sq.html",
+  "时钟": "https://bb1026.github.io/bing/time.html"
 }
