@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bing的网站</title>
-    <link rel="shortcut icon" href="\imgs\logo.ico" type="image/x-icon"> <!-- 添加书签logo -->
+    <title>网址跳转</title>
 </head>
 <body>
-    <input type="text" id="keyInput" placeholder="请输入..."> <!-- 添加了 placeholder -->
-    <button onclick="submitForm()">提交</button>
+    <input type="text" id="keyInput" placeholder="输入键..." onkeydown="checkKey(event)">
     <div id="result"></div> <!-- 用于显示结果的容器 -->
-    
+
     <script>
-        var urlToOpen; // 全局变量用于存储要打开的网址
+        function checkKey(event) {
+            if (event.keyCode === 13) { // 检测是否按下了回车键
+                submitForm();
+            }
+        }
 
         function submitForm() {
-            var key = document.getElementById("keyInput").value.trim(); // 去除空格和不可见字符
+            var key = document.getElementById("keyInput").value.trim(); // 获取输入的键
             var resultElement = document.getElementById("result");
 
             // 发送请求到JSON文件以获取值
-            fetch('\multiple_content.json') // 使用相对路径
+            fetch('https://bb1026.github.io/bing/multiple_content.json') // 使用绝对路径
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('网络响应不正确');
@@ -30,25 +32,16 @@
                     // 检查键是否存在于JSON数据中
                     if (data.hasOwnProperty(key)) {
                         var url = data[key];
-                        resultElement.textContent = url;
-                        urlToOpen = url; // 存储要打开的网址
+                        resultElement.textContent = "正在跳转到网址：" + url;
+                        window.location.href = url; // 直接跳转到对应网址
                     } else {
-                        resultElement.textContent = "数据库中未找到该键值对。";
+                        resultElement.textContent = "键不存在！";
                     }
                 })
                 .catch(error => {
                     console.error('获取数据时发生错误:', error);
                     resultElement.textContent = "获取数据时发生错误，请稍后再试。";
                 });
-        }
-
-        // 当用户点击按钮时打开存储的网址
-        function openUrl() {
-            if (urlToOpen) {
-                window.open(urlToOpen, '_blank');
-            } else {
-                alert("没有找到对应的网址。");
-            }
         }
     </script>
 </body>
