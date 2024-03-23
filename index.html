@@ -32,8 +32,7 @@
                     // 检查键是否存在于JSON数据中
                     if (data.hasOwnProperty(key)) {
                         var url = data[key];
-                        resultElement.textContent = url;
-                        window.open.href = url; // 直接跳转到对应网址
+                        window.location.href = url; // 直接跳转到对应网址
                     } else {
                         resultElement.textContent = "不存在！";
                     }
