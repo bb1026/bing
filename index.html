@@ -21,7 +21,7 @@
             var resultElement = document.getElementById("result");
 
             // 发送请求到JSON文件以获取值
-            fetch('https://bb1026.github.io/bing/multiple_content.json') // 使用绝对路径
+            fetch('\multiple_content.json') // 使用绝对路径
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('网络响应不正确');
@@ -32,7 +32,7 @@
                     // 检查键是否存在于JSON数据中
                     if (data.hasOwnProperty(key)) {
                         var url = data[key];
-                        resultElement.textContent = "正在跳转到网址：" + url;
+                        resultElement.textContent = url;
                         window.open.href = url; // 直接跳转到对应网址
                     } else {
                         resultElement.textContent = "不存在！";
