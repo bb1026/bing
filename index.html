@@ -4,37 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bing的网站</title>
-    <link rel="shortcut icon" href="\imgs\logo.ico" type="image/x-icon"> <!-- 添加书签logo -->
+    <link rel="shortcut icon" href='\imgs\logo.ico' type="image/x-icon"> <!-- 添加书签logo -->
 </head>
 <body>
-    <input type="text" id="keyInput">
+    <input type="text" id="keyInput" placeholder="请输入..."> <!-- 添加了 placeholder -->
     <button onclick="submitForm()">提交</button>
     <div id="result"></div> <!-- 用于显示结果的容器 -->
-    
+    
     <script>
         function submitForm() {
             var key = document.getElementById("keyInput").value.trim(); // 去除空格和不可见字符
             var resultElement = document.getElementById("result");
 
             // 发送请求到JSON文件以获取值
-            fetch('multiple_content.json')
+            fetch('\multiple_content.json') // 使用相对路径
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error('网络响应不正确');
                     }
                     return response.json();
                 })
                 .then(data => {
                     // 检查键是否存在于JSON数据中
                     if (data.hasOwnProperty(key)) {
-                        resultElement.textContent = data[key];
+                        var value = data[key];
+                        // 在新窗口中打开链接
+                        window.open(value, '_blank');
                     } else {
-                        resultElement.textContent = "Key not found in database.";
+                        resultElement.textContent = "数据库中未找到该键值对。";
                     }
                 })
                 .catch(error => {
-                    console.error('Error fetching data:', error);
-                    resultElement.textContent = "Error fetching data. Please try again later.";
+                    console.error('获取数据时发生错误:', error);
+                    resultElement.textContent = "获取数据时发生错误，请稍后再试。";
                 });
         }
     </script>
