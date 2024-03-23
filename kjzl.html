@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GET请求示例</title>
+</head>
+<body>
+    <h1>GET请求示例</h1>
+    <input type="text" id="textInput" placeholder="输入键...">
+    <button onclick="submitGetRequest()">获取值</button>
+    <div id="result"></div>
+
+    <script>
+        function submitGetRequest() {
+            var key = document.getElementById("textInput").value.trim(); // 获取输入的键
+            var resultDiv = document.getElementById("result");
+
+            // 构建包含键值对的查询参数
+            var queryParams = new URLSearchParams();
+            queryParams.append('key', key);
+
+            // 构建请求URL
+            var url = 'multiple_content.json?' + queryParams.toString();
+
+            // 发送GET请求获取值
+            fetch(url) // 使用相对路径，请确保multiple_content.json文件位于相同目录下
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应不正确');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 检查键是否存在于JSON数据中
+                    if (data.hasOwnProperty(key)) {
+                        var value = data[key];
+                        resultDiv.textContent = "成功找到键对应的值：" + value;
+                    } else {
+                        resultDiv.textContent = "键不存在！";
+                    }
+                })
+                .catch(error => {
+                    console.error('获取数据时发生错误:', error);
+                    resultDiv.textContent = "获取数据时发生错误，请稍后再试。";
+                });
+        }
+    </script>
+</body>
+</html>
