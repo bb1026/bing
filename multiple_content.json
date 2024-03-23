@@ -1,5 +1,5 @@
 {
-  "音乐": "\bing\music.json",
-  "日历": "\bing\calendar.html",
-  "书签":"\bing\sq.html"
+  "音乐": "music.json",
+  "日历": "calendar.html",
+  "书签": "sq.html"
 }
