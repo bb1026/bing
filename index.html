@@ -1,66 +1,41 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bing的网站</title>
-    <style>
-        #textInput {
-            width: 80%; /* 设置文本框宽度为屏幕宽度的80% */
-            max-width: 400px; /* 设置文本框的最大宽度为400px */
-            margin: 0 auto; /* 居中显示 */
-            display: block; /* 将文本框显示为块级元素 */
-            padding: 10px; /* 设置文本框内边距 */
-        }
-
-        #content {
-            margin: 20px auto; /* 居中显示 */
-            width: 80%; /* 设置内容宽度为屏幕宽度的80% */
-            max-width: 600px; /* 设置内容的最大宽度为600px */
-        }
-    </style>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"> <!-- 添加书签logo -->
 </head>
 <body>
-    <form onsubmit="return false;">
-        <input type="text" id="textInput" name="textInput" onkeypress="checkEnterKey(event)" placeholder="输入关键词...">
-    </form>
-
-    <div id="content"></div>
-
+    <input type="text" id="keyInput">
+    <button onclick="submitForm()">提交</button>
+    <div id="result"></div> <!-- 用于显示结果的容器 -->
+    
     <script>
-        function checkEnterKey(event) {
-            if (event.keyCode === 13) {
-                getContent();
-            }
-        }
+        function submitForm() {
+            var key = document.getElementById("keyInput").value;
+            var resultElement = document.getElementById("result");
 
-        function getContent() {
-            var inputText = document.getElementById("textInput").value;
-            // 发送 AJAX 请求获取数据
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    displayContent(response);
-                } else if (xhr.readyState === 4) {
-                    alert("无法获取内容");
-                }
-            };
-            xhr.open("GET", "https://bb1026.github.io/bing/multiple_content.json", true);
-            xhr.send();
-        }
-
-        function displayContent(data) {
-            var contentDiv = document.getElementById("content");
-            // 清空内容
-            contentDiv.innerHTML = "";
-            // 遍历数据，并创建并显示内容
-            for (var key in data) {
-                if (data.hasOwnProperty(key)) {
-                    var p = document.createElement("p");
-                    p.textContent = key + ": " + data[key];
-                    contentDiv.appendChild(p);
-                }
-            }
+            // 发送查找请求到JSON文件以获取值
+            fetch('\bing\multiple_content.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 检查键是否存在于JSON数据中
+                    if (data.hasOwnProperty(key)) {
+                        resultElement.textContent = data[key];
+                    } else {
+                        resultElement.textContent = "Key not found in database.";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    resultElement.textContent = "Error fetching data. Please try again later.";
+                });
         }
     </script>
 </body>
