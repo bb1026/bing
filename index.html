@@ -33,9 +33,9 @@
                     if (data.hasOwnProperty(key)) {
                         var url = data[key];
                         resultElement.textContent = "正在跳转到网址：" + url;
-                        window.location.href = url; // 直接跳转到对应网址
+                        window.open.href = url; // 直接跳转到对应网址
                     } else {
-                        resultElement.textContent = "键不存在！";
+                        resultElement.textContent = "不存在！";
                     }
                 })
                 .catch(error => {
