@@ -1,102 +1,67 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Bing的网站</title>
-	<link href="https://bb1026.github.io/bing/imgs/logo.ico" rel="shortcut icon" type="imgs/logo.ico" />
-	<style type="text/css">
-		div{
-			height: 100%;
-			width:100%;
-			background-color:rgba(,);
-			text-align: center; 
-			line-height: 20px;/*文字水平居中*/
-			margin:auto;/*div水平居中*/
-		}
-
-        body {
-            margin: 0px;
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Bing的网站</title>
+    <style>
+        #textInput {
+            width: 80%; /* 设置文本框宽度为屏幕宽度的80% */
+            max-width: 400px; /* 设置文本框的最大宽度为400px */
+            margin: 0 auto; /* 居中显示 */
+            display: block; /* 将文本框显示为块级元素 */
+            padding: 10px; /* 设置文本框内边距 */
         }
 
-        #box {
-            width: 100%;
-            height: 100px;
-            background-color: black;
-
-            position: fixed;
-            bottom: 0px;
+        #content {
+            margin: 20px auto; /* 居中显示 */
+            width: 80%; /* 设置内容宽度为屏幕宽度的80% */
+            max-width: 600px; /* 设置内容的最大宽度为600px */
         }
-
-        #wechat {
-            width: 44px;
-            height: 44px;
-
-            background-image: url("imgs/weixin.jpg");
-            background-repeat: no-repeat;
-            background-size: 100%;
-
-            margin: 28px auto;
-
-            position: relative;
-        }
-
-        #code {
-            display: none;
-
-            width: 450px;
-            height: 450px;
-            background-color: white;
-
-            background-image: url("imgs/WeChatQR.jpg");
-            background-repeat: no-repeat;
-            background-size: 100%;
-
-            position: absolute;
-            left: -180px;
-            bottom: 72px;
-        }
-
-        #wechat:hover {
-            background-image: url("imgs/logo.ico");
-        }
-
-        #wechat:hover>#code{
-            display: block;
-        }
-	</style>
+    </style>
 </head>
 <body>
-	<div class="box1"><a href="https://bb1026.github.io/bing/"><img src="imgs/logo.ico" width="100" hight="100" /></a></div>
-	<div class="box1"><a href="\bing\time.html" target="_blank">时钟</a></div>
-	<p>
-	<div class="box2"><a href="\bing\calendar.html" target="_blank">万年历</a></div>
-	<p>
-	<div class="box3"><a href="\bing\sq.html" target="_blank">书签</a></div>
-	<p>
-	<div class="box4"><a href="http://wa.me/6584514014" target="_blank">WhatsApp Me</a></div>
-	<p>
-	<div class="box5"><a>请输入新加坡手机号按回车</a></div>
-	<div class="box6">
-	<input type="text" id="enterSubmit" value="">
-	<script type="text/javascript">
- 	window.onload = function(){
-	document.getElementById("enterSubmit").onkeyup = function(e){
-           e = e || window.event;
-           var keycode = e.keyCode || e.which ||e.charCode;
-           if(keycode === 13){
-	location.href="http://wa.me/65"+enterSubmit.value;
+    <form onsubmit="return false;">
+        <input type="text" id="textInput" name="textInput" onkeypress="checkEnterKey(event)" placeholder="输入关键词...">
+    </form>
+
+    <div id="content"></div>
+
+    <script>
+        function checkEnterKey(event) {
+            if (event.keyCode === 13) {
+                getContent();
             }
         }
-    };
-</script>
-</div>
-    <!-- 用于包含二维码所有的内容，显示在页面中的底部 -->
-    <div id="box">
-        <!-- 用于显示微信图标 -->
-        <div id="wechat">
-            <!-- 用于显示，隐藏二维码图片 -->
-            <div id="code"></div>
-        </div>
-    </div>
+
+        function getContent() {
+            var inputText = document.getElementById("textInput").value;
+            // 发送 AJAX 请求获取数据
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    displayContent(response);
+                } else if (xhr.readyState === 4) {
+                    alert("无法获取内容");
+                }
+            };
+            xhr.open("GET", "https://bb1026.github.io/bing/multiple_content.json", true);
+            xhr.send();
+        }
+
+        function displayContent(data) {
+            var contentDiv = document.getElementById("content");
+            // 清空内容
+            contentDiv.innerHTML = "";
+            // 遍历数据，并创建并显示内容
+            for (var key in data) {
+                if (data.hasOwnProperty(key)) {
+                    var p = document.createElement("p");
+                    p.textContent = key + ": " + data[key];
+                    contentDiv.appendChild(p);
+                }
+            }
+        }
+    </script>
 </body>
 </html>
