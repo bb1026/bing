@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bing的网站</title>
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"> <!-- 添加书签logo -->
+    <link rel="shortcut icon" href="\imgs\logo.ico" type="image/x-icon"> <!-- 添加书签logo -->
 </head>
 <body>
     <input type="text" id="keyInput">
@@ -17,7 +17,7 @@
             var resultElement = document.getElementById("result");
 
             // 发送请求到JSON文件以获取值
-            fetch('\bing\multiple_content.json')
+            fetch('multiple_content.json')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
