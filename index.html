@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bing的网站</title>
-    <link rel="shortcut icon" href='\imgs\logo.ico' type="image/x-icon"> <!-- 添加书签logo -->
+    <link rel="shortcut icon" href="\imgs\logo.ico" type="image/x-icon"> <!-- 添加书签logo -->
 </head>
 <body>
     <input type="text" id="keyInput" placeholder="请输入..."> <!-- 添加了 placeholder -->
     <button onclick="submitForm()">提交</button>
     <div id="result"></div> <!-- 用于显示结果的容器 -->
-    
+    
     <script>
         function submitForm() {
             var key = document.getElementById("keyInput").value.trim(); // 去除空格和不可见字符
@@ -28,7 +28,8 @@
                     // 检查键是否存在于JSON数据中
                     if (data.hasOwnProperty(key)) {
                         var value = data[key];
-                        // 在新窗口中打开链接
+                        resultElement.textContent =  value;
+                        // 在新页面中打开链接
                         window.open(value, '_blank');
                     } else {
                         resultElement.textContent = "数据库中未找到该键值对。";
