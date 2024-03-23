@@ -13,10 +13,10 @@
     
     <script>
         function submitForm() {
-            var key = document.getElementById("keyInput").value;
+            var key = document.getElementById("keyInput").value.trim(); // 去除空格和不可见字符
             var resultElement = document.getElementById("result");
 
-            // 发送查找请求到JSON文件以获取值
+            // 发送请求到JSON文件以获取值
             fetch('\bing\multiple_content.json')
                 .then(response => {
                     if (!response.ok) {
