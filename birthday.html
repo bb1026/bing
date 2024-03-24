@@ -62,6 +62,20 @@
             transform: translateX(-50%);
             z-index: 1; /* 设置播放控件的z-index，使其在按钮之下 */
         }
+        /* 新增的切换风格样式 */
+        .slide-up {
+            transition: transform 1s ease-in-out;
+            transform: translateY(100%);
+        }
+        .slide-down {
+            transition: transform 1s ease-in-out;
+            transform: translateY(-100%);
+        }
+        .flip {
+            transition: transform 1s ease-in-out;
+            transform: rotateY(180deg);
+        }
+        /* 新增的切换风格样式结束 */
     </style>
 </head>
 <body>
@@ -70,23 +84,34 @@
         <h1>生日快乐！</h1>
         <p>愿你的生日充满欢乐和祝福！</p>
     </div>
-    <audio autoplay controls>
-        <source src="/bing/birthday/happy_birthday_song.mp3" type="audio/mpeg">
+    <audio id="audio" controls>
+        <source src="" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
     <div id="controls">
         <button onclick="previousImage()">上一张</button>
         <button onclick="nextImage()">下一张</button>
+        <button onclick="previousSong()">上一首</button>
+        <button onclick="nextSong()">下一首</button>
     </div>
 
     <script>
         const slideshow = document.getElementById("slideshow");
         const numberOfImages = 3; // 图片数量
         let currentIndex = 0;
+        const transitionStyles = ['fade', 'slide', 'zoom', 'slide-up', 'slide-down', 'flip']; // 不同的切换风格
+        const songs = [
+            "/bing/birthday/happy_birthday_song.mp3",
+            "/birthday/稻香- 周杰伦.mp3",
+            // 添加更多的歌曲链接
+        ];
+        let currentSongIndex = 0;
+        const audio = document.getElementById("audio");
 
-        function showImage(index) {
+        function showImage(index, transitionStyle) {
             const img = document.createElement("img");
             img.src = `/bing/birthday/birthday_image${index + 1}.JPEG`;
+            img.className = transitionStyle; // 添加 CSS 类来应用不同的切换风格
             img.onload = function() {
                 img.style.opacity = 1;
             };
@@ -97,15 +122,33 @@
 
         function previousImage() {
             currentIndex = (currentIndex - 1 + numberOfImages) % numberOfImages;
-            showImage(currentIndex);
+            const randomTransitionStyle = transitionStyles[Math.floor(Math.random() * transitionStyles.length)]; // 随机选择切换风格
+            showImage(currentIndex, randomTransitionStyle);
         }
 
         function nextImage() {
             currentIndex = (currentIndex + 1) % numberOfImages;
-            showImage(currentIndex);
+            const randomTransitionStyle = transitionStyles[Math.floor(Math.random() * transitionStyles.length)]; // 随机选择切换风格
+            showImage(currentIndex, randomTransitionStyle);
         }
 
-        showImage(currentIndex); // 显示第一张图片
+        function previousSong() {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            audio.src = songs[currentSongIndex];
+            audio.play();
+        }
+
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            audio.src = songs[currentSongIndex];
+            audio.play();
+        }
+
+        audio.addEventListener('ended', nextSong);
+
+        showImage(currentIndex, transitionStyles[0]); // 显示第一张图片，初始切换风格为第一个
+        audio.src = songs[currentSongIndex]; // 设置初始歌曲
+        audio.play(); // 播放初始歌曲
     </script>
 </body>
 </html>
