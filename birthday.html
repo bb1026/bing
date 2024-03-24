@@ -26,21 +26,8 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            animation: slide 5s ease infinite;
-        }
-        @keyframes slide {
-            0% {
-                opacity: 0;
-            }
-            20% {
-                opacity: 1;
-            }
-            80% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-            }
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
         }
         #birthdayWishes {
             position: absolute;
@@ -56,41 +43,39 @@
     </style>
 </head>
 <body>
-    <div id="slideshow">
-        <img src="\birthday\birthday_image1.JPEG">
-        <img src="\birthday\birthday_image2.JPEG">
-        <img src="\birthday\birthday_image3.JPEG">
-    </div>
+    <div id="slideshow"></div>
     <div id="birthdayWishes">
         <h1>生日快乐！</h1>
         <p>愿你的生日充满欢乐和祝福！</p>
         <audio autoplay>
-            <source src="\birthday\happy_birthday_song.mp3" type="audio/mpeg">
+            <source src="/birthday/happy_birthday_song.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
     </div>
 
     <script>
-        const images = document.querySelectorAll("#slideshow img");
+        const slideshow = document.getElementById("slideshow");
+        const numberOfImages = 3; // 图片数量
         let currentIndex = 0;
 
         function showImage(index) {
-            for (let i = 0; i < images.length; i++) {
-                images[i].style.opacity = 0;
-            }
-            images[index].style.opacity = 1;
+            const img = document.createElement("img");
+            img.src = `/birthday/birthday_image${index + 1}.JPEG`;
+            img.onload = function() {
+                img.style.opacity = 1;
+            };
+            slideshow.innerHTML = ""; // 清空原有图片
+            slideshow.appendChild(img);
         }
 
         function nextImage() {
-            currentIndex = (currentIndex + 1) % images.length;
+            currentIndex = (currentIndex + 1) % numberOfImages;
             showImage(currentIndex);
         }
 
-        setInterval(nextImage, 5000); // 每隔5秒切换一张图片
+        showImage(currentIndex); // 显示第一张图片
 
-        // 隐藏音频控件
-        const audio = document.querySelector("audio");
-        audio.controls = false;
+        setInterval(nextImage, 5000); // 每隔5秒切换一张图片
     </script>
 </body>
 </html>
