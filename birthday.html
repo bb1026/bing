@@ -40,6 +40,26 @@
         #birthdayWishes p {
             margin-top: 20px;
         }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 1;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        audio {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
     </style>
 </head>
 <body>
@@ -47,10 +67,14 @@
     <div id="birthdayWishes">
         <h1>生日快乐！</h1>
         <p>愿你的生日充满欢乐和祝福！</p>
-        <audio autoplay>
-            <source src="/birthday/happy_birthday_song.mp3" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
+    </div>
+    <audio autoplay>
+        <source src="https://bb1026.github.io/bing/birthday/happy_birthday_song.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <div id="controls">
+        <button onclick="previousImage()">上一张</button>
+        <button onclick="nextImage()">下一张</button>
     </div>
 
     <script>
@@ -60,12 +84,18 @@
 
         function showImage(index) {
             const img = document.createElement("img");
-            img.src = `/birthday/birthday_image${index + 1}.JPEG`;
+            img.src = `https://bb1026.github.io/bing/birthday/birthday_image${index + 1}.JPEG`;
             img.onload = function() {
                 img.style.opacity = 1;
             };
             slideshow.innerHTML = ""; // 清空原有图片
             slideshow.appendChild(img);
+            currentIndex = index;
+        }
+
+        function previousImage() {
+            currentIndex = (currentIndex - 1 + numberOfImages) % numberOfImages;
+            showImage(currentIndex);
         }
 
         function nextImage() {
@@ -74,8 +104,6 @@
         }
 
         showImage(currentIndex); // 显示第一张图片
-
-        setInterval(nextImage, 5000); // 每隔5秒切换一张图片
     </script>
 </body>
 </html>
