@@ -42,7 +42,7 @@
         }
         #controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 50px; /* 调整按钮位置 */
             left: 0;
             width: 100%;
             text-align: center;
@@ -53,12 +53,14 @@
             margin: 0 10px;
             font-size: 16px;
             cursor: pointer;
+            z-index: 2; /* 设置按钮的z-index，使其在播放控件之上 */
         }
         audio {
             position: absolute;
             bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
+            z-index: 1; /* 设置播放控件的z-index，使其在按钮之下 */
         }
     </style>
 </head>
@@ -68,8 +70,8 @@
         <h1>生日快乐！</h1>
         <p>愿你的生日充满欢乐和祝福！</p>
     </div>
-    <audio autoplay>
-        <source src="https://bb1026.github.io/bing/birthday/happy_birthday_song.mp3" type="audio/mpeg">
+    <audio autoplay controls>
+        <source src="\birthday\happy_birthday_song.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
     <div id="controls">
@@ -84,7 +86,7 @@
 
         function showImage(index) {
             const img = document.createElement("img");
-            img.src = `https://bb1026.github.io/bing/birthday/birthday_image${index + 1}.JPEG`;
+            img.src = `\birthday\birthday_image${index + 1}.JPEG`;
             img.onload = function() {
                 img.style.opacity = 1;
             };
