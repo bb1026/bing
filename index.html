@@ -33,7 +33,7 @@
                     // 检查键是否存在于JSON数据中
                     if (data.hasOwnProperty(key)) {
                         var url = data[key];
-                        if (key === "生日快乐" && url.includes("icloud.com/shortcuts")) {
+                        if (key === "生日快乐" && data[key].includes("www.icloud.com/shortcuts/")) {
                             window.location.href = url; // 直接打开链接
                         } else {
                             pageFrame.src = url; // 在 iframe 中加载对应网页
