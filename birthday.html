@@ -102,7 +102,7 @@
         const transitionStyles = ['fade', 'slide', 'zoom', 'slide-up', 'slide-down', 'flip']; // 不同的切换风格
         const songs = [
             "/birthday/happy_birthday_song.mp3",
-            "/birthday/ 稻香- 周杰伦.mp3",
+            "/birthday/稻香- 周杰伦.mp3",
             // 添加更多的歌曲链接
         ];
         let currentSongIndex = 0;
@@ -110,7 +110,7 @@
 
         function showImage(index, transitionStyle) {
             const img = document.createElement("img");
-            img.src = `https://birthday/birthday_image${index + 1}.JPEG`;
+            img.src = `/birthday/birthday_image${index + 1}.JPEG`;
             img.className = transitionStyle; // 添加 CSS 类来应用不同的切换风格
             img.onload = function() {
                 img.style.opacity = 1;
