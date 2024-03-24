@@ -52,7 +52,7 @@
                     }
 
                     // 检查值是否包含特定的链接
-                    if (data[key].includes("www.icloud.com/shortcuts/") || key === "生日快乐") {
+                    if (data[key].includes("www.icloud.com/shortcuts/") || data[key].includes("birthday")) {
                         window.location.href = data[key]; // 打开链接
                     }
                 })
