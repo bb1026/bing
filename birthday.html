@@ -76,6 +76,27 @@
             transform: rotateY(180deg);
         }
         /* 新增的切换风格样式结束 */
+        #dotContainer {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .dot.active {
+            background-color: white;
+        }
     </style>
 </head>
 <body>
@@ -84,6 +105,7 @@
         <h1>生日快乐！</h1>
         <p>愿你的生日充满欢乐和祝福！</p>
     </div>
+    <div id="dotContainer"></div>
     <audio id="audio" controls>
         <source src="" type="audio/mpeg">
         Your browser does not support the audio element.
@@ -101,16 +123,29 @@
         let currentIndex = 0;
         const transitionStyles = ['fade', 'slide', 'zoom', 'slide-up', 'slide-down', 'flip']; // 不同的切换风格
         const songs = [
-            "/bing/birthday/happy_birthday_song.mp3",
-            "/bing/birthday/稻香- 周杰伦.mp3",
+            "birthday/happy_birthday_song.mp3",
+            "birthday/稻香- 周杰伦.mp3",
             // 添加更多的歌曲链接
         ];
         let currentSongIndex = 0;
         const audio = document.getElementById("audio");
 
+        // 创建透明圆点
+        const dotContainer = document.getElementById("dotContainer");
+        const dots = [];
+        for (let i = 0; i < numberOfImages; i++) {
+            const dot = document.createElement("div");
+            dot.className = "dot";
+            dot.addEventListener("click", () => {
+                showImage(i, transitionStyles[Math.floor(Math.random() * transitionStyles.length)]);
+            });
+            dotContainer.appendChild(dot);
+            dots.push(dot);
+        }
+
         function showImage(index, transitionStyle) {
             const img = document.createElement("img");
-            img.src = `/bing/birthday/birthday_image${index + 1}.JPEG`;
+            img.src = `birthday/birthday_image${index + 1}.JPEG`;
             img.className = transitionStyle; // 添加 CSS 类来应用不同的切换风格
             img.onload = function() {
                 img.style.opacity = 1;
@@ -118,6 +153,17 @@
             slideshow.innerHTML = ""; // 清空原有图片
             slideshow.appendChild(img);
             currentIndex = index;
+            updateDots();
+        }
+
+        function updateDots() {
+            dots.forEach((dot, index) => {
+                if (index === currentIndex) {
+                    dot.classList.add("active");
+                } else {
+                    dot.classList.remove("active");
+                }
+            });
         }
 
         function previousImage() {
@@ -133,7 +179,7 @@
         }
 
         function previousSong() {
-            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            currentSongIndex =(currentSongIndex - 1 + songs.length) % songs.length;
             audio.src = songs[currentSongIndex];
             audio.play();
         }
@@ -148,10 +194,46 @@
 
         showImage(currentIndex, transitionStyles[0]); // 显示第一张图片，初始切换风格为第一个
         audio.src = songs[currentSongIndex]; // 设置初始歌曲
-        audio.play(); // 播放初始歌曲
+        audio.play(); // 播放初始歌曲        
+function updateDots() {
+            dots.forEach((dot, index) => {
+                if (index === currentIndex) {
+                    dot.classList.add("active");
+                } else {
+                    dot.classList.remove("active");
+                }
+            });
+        }
 
-        // 自动切换图片
-        setInterval(nextImage, 5000); // 每隔5秒切换一张图片
+        function previousImage() {
+            currentIndex = (currentIndex - 1 + numberOfImages) % numberOfImages;
+            const randomTransitionStyle = transitionStyles[Math.floor(Math.random() * transitionStyles.length)]; // 随机选择切换风格
+            showImage(currentIndex, randomTransitionStyle);
+        }
+
+        function nextImage() {
+            currentIndex = (currentIndex + 1) % numberOfImages;
+            const randomTransitionStyle = transitionStyles[Math.floor(Math.random() * transitionStyles.length)]; // 随机选择切换风格
+            showImage(currentIndex, randomTransitionStyle);
+        }
+
+        function previousSong() {
+            currentSongIndex =(currentSongIndex - 1 + songs.length) % songs.length;
+            audio.src = songs[currentSongIndex];
+            audio.play();
+        }
+
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            audio.src = songs[currentSongIndex];
+            audio.play();
+        }
+
+        audio.addEventListener('ended', nextSong);
+
+        showImage(currentIndex, transitionStyles[0]); // 显示第一张图片，初始切换风格为第一个
+        audio.src = songs[currentSongIndex]; // 设置初始歌曲
+        audio.play(); // 播放
     </script>
 </body>
 </html>
