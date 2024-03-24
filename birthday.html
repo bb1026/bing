@@ -71,7 +71,7 @@
         <p>愿你的生日充满欢乐和祝福！</p>
     </div>
     <audio autoplay controls>
-        <source src="/birthday/happy_birthday_song.mp3" type="audio/mpeg">
+        <source src="/bing/birthday/happy_birthday_song.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
     <div id="controls">
@@ -86,7 +86,7 @@
 
         function showImage(index) {
             const img = document.createElement("img");
-            img.src = `/birthday/birthday_image${index + 1}.JPEG`;
+            img.src = `/bing/birthday/birthday_image${index + 1}.JPEG`;
             img.onload = function() {
                 img.style.opacity = 1;
             };
