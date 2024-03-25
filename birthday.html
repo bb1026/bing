@@ -11,6 +11,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            background: linear-gradient(to bottom, #87CEFA, white); /* 线性渐变背景 */
         }
         #slideshow {
             position: absolute;
@@ -35,7 +36,7 @@
             top: 20px;
             left: 20px;
             color: white;
-            z-index: 1;
+            z-index: 2;
             text-align: left;
         }
         #birthdayWishes p {
@@ -43,7 +44,7 @@
         }
         #controls {
             position: absolute;
-            bottom: 70px; /* 调整按钮位置 */
+            bottom: 70px;
             left: 0;
             width: 100%;
             text-align: center;
@@ -54,14 +55,14 @@
             margin: 0 10px;
             font-size: 16px;
             cursor: pointer;
-            z-index: 2; /* 设置按钮的z-index，使其在播放控件之上 */
+            z-index: 2;
         }
         audio {
             position: absolute;
             bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 1; /* 设置播放控件的z-index，使其在按钮之下 */
+            z-index: 1;
         }
         /* 新增的切换风格样式 */
         .slide-up {
@@ -120,9 +121,9 @@
 
     <script>
         const slideshow = document.getElementById("slideshow");
-        const numberOfImages = 3; // 图片数量
+        const numberOfImages = 3;
         let currentIndex = 0;
-        const transitionStyles = ['fade', 'slide', 'zoom', 'slide-up', 'slide-down', 'flip']; // 不同的切换风格
+        const transitionStyles = ['fade', 'slide', 'zoom', 'slide-up', 'slide-down', 'flip'];
         const songs = [
             "birthday/happy_birthday_song.mp3",
             "birthday/稻香- 周杰伦.mp3",
@@ -131,7 +132,6 @@
         let currentSongIndex = 0;
         const audio = document.getElementById("audio");
 
-        // 创建透明圆点
         const dotContainer = document.getElementById("dotContainer");
         const dots = [];
         for (let i = 0; i < numberOfImages; i++) {
@@ -147,11 +147,11 @@
         function showImage(index, transitionStyle) {
             const img = document.createElement("img");
             img.src = `birthday/birthday_image${index + 1}.JPEG`; // 添加图片
-            img.className = transitionStyle; // 添加 CSS 类来应用不同的切换风格
+            img.className = transitionStyle;
             img.onload = function() {
                 img.style.opacity = 1;
             };
-            slideshow.innerHTML = ""; // 清空原有图片
+            slideshow.innerHTML = "";
             slideshow.appendChild(img);
             currentIndex = index;
             updateDots();
@@ -169,13 +169,13 @@
 
         function previousImage() {
             currentIndex = (currentIndex - 1 + numberOfImages) % numberOfImages;
-            const randomTransitionStyle = transitionStyles[Math.floor(Math.random() * transitionStyles.length)]; // 随机选择切换风格
+            const randomTransitionStyle = transitionStyles[Math.floor(Math.random() * transitionStyles.length)];
             showImage(currentIndex, randomTransitionStyle);
         }
 
         function nextImage() {
             currentIndex = (currentIndex + 1) % numberOfImages;
-            const randomTransitionStyle = transitionStyles[Math.floor(Math.random() * transitionStyles.length)]; // 随机选择切换风格
+            const randomTransitionStyle = transitionStyles[Math.floor(Math.random() * transitionStyles.length)];
             showImage(currentIndex, randomTransitionStyle);
         }
 
@@ -193,12 +193,11 @@
 
         audio.addEventListener('ended', nextSong);
 
-        showImage(currentIndex, transitionStyles[0]); // 显示第一张图片，初始切换风格为第一个
-        audio.src = songs[currentSongIndex]; // 设置初始歌曲
-        audio.play(); // 播放初始歌曲
-
+        showImage(currentIndex, transitionStyles[0]);
+        audio.src = songs[currentSongIndex];
+        audio.play();
         // 自动切换图片
-        setInterval(nextImage, 5000); // 每隔5秒切换一张图片
+        setInterval(nextImage, 5000);
     </script>
 </body>
 </html>
