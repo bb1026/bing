@@ -146,7 +146,7 @@
 
         function showImage(index, transitionStyle) {
             const img = document.createElement("img");
-            img.src = `birthday/birthday_image${index + 1}.JPEG`; //添加图片
+            img.src = `birthday/birthday_image${index + 1}.JPEG`; // 添加图片
             img.className = transitionStyle; // 添加 CSS 类来应用不同的切换风格
             img.onload = function() {
                 img.style.opacity = 1;
