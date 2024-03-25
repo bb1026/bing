@@ -4,16 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bing的网站</title>
-    <link rel="icon" href="imgs/logo.ico" type="image/x-icon"> <!-- 书签图标 -->
+    <link rel="icon" href="imgs/logo.ico" type="image/x-icon">
     <style>
         #keyInputContainer {
             display: flex;
             justify-content: center;
-            margin-bottom: 20px; /* 添加一些底部边距以增加可读性 */
+            margin-bottom: 20px;
         }
 
         #keyInput {
-            /* 添加任何你想要的样式 */
+            border: 2px solid #ccc;
+            font-size: 16px;
+            padding: 8px;
+        }
+        
+        body {
+            background-color: #f2f2f2;
+            color: #333;
         }
     </style>
 </head>
@@ -25,17 +32,16 @@
 
 <script>
     function checkKey(event) {
-        if (event.keyCode === 13) { // 检测是否按下了回车键
+        if (event.keyCode === 13) {
             submitForm();
         }
     }
 
     function submitForm() {
-        var key = document.getElementById("keyInput").value.trim(); // 获取输入的键
+        var key = document.getElementById("keyInput").value.trim();
         var pageFrame = document.getElementById("pageFrame");
 
-        // 发送请求到JSON文件以获取值
-        fetch('multiple_content.json') // 使用绝对路径
+        fetch('multiple_content.json')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('网络响应不正确');
@@ -43,24 +49,20 @@
                 return response.json();
             })
             .then(data => {
-                // 检查键是否存在于JSON数据中
                 if (data.hasOwnProperty(key)) {
                     var url = data[key];
                     if (!url.startsWith("http")) {
-                        pageFrame.src = ""; // 清空 iframe
-                        pageFrame.contentWindow.document.write(data[key]); // 直接显示内容
+                        pageFrame.src = "";
+                        pageFrame.contentWindow.document.write(data[key]);
                     } else {
-                        pageFrame.src = url; // 在 iframe 中加载对应网页
+                        pageFrame.src = url;
                     }
-
-                    // 检查值是否包含特定的链接
                     if (url === "www.icloud.com/shortcuts/" || url === "birthday") {
-                        window.location.href = url; // 打开链接
+                        window.location.href = url;
                     }
                 } else {
-                    // 输入错误时在 iframe 中显示"输入有误"并居中显示
-                    pageFrame.src = ""; // 清空 iframe
-                    pageFrame.contentWindow.document.write("<div style='text-align: center; margin-top: 50px;'>输入不正确</div>"); // 在 iframe 中显示内容并居中显示
+                    pageFrame.src = "";
+                    pageFrame.contentWindow.document.write("<div style='text-align: center; margin-top: 50px;'>输入有误</div>");
                 }
             })
             .catch(error => {
