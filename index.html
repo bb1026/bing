@@ -19,7 +19,7 @@
 </head>
 <body>
     <div id="keyInputContainer">
-        <input type="text" id="keyInput" placeholder="输入键..." onkeydown="checkKey(event)">
+        <input type="text" id="keyInput" onkeydown="checkKey(event)">
     </div>
     <iframe id="pageFrame" width="100%" height="500px" frameborder="0"></iframe>
 
@@ -58,9 +58,9 @@
                         window.location.href = url; // 打开链接
                     }
                 } else {
-                    // 输入错误时在 iframe 中显示"输入有误"
+                    // 输入错误时在 iframe 中显示"输入有误"并居中显示
                     pageFrame.src = ""; // 清空 iframe
-                    pageFrame.contentWindow.document.write("输入有误"); // 在 iframe 中显示内容
+                    pageFrame.contentWindow.document.write("<div style='text-align: center; margin-top: 50px;'>输入不正确</div>"); // 在 iframe 中显示内容并居中显示
                 }
             })
             .catch(error => {
