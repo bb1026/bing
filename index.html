@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,44 +23,50 @@
     </div>
     <iframe id="pageFrame" width="100%" height="500px" frameborder="0"></iframe>
 
-    <script>
-        function checkKey(event) {
-            if (event.keyCode === 13) { // 检测是否按下了回车键
-                submitForm();
-            }
+<script>
+    function checkKey(event) {
+        if (event.keyCode === 13) { // 检测是否按下了回车键
+            submitForm();
         }
+    }
 
-        function submitForm() {
-            var key = document.getElementById("keyInput").value.trim(); // 获取输入的键
-            var pageFrame = document.getElementById("pageFrame");
+    function submitForm() {
+        var key = document.getElementById("keyInput").value.trim(); // 获取输入的键
+        var pageFrame = document.getElementById("pageFrame");
 
-            // 发送请求到JSON文件以获取值
-            fetch('multiple_content.json') // 使用绝对路径
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('网络响应不正确');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // 检查键是否存在于JSON数据中
-                    if (data.hasOwnProperty(key)) {
-                        var url = data[key];
-                        pageFrame.src = url; // 在 iframe 中加载对应网页
+        // 发送请求到JSON文件以获取值
+        fetch('multiple_content.json') // 使用绝对路径
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('网络响应不正确');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 检查键是否存在于JSON数据中
+                if (data.hasOwnProperty(key)) {
+                    var url = data[key];
+                    if (!url.startsWith("http")) {
+                        pageFrame.src = ""; // 清空 iframe
+                        pageFrame.contentWindow.document.write(data[key]); // 直接显示内容
                     } else {
-                        alert("输入有误！");
+                        pageFrame.src = url; // 在 iframe 中加载对应网页
                     }
 
                     // 检查值是否包含特定的链接
-                    if (data[key].includes("www.icloud.com/shortcuts/") || data[key].includes("birthday")) {
-                        window.location.href = data[key]; // 打开链接
+                    if (url === "www.icloud.com/shortcuts/" || url === "birthday") {
+                        window.location.href = url; // 打开链接
                     }
-                })
-                .catch(error => {
-                    console.error('获取数据时发生错误:', error);
-                    alert("获取数据时发生错误，请稍后再试。");
-                });
-        }
-    </script>
+                } else {
+                    // 输入错误时在 iframe 中显示"输入有误"
+                    pageFrame.src = ""; // 清空 iframe
+                    pageFrame.contentWindow.document.write("输入有误"); // 在 iframe 中显示内容
+                }
+            })
+            .catch(error => {
+                console.error('获取数据时发生错误:', error);
+            });
+    }
+</script>
 </body>
 </html>
