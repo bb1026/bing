@@ -11,7 +11,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: linear-gradient(to bottom, #87CEFA, white); /* 线性渐变背景 */
+            background: url("https://source.unsplash.com/random") center/cover no-repeat, linear-gradient(to bottom, #87CEFA, white); /* 添加背景图片并设置渐变背景 */
         }
         #slideshow {
             position: absolute;
@@ -44,25 +44,28 @@
         }
         #controls {
             position: absolute;
-            bottom: 70px;
-            left: 0;
-            width: 100%;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
             text-align: center;
             z-index: 1;
         }
         button {
+            display: block;
+            margin: 10px auto;
             padding: 10px 20px;
-            margin: 0 10px;
             font-size: 16px;
             cursor: pointer;
-            z-index: 2;
         }
         audio {
+            display: none;
+        }
+        #audioTime {
             position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 14px;
         }
         /* 新增的切换风格样式 */
         .slide-up {
@@ -105,25 +108,33 @@
     <div id="slideshow"></div>
     <div id="birthdayWishes">
         <h1>生日快乐！</h1>
-        <p>愿你的生日充满欢乐和祝福！</p>
+        <p id="wishText">愿你的生日充满欢乐和祝福！</p>
     </div>
     <div id="dotContainer"></div>
-    <audio id="audio" controls>
+    <div id="controls">
+        <button onclick="previousImage()">⬅️</button>
+        <button onclick="nextImage()">➡️</button>
+        <button onclick="previousSong()">⏮️</button>
+        <button id="toggleButton" onclick="togglePlayPause()">▶️</button>
+        <button onclick="nextSong()">⏭️</button>
+    </div>
+
+    <audio id="audio">
         <source src="" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
-    <div id="controls">
-        <button onclick="previousImage()">上一张</button>
-        <button onclick="nextImage()">下一张</button>
-        <button onclick="previousSong()">上一首</button>
-        <button onclick="nextSong()">下一首</button>
-    </div>
+    <div id="audioTime">00:00 / 00:00</div>
 
     <script>
         const slideshow = document.getElementById("slideshow");
         const numberOfImages = 3;
         let currentIndex = 0;
         const transitionStyles = ['fade', 'slide', 'zoom', 'slide-up', 'slide-down', 'flip'];
+        const images = [
+            { src: "birthday/birthday_image1.JPEG", wish: "祝你岁岁平安，年年快乐！" },
+            { src: "birthday_image2.JPEG", wish: "愿你的生日充满欢乐和祝福！" },
+            { src: "birthday/birthday_image3.JPEG", wish: "生日快乐！" }
+        ];
         const songs = [
             "birthday/happy_birthday_song.mp3",
             "birthday/稻香- 周杰伦.mp3",
@@ -131,6 +142,7 @@
         ];
         let currentSongIndex = 0;
         const audio = document.getElementById("audio");
+        const audioTime = document.getElementById("audioTime");
 
         const dotContainer = document.getElementById("dotContainer");
         const dots = [];
@@ -146,7 +158,7 @@
 
         function showImage(index, transitionStyle) {
             const img = document.createElement("img");
-            img.src = `birthday/birthday_image${index + 1}.JPEG`; // 添加图片
+            img.src = images[index].src;
             img.className = transitionStyle;
             img.onload = function() {
                 img.style.opacity = 1;
@@ -155,6 +167,12 @@
             slideshow.appendChild(img);
             currentIndex = index;
             updateDots();
+            updateWish();
+        }
+
+        function updateWish() {
+            const wishText = document.getElementById("wishText");
+            wishText.textContent = images[currentIndex].wish;
         }
 
         function updateDots() {
@@ -179,19 +197,44 @@
             showImage(currentIndex, randomTransitionStyle);
         }
 
+        function togglePlayPause() {
+            if (audio.paused) {
+                audio.play();
+                toggleButton.innerHTML = "⏸️";
+            } else {
+                audio.pause();
+                toggleButton.innerHTML = "▶️";
+            }
+        }
+
+        function updateTime() {
+            const currentTime = formatTime(audio.currentTime);
+            const duration = formatTime(audio.duration);
+            audioTime.textContent = `${currentTime} / ${duration}`;
+        }
+
+        function formatTime(time) {
+            const minutes = Math.floor(time / 60);
+            const seconds = Math.floor(time % 60);
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
         function previousSong() {
             currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
             audio.src = songs[currentSongIndex];
             audio.play();
+            toggleButton.innerHTML = "⏸️";
         }
 
         function nextSong() {
             currentSongIndex = (currentSongIndex + 1) % songs.length;
             audio.src = songs[currentSongIndex];
             audio.play();
+            toggleButton.innerHTML = "⏸️";
         }
 
         audio.addEventListener('ended', nextSong);
+        audio.addEventListener('timeupdate', updateTime);
 
         showImage(currentIndex, transitionStyles[0]);
         audio.src = songs[currentSongIndex];
