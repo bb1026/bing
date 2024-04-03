@@ -3,7 +3,14 @@
     "ID": "js-101",
     "update": "上传代码",
     "name": "汉生汇率",
-    "url": "https://bb1026.github.io/bing/js-101.js",
+    "url": "https://bb1026.github.io/bing/js/js-101.js",
     "version": "1.1"
+  },
+    "js-102": {
+    "ID": "js-102",
+    "update": "上传代码",
+    "name": "Panda Remit",
+    "url": "https://bb1026.github.io/bing/js/js-101.js",
+    "version": "1.5"
   }
 }
