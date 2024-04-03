@@ -1,3 +1,7 @@
+this.name = "汉生汇率"
+this.widget_ID = "js-101"
+this.version = "v1.1"
+
 const widget = new ListWidget();
 
 // 设置货币
