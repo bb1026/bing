@@ -5,16 +5,16 @@ this.version = "v1.1"
 const widget = new ListWidget();
 
 // 设置货币
-let currency = "人民币";
+const currency = "人民币";
 if (!config.runsInApp) {
   currency = args.widgetParameter || "人民币";
 }
 
 // 请求汉生汇率网站数据
 const url = "https://www.hanshanmoney.com/zh/rate-cn/";
-let req = new Request(url);
-let reqdata = await req.loadString();
-let data = reqdata.replace(/<[^>]+>/g,'');
+const req = new Request(url);
+const reqdata = await req.loadString();
+const data = reqdata.replace(/<[^>]+>/g,'');
 
 // 解析日期、时间和汇率数据
 const riqi = data.match(/有效日期:.*/i)?.toString().replace(/ /g,'') || "日期信息不可用";
