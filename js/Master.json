@@ -1,4 +1,11 @@
 {
+  "js-100": {
+    "ID": "js-100",
+    "update": "上传代码",
+    "name": "安装小助手",
+    "url": "https://bb1026.github.io/bing/js/js-100.js",
+    "version": "v1.0"
+  },
   "js-101": {
     "ID": "js-101",
     "update": "上传代码",
