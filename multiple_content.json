@@ -1,9 +1,12 @@
 {
-  "音乐c": "https://bb1026.github.io/bing/music.json",
-  "日历": "https://bb1026.github.io/bing/calendar.html",
-  "书签": "https://bb1026.github.io/bing/sq.html",
-  "时钟": "https://bb1026.github.io/bing/time.html",
-  "星星": "https://bb1026.github.io/bing/xxbirthday.html",
+  "音乐c": "https://raw.githubusercontent.com/bb1026/bing/main/music.json",
+  "日历": "https://raw.githubusercontent.com/bb1026/bing/main/calendar.html",
+  "书签": "https://raw.githubusercontent.com/bb1026/bing/main/sq.html",
+  "时钟": "https://raw.githubusercontent.com/bb1026/bing/main/time.html",
+  "星星": "https://raw.githubusercontent.com/bb1026/bing/main/xxbirthday.html",
   "音乐": "链接🔗还没做好!🙂",
-  "神秘代码": "https://bb1026.github.io/bing/multiple_content.json"
+  "js-100": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-100.js",
+  "js-101": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-101.js",
+  "js-102": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-102.js",
+  "神秘代码": "https://raw.githubusercontent.com/bb1026/bing/main/multiple_content.json"
 }
