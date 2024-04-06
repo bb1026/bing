@@ -19,5 +19,19 @@
     "name": "Panda Remit",
     "url": "https://bb1026.github.io/bing/js/js-102.js",
     "version": "v1.5"
-  }
+  },
+    "js-103": {
+    "ID": "js-103",
+    "update": "上传代码",
+    "name": "Singapore Bus",
+    "url": "https://bb1026.github.io/bing/js/js-103.js",
+    "version": "v1.0"
+    },
+    "js-104": {
+    "ID": "js-104",
+    "update": "上传代码",
+    "name": "日历📆Calendar",
+    "url": "https://bb1026.github.io/bing/js/js-104.js",
+    "version": "v1.0"
+    }
 }
