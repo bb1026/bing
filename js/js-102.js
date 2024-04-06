@@ -1,6 +1,6 @@
-this.name = "Panda Remit"
-this.widget_ID = "js-102"
-this.version = "v1.5"
+this.name = "Panda Remit";
+this.widget_ID = "js-102";
+this.version = "v1.5";
 
 let api = await loadapi();
 let widget = await createWidget(api);
