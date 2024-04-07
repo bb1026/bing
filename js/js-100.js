@@ -3,7 +3,16 @@ this.widget_ID = "js-100";
 this.version = "v1.1";
 
 // 定义网页的 URL
-const pageURL = "https://bb1026.github.io/bing/js/Master.json";
+const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
+
+let scriptList = await new Request(scriptListURL).loadJSON();
+
+let scriptversion = scriptList[this.widget_ID].version;
+console.log(scriptversion); 
+if (this.version !== scriptversion) {
+Pastebpast.copy(scriptList[this.widget_ID].url);
+  Safari.open("scriptable:///run?scriptName=安装小助手");
+};
 
 // 创建文件管理器
 const fm = FileManager.iCloud();
@@ -36,7 +45,7 @@ if (clipboardLink.includes("js-")) {
 }
 
 // 发起网络请求获取网页内容
-const req = new Request(pageURL);
+const req = new Request(scriptListURL);
 const responseBody = await req.loadJSON();
 
 // 获取用户输入的脚本信息
