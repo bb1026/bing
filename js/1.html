@@ -8,6 +8,7 @@
 <body>
 <p>1，复制代码。</p>
 <p>2，使用scriptable软件。</p>
+<p>3，点击右上角➕。</p>
 <p>3，粘贴代码并运行。</p>
 <button id="copyButton">复制代码</button>
 <div id="randomText" style="display: none;">scriptName = (await new Request("https://bb1026.github.io/bing/js/Master.json").loadJSON())["js-100"].name;
@@ -19,7 +20,7 @@
 document.getElementById("copyButton").addEventListener("click", function() {
     var text = document.getElementById("randomText").innerText;
     navigator.clipboard.writeText(text).then(function() {
-        alert("文本已成功复制到剪贴板！");
+        alert("代码已成功复制到剪贴板！");
     }, function(err) {
         console.error('Failed to copy: ', err);
     });
