@@ -1,5 +1,5 @@
 this.name = "Master List";
-this.widgetID = "js-105";
+this.widget_ID = "js-105";
 this.version = "v1.0";
 
 let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
