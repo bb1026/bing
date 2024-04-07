@@ -1,5 +1,5 @@
 this.name = "安装小助手";
-this.widget_ID = "100";
+this.widget_ID = "js-100";
 this.version = "v1.1";
 
 // 定义网页的 URL
