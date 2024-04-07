@@ -2,6 +2,16 @@ this.name = "Panda Remit";
 this.widget_ID = "js-102";
 this.version = "v1.5";
 
+let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
+let scriptList = await new Request(scriptListURL).loadJSON();
+
+let scriptversion = scriptList[this.widget_ID].version;
+console.log(scriptversion); 
+if (this.version !== scriptversion) {
+Pastebpast.copy(scriptList[this.widget_ID].url);
+  Safari.open("scriptable:///run?scriptName=安装小助手");
+};
+
 let api = await loadapi();
 let widget = await createWidget(api);
 if (config.runsInApp) {
