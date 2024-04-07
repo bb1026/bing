@@ -1,5 +1,5 @@
 this.name = "Singapore Bus";
-this.widget_ID = "js_103";
+this.widget_ID = "js-103";
 this.version = "v1.0"; 
 
 let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
