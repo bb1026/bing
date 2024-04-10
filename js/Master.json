@@ -47,5 +47,12 @@
     "name": "音乐下载",
     "url": "https://bb1026.github.io/bing/js/js-106.js",
     "version": "v1.0"
+    },
+    "js-107": {
+    "ID": "js-107",
+    "update": "上传代码",
+    "name": "附近的Bus SG",
+    "url": "https://bb1026.github.io/bing/js/js-107.js",
+    "version": "v1.0"
     }
 }
