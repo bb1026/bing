@@ -37,6 +37,12 @@
         .country-code {
             font-size: 14px; /* 调整国家代码字体大小 */
         }
+        select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-left: 5px; /* 调整选择框左边距 */
+        }
     </style>
 </head>
 <body>
@@ -48,9 +54,26 @@
 
     <div class="calculator">
         <input type="number" id="num1" value="100" oninput="updateResult('num1', 'num2', 'multiply')" onblur="removeLeadingZero('num1')">
-        <span class="country-code" id="currency"></span><br> <!-- 使用currency -->
+        <select id="fromCurrency" onchange="fetchExchangeRate()">
+            <option value="SGD">SGD</option>
+            <option value="CNY">CNY</option>
+            <option value="HKD">HKD</option>
+            <option value="USD">USD</option>
+            <option value="JPY">JPY</option>
+        </select>
+        <br>
         <input type="number" id="num2" oninput="updateResult('num2', 'num1', 'divide')" onblur="removeLeadingZero('num2')">
-        <span class="country-code" id="targetCurrency"></span> <!-- 使用targetCurrency -->
+        <select id="toCurrency" onchange="fetchExchangeRate()">
+            <option value="CNY">CNY</option>
+            <option value="SGD">SGD</option>
+            <option value="MYR">MYR</option>
+            <option value="HKD">HKD</option>
+            <option value="USD">USD</option>
+            <option value="JPY">JPY</option>
+        </select>
+        <br>
+        <span class="country-code" id="currency"></span>
+        <span class="country-code" id="targetCurrency"></span>
     </div>
 
     <div class="source">
@@ -65,11 +88,9 @@
 
         let currency, targetCurrency; // 定义currency和targetCurrency变量
 
-        function updateCurrency(currencyCode, targetCurrencyCode) {
+        function updateCurrencyText(currencyCode, targetCurrencyCode) {
             currency = currencyCode;
             targetCurrency = targetCurrencyCode;
-            document.getElementById('currency').innerText = currency; // 更新currency显示
-            document.getElementById('targetCurrency').innerText = targetCurrency; // 更新targetCurrency显示
         }
 
         function updateResult(inputId, outputId, operation) {
@@ -96,7 +117,9 @@
 
         // 获取汇率数据
         function fetchExchangeRate() {
-            fetch('https://prod.pandaremit.com/pricing/rate/SGD/CNY')
+            const fromCurrency = document.getElementById("fromCurrency").value;
+            const toCurrency = document.getElementById("toCurrency").value;
+            fetch(`https://prod.pandaremit.com/pricing/rate/${fromCurrency}/${toCurrency}`)
             .then(response => response.json())
             .then(data => {
                 const exchangeRate = parseFloat(data.model.pandaRate).toFixed(4); // 显示四位小数
@@ -104,7 +127,7 @@
                 targetCurrency = data.model.target;
                 const exchangeRateElement = document.getElementById('exchangeRate');
                 exchangeRateElement.innerHTML = `<p>1 ${currency} = <span id="exchangeRateValue">${exchangeRate}</span> ${targetCurrency}</p>`;
-                updateCurrency(currency, targetCurrency); // 更新currency和targetCurrency
+                updateCurrencyText(currency, targetCurrency); // 更新currency和targetCurrency
                 updateResult('num1', 'num2', 'multiply'); // 更新乘法计算
             })
             .catch(error => {
