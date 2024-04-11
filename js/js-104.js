@@ -1,3 +1,6 @@
+// Variables used by Scriptable.
+// These must be at the very top of the file. Do not edit.
+// icon-color: cyan; icon-glyph: bus;
 this.name = "日历📆Calendar";
 this.widget_ID = "js-104";
 this.version = "v1.0";
