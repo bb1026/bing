@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Exchange Rate</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .exchange-rate {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .input-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 150px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-time Exchange Rate</h1>
+    <div class="exchange-rate" id="exchangeRate">
+        <p>Loading...</p>
+    </div>
+    <div class="input-container">
+        <label for="currency">Currency:</label>
+        <input type="number" id="currency" oninput="calculateExchange('currency', 'targetCurrency')" step="0.01">
+        <label for="targetCurrency">Target Currency:</label>
+        <input type="number" id="targetCurrency" oninput="calculateExchange('targetCurrency', 'currency')" step="0.01">
+    </div>
+
+    <script>
+        // Function to fetch exchange rate data
+        function fetchExchangeRate() {
+            fetch('https://prod.pandaremit.com/pricing/rate/SGD/CNY', {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const exchangeRate = data.model.pandaRate;
+                const currency = data.model.code;
+                const targetCurrency = data.model.target;
+                const exchangeRateElement = document.getElementById('exchangeRate');
+                exchangeRateElement.innerHTML = `<p>1 ${currency} (${targetCurrency}) = ${exchangeRate} ${targetCurrency}</p>`;
+            })
+            .catch(error => {
+                console.error('Error fetching exchange rate:', error);
+                const exchangeRateElement = document.getElementById('exchangeRate');
+                exchangeRateElement.innerHTML = `<p>Error fetching exchange rate. Please try again later.</p>`;
+            });
+        }
+
+        // Function to calculate exchange amount
+        function calculateExchange(inputId, outputId) {
+            const inputAmount = parseFloat(document.getElementById(inputId).value);
+            const exchangeRate = parseFloat(document.getElementById('exchangeRate').innerText.split(' ')[5]);
+
+            if (!isNaN(inputAmount)) {
+                const result = inputId === 'currency' ? inputAmount * exchangeRate : inputAmount / exchangeRate;
+                document.getElementById(outputId).value = result.toFixed(2);
+            } else {
+                document.getElementById(outputId).value = '';
+            }
+        }
+
+        // Fetch exchange rate on page load
+        fetchExchangeRate();
+    </script>
+</body>
+</html>
