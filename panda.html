@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-time Exchange Rate</title>
+    <title>实时汇率</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,37 +13,74 @@
         h1 {
             text-align: center;
         }
-        .exchange-rate {
+        .calculator {
             margin-top: 20px;
             text-align: center;
-        }
-        .input-container {
-            text-align: center;
-            margin-top: 20px;
         }
         input[type="number"] {
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 5px;
             width: 150px;
-            margin-right: 10px;
+            margin: 0 10px;
+        }
+        .exchange-rate {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .source {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <h1>Real-time Exchange Rate</h1>
+    <h1>实时汇率</h1>
+
     <div class="exchange-rate" id="exchangeRate">
-        <p>Loading...</p>
+        <p>加载中...</p>
     </div>
-    <div class="input-container">
-        <label for="currency">Currency:</label>
-        <input type="number" id="currency" oninput="calculateExchange('currency', 'targetCurrency')" step="0.01">
-        <label for="targetCurrency">Target Currency:</label>
-        <input type="number" id="targetCurrency" oninput="calculateExchange('targetCurrency', 'currency')" step="0.01">
+
+    <div class="calculator">
+        <input type="number" id="num1" value="100" oninput="updateResult('num1', 'num2', 'multiply')" onblur="removeLeadingZero('num1')">
+        <input type="number" id="num2" oninput="updateResult('num2', 'num1', 'divide')" onblur="removeLeadingZero('num2')">
+    </div>
+
+    <div class="source">
+        数据来源 <a href="https://www.pandaremit.com/zh" target="_blank">熊猫汇款(Panda Remit)</a>
     </div>
 
     <script>
-        // Function to fetch exchange rate data
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchExchangeRate();
+            updateResult('num1', 'num2', 'multiply');
+        });
+
+        function updateResult(inputId, outputId, operation) {
+            const inputNumber = parseFloat(document.getElementById(inputId).value) || 0;
+            let result;
+
+            const exchangeRate = parseFloat(document.getElementById('exchangeRateValue').innerText); // 将汇率值转换为数值
+
+            if (operation === 'multiply') {
+                result = (inputNumber * exchangeRate).toFixed(2);
+            } else if (operation === 'divide' && inputNumber !== 0) {
+                result = (inputNumber / exchangeRate).toFixed(2);
+            } else {
+                result = '';
+            }
+
+            document.getElementById(outputId).value = result;
+        }
+
+        function removeLeadingZero(inputId) {
+            const inputElement = document.getElementById(inputId);
+            inputElement.value = inputElement.value.replace(/^0+(?=\d)/, '');
+        }
+
+        // 获取汇率数据
         function fetchExchangeRate() {
             fetch('https://prod.pandaremit.com/pricing/rate/SGD/CNY', {
                 headers: {
@@ -52,34 +89,19 @@
             })
             .then(response => response.json())
             .then(data => {
-                const exchangeRate = data.model.pandaRate;
+                const exchangeRate = parseFloat(data.model.pandaRate).toFixed(4); // 显示四位小数
                 const currency = data.model.code;
                 const targetCurrency = data.model.target;
                 const exchangeRateElement = document.getElementById('exchangeRate');
-                exchangeRateElement.innerHTML = `<p>1 ${currency} (${targetCurrency}) = ${exchangeRate} ${targetCurrency}</p>`;
+                exchangeRateElement.innerHTML = `<p>1 (${currency}) = <span id="exchangeRateValue">${exchangeRate}</span> (${targetCurrency})</p>`;
+                updateResult('num1', 'num2', 'multiply'); // 更新乘法计算
             })
             .catch(error => {
-                console.error('Error fetching exchange rate:', error);
+                console.error('获取汇率数据错误:', error);
                 const exchangeRateElement = document.getElementById('exchangeRate');
-                exchangeRateElement.innerHTML = `<p>Error fetching exchange rate. Please try again later.</p>`;
+                exchangeRateElement.innerHTML = `<p>获取汇率数据错误，请稍后再试。</p>`;
             });
         }
-
-        // Function to calculate exchange amount
-        function calculateExchange(inputId, outputId) {
-            const inputAmount = parseFloat(document.getElementById(inputId).value);
-            const exchangeRate = parseFloat(document.getElementById('exchangeRate').innerText.split(' ')[5]);
-
-            if (!isNaN(inputAmount)) {
-                const result = inputId === 'currency' ? inputAmount * exchangeRate : inputAmount / exchangeRate;
-                document.getElementById(outputId).value = result.toFixed(2);
-            } else {
-                document.getElementById(outputId).value = '';
-            }
-        }
-
-        // Fetch exchange rate on page load
-        fetchExchangeRate();
     </script>
 </body>
 </html>
