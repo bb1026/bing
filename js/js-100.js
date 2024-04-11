@@ -1,10 +1,15 @@
+// Variables used by Scriptable.
+// These must be at the very top of the file. Do not edit.
+// icon-color: green; icon-glyph: hands-helping;
 this.name = "安装小助手";
 this.widget_ID = "js-100";
 this.version = "v1.1";
 
 // 检查更新
 const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
+
 let scriptList = await new Request(scriptListURL).loadJSON();
+
 if (scriptList[this.widget_ID]){
 let scriptversion = scriptList[this.widget_ID].version;
 console.log(scriptversion); 
@@ -20,11 +25,15 @@ const fm = FileManager.iCloud();
 // 从剪贴板中获取链接
 let clipboardLink = await Pasteboard.pasteString();
 
-if (clipboardLink.includes("js-")) {
-  // 从剪贴板中的 URL 提取脚本 ID
+if (clipboardLink) {
+  if (clipboardLink.includes("js-")) {
+    // 从剪贴板中的 URL 提取脚本 ID
     let startIndex = clipboardLink.lastIndexOf("js-") + 3;
     let endIndex = clipboardLink.lastIndexOf(".js");
     var scriptID = clipboardLink.substring(startIndex, endIndex);
+  } else {
+    console.log("剪贴板中的链接不包含脚本 ID。");
+  }
 } else {
   // 弹出输入框让用户输入脚本 ID
   const inputAlert = new Alert();
@@ -44,6 +53,8 @@ if (clipboardLink.includes("js-")) {
   }
 }
 
+const scriptURL = `https://bb1026.github.io/bing/js/js-${scriptID}.js`;
+
 // 发起网络请求获取网页内容
 const req = new Request(scriptListURL);
 const responseBody = await req.loadJSON();
@@ -53,7 +64,6 @@ const scriptInfo = responseBody[`js-${scriptID}`];
 
 if (scriptInfo) {
   const scriptName = scriptInfo.name;
-  const scriptURL = scriptInfo.url;
   const scriptUpdate = scriptInfo.update;
   const scriptVersion = scriptInfo.version;
 
