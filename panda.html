@@ -93,7 +93,7 @@
                 const currency = data.model.code;
                 const targetCurrency = data.model.target;
                 const exchangeRateElement = document.getElementById('exchangeRate');
-                exchangeRateElement.innerHTML = `<p>1 (${currency}) = <span id="exchangeRateValue">${exchangeRate}</span> (${targetCurrency})</p>`;
+                exchangeRateElement.innerHTML = `<p>1 ${currency} = <span id="exchangeRateValue">${exchangeRate}</span> ${targetCurrency}</p>`;
                 updateResult('num1', 'num2', 'multiply'); // 更新乘法计算
             })
             .catch(error => {
