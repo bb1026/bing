@@ -1,10 +1,15 @@
+// Variables used by Scriptable.
+// These must be at the very top of the file. Do not edit.
+// icon-color: deep-gray; icon-glyph: exchange-alt;
 this.name = "汉生汇率";
 this.widget_ID = "js-101";
 this.version = "v1.1";
 
 // 检查更新
 const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
+
 let scriptList = await new Request(scriptListURL).loadJSON();
+
 if (scriptList[this.widget_ID]){
 let scriptversion = scriptList[this.widget_ID].version;
 console.log(scriptversion); 
