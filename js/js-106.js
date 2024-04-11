@@ -1,10 +1,15 @@
+// Variables used by Scriptable.
+// These must be at the very top of the file. Do not edit.
+// icon-color: deep-purple; icon-glyph: music;
 this.name = "音乐下载";
 this.widget_ID = "js-106";
 this.version = "v1.0";
 
 // 检查更新
 const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
+
 let scriptList = await new Request(scriptListURL).loadJSON();
+
 if (scriptList[this.widget_ID]){
 let scriptversion = scriptList[this.widget_ID].version;
 console.log(scriptversion); 
@@ -72,6 +77,7 @@ const musicData = combinedMatches.map(item => {
 
 // 创建 UITable
 let table = new UITable();
+table.showSeparators = true;
 
 // 添加标题行
 let headerRow = new UITableRow();
