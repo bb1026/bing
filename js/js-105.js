@@ -1,7 +1,11 @@
+// Variables used by Scriptable.
+// These must be at the very top of the file. Do not edit.
+// icon-color: cyan; icon-glyph: theater-masks;
 this.name = "Master List";
 this.widget_ID = "js-105";
 this.version = "v1.0";
 
+// 检查更新
 let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
 let scriptList = await new Request(scriptListURL).loadJSON();
 
