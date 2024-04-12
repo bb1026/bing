@@ -7,9 +7,7 @@ this.version = "v1.1";
 
 // 检查更新
 const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
-
 let scriptList = await new Request(scriptListURL).loadJSON();
-
 if (scriptList[this.widget_ID]){
 let scriptversion = scriptList[this.widget_ID].version;
 console.log(scriptversion); 
@@ -100,7 +98,7 @@ if (scriptInfo) {
       // 显示成功消息
       const successAlert = new Alert();
       successAlert.title = "成功";
-      successAlert.message = `<${scriptName}>脚本已成功覆盖安装！\n更新日期：${scriptUpdate}\n版本号：${scriptVersion}\n是否立即运行安装的脚本？`;
+      successAlert.message = `<${scriptName}>脚本已成功覆盖安装！\n更新内容：${scriptUpdate}\n版本号：${scriptVersion}\n是否立即运行安装的脚本？`;
       successAlert.addAction("不了");
       successAlert.addAction("打开");
       const runScript = await successAlert.present();
@@ -143,7 +141,7 @@ if (scriptInfo) {
     // 显示成功消息
     const successAlert = new Alert();
     successAlert.title = "成功";
-    successAlert.message = `<${scriptName}>脚本已成功下载和安装！\n更新日期：${scriptUpdate}\n版本号：${scriptVersion}\n是否立即运行安装的脚本？`;
+    successAlert.message = `<${scriptName}>脚本已成功下载和安装！\n更新内容：${scriptUpdate}\n版本号：${scriptVersion}\n是否立即运行安装的脚本？`;
     successAlert.addAction("不了");
     successAlert.addAction("打开");
     const runScript = await successAlert.present();
@@ -153,7 +151,7 @@ if (scriptInfo) {
       );
     }
     console.log(
-      `<${scriptName}>脚本已成功下载和安装！\n更新日期：${scriptUpdate}\n版本号：${scriptVersion}`
+      `<${scriptName}>脚本已成功下载和安装！\n更新内容：${scriptUpdate}\n版本号：${scriptVersion}`
     );
   }
 } else {
