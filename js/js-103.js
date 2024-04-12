@@ -3,7 +3,7 @@
 // icon-color: cyan; icon-glyph: bus;
 this.name = "Singapore Bus";
 this.widget_ID = "js-103";
-this.version = "v1.0"; 
+this.version = "v2.0"; 
 
 // 检查更新
 const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
@@ -17,142 +17,104 @@ Pasteboard.copy(scriptList[this.widget_ID].url);
   }
 };
 
-const w = new ListWidget();
+const myBusCodes = [
+  { stopCode: "59009", busCodes: [800, 804] }, 
+  { stopCode: "59241", busCodes: [804] }, 
+  { stopCode: "22009", busCodes: [246, 249] }, 
+  { stopCode: "21499", busCodes: [246] }, 
+  { stopCode: "21491", busCodes: [246] }, 
+  { stopCode: "21321", busCodes: [249] },
+//   { stopCode: "59073", busCodes: [858] }
+];
 
-let date = new Date();
-let y = date.getFullYear();
-let m = ("0" + (date.getMonth() + 1)).slice(-2);
-let d = ("0" + date.getDate()).slice(-2);
-let minute = ("0" + date.getMinutes()).slice(-2);
-let hour = ("0" + date.getHours()).slice(-2);
-let second = ("0" + date.getSeconds()).slice(-2);
-const refreshtime = y + "-" + m + "-" + d + " " + hour + ":" + minute + ":" + second;
+async function getStopArrivalInfo(stopId) {
+    const url = `https://transport.nestia.com/api/v4.5/stops/${stopId}/bus_arrival`;
+    const request = new Request(url);
+    const response = await request.loadJSON();
+    return response;
+}
 
-// 字体颜色和大小
-const zitisize = Font.systemFont(15);
-
-//小组件
-const sg = w.addText("Singapore Bus");
-sg.centerAlignText();
-// sg.textColor = Color.magenta();
-sg.font = Font.boldMonospacedSystemFont(20);
-let rt = w.addText(refreshtime);
-rt.centerAlignText();
-rt.font = Font.systemFont(15);
-w.addSpacer(5);
-
-// 加载Bus数据
-const idurl = "https://transport.nestia.com/api/v4.5/search/bus?key=";
-const busurl = "https://transport.nestia.com/api/v4.5/stops/";
-
-const busarr = new Array(
-  ["59009", 800, 804], //YiShun Int
-  ["59241", 804], //Bus804 Blk236
-  ["22009", 246, 249], //BoonLay Int
-  ["21499", 246], //Bus246 TKukang to lakeside
-  ["21491", 246], //Bus246 Tukang to boonlay
-  ["21321", 249],
-  ["59073", 858]
-);
-
-// 加载Bus
-for (let i in busarr) {
-  async function busidget() {
-    let req = new Request(idurl + busarr[i][0]);
-    let results = await req.loadJSON();
-    return results;
-  }
-  const Reqdata = await busidget(idurl + busarr[i][0]);
-  const station_id = Reqdata[0].id;
-  const station_code = Reqdata[0].code;
-  const station_name = Reqdata[0].name;
-
-  //添加小组件
-  const carton = w.addStack();
-  var cartonstation = carton.addStack();
-  const stop = cartonstation.addText(
-    "Station: " + station_name + " " + station_code
-  );
-  stop.font = Font.boldMonospacedSystemFont(15);
-
-  // id获取
-  async function busarrget() {
-    let req = new Request(busurl + station_id + "/bus_arrival");
-    let results = await req.loadJSON();
-    return results;
-  }
-  const bustime = await busarrget(busurl + station_id);
-
-  for (let o = 0; o < bustime.length; o++) {
-    for (let p = o + 1; p < bustime.length; p++) {
-      if (bustime[o].bus_code === bustime[p].bus_code) {
-        bustime.splice(p, 1);
-      } else {
-        p++;
-      }
-    }
-  }
-
-  for (x = 0; x < bustime.length; x++) {
-    var bus_code = bustime[x].bus_code;
-    var bus_stopname = bustime[x].bus.end_stop.name;
-
-    for (let c in busarr[i]) {
-      if (bus_code == busarr[i][c]) {
-        const arrival = bustime[x].arrivals;
-        if (arrival == undefined) {
-          var busFirst = "已停运";
-        } else {
-          let bus1time = arrival[0];
-          console.log(bus1time.arrival_time);
-          if (bus1time.status != 1 || bus1time.arrival_time < -1800) {
-            var busFirst = "已停运";
-          } else {
-            if (bus1time.arrival_time <= 0) {
-              var busFirst = "Arrived";
-            } else {
-              var busFirst = (bus1time.arrival_time / 60).toFixed(1) + "分钟";
+async function getArrivalInfoForStops() {
+    const arrivalInfoArray = [];
+    const processedStopCodes = [];
+    for (let busCodeObj of myBusCodes) {
+        const stopCode = busCodeObj.stopCode;
+        const busCodes = busCodeObj.busCodes;
+        try {
+            if (processedStopCodes.includes(stopCode)) {
+                continue;
             }
-          }
-          if (arrival[1] == undefined) {
-            var busSecond = "已停运";
-          } else {
-            let bus2time = arrival[1];
-            if (bus2time.status != 1 || bus2time.arrival_time < -1800) {
-              var busSecond = "已停运";
-            } else {
-              if (bus2time.arrival_time <= 0) {
-                var busSecond = "Arrived";
-              } else {
-                var busSecond =
-                  (bus2time.arrival_time / 60).toFixed(1) + "分钟";
-              }
+
+            const stopInfoUrl = `https://transport.nestia.com/api/v4.5/search/bus?key=${stopCode}`;
+            const stopInfoRequest = new Request(stopInfoUrl);
+            const stopInfoResponse = await stopInfoRequest.loadJSON();
+            const stopId = stopInfoResponse[0].id;
+            const stopName = stopInfoResponse[0].name;
+
+            const stopArrivalInfo = await getStopArrivalInfo(stopId);
+            
+            const uniqueBusCodes = new Set();
+            for (let arrival of stopArrivalInfo) {
+                const busCode = arrival.bus_code;
+                if (busCodes.includes(parseInt(busCode)) && !uniqueBusCodes.has(busCode)) {
+                    const arrivals = arrival.arrivals;
+                    const arrivalTimes = [];
+                    for (let i = 0; i < Math.min(arrivals.length, 2); i++) {                        const arrivalTimeInSeconds = arrivals[i].arrival_time;
+                        let arrivalTime;
+                        if (arrivalTimeInSeconds === undefined || arrivalTimeInSeconds === -600 ) {
+                            arrivalTime = "未知或停运";
+                        } else if (arrivalTimeInSeconds < 15) {
+                            arrivalTime = "到达";
+                        } else if (arrivalTimeInSeconds < -1) {
+                            arrivalTime = "离开";
+                        } else {
+                            arrivalTime = (arrivalTimeInSeconds / 60).toFixed(1) + "分钟";
+                        }
+                        arrivalTimes.push(arrivalTime);
+                    }
+                    const status = arrival.arrivals[0].status;
+                    const arrivalText = `Bus: ${busCode}    ${arrivalTimes.join(" , ")}`;
+                    uniqueBusCodes.add(busCode);
+                    arrivalInfoArray.push({ stopName, arrivalText, stopCode });
+                }
             }
-          }
+             processedStopCodes.push(stopCode);
+        } catch (error) {
+            console.error(`获取站点 ${stopCode} 的到站信息时出错: ${error}`);
         }
-
-        //添加bus小组件
-        const cartonbus = w.addStack();
-        const cartonbuscode = cartonbus.addStack();
-        const cartonbus1 = cartonbus.addStack();
-        cartonbus1.setPadding(0, 15, 0, 0);
-        const cartonbus2 = cartonbus.addStack();
-        cartonbus2.setPadding(0, 15, 0, 0);
-        const busst = cartonbuscode.addText("Bus: " + bus_code);
-        busst.font = zitisize;
-        const bus1st = cartonbus1.addText("First: " + busFirst);
-        bus1st.font = zitisize;
-        const bus2st = cartonbus2.addText("Second: " + busSecond);
-        bus2st.font = zitisize;
-      }
     }
-  }
-}
-w.addSpacer();
-
-if (config.runsInApp) {
-  await w.presentLarge();
+    return arrivalInfoArray;
 }
 
-Script.setWidget(w);
-Script.complete();
+// 创建小组件
+const busInfo = await getArrivalInfoForStops();
+const widget = new ListWidget();
+
+// 添加标题文本
+const title = widget.addText("新加坡巴士\n" + new Date().toLocaleTimeString());
+title.font = Font.boldSystemFont(20);
+title.centerAlignText();
+
+// 添加站点和到站信息
+const uniqueStops = new Set();
+for (let info of busInfo) {
+    const stopName = info.stopName;
+    const stopCode = info.stopCode;
+    if (!uniqueStops.has(stopName)) {
+        uniqueStops.add(stopName);
+        const stopText = widget.addText(`站点: ${stopName} (${stopCode})`);
+        stopText.font = Font.boldSystemFont(14);
+    }
+    const arrivalText = info.arrivalText;
+    const arrivalTextItem = widget.addText(arrivalText);
+    arrivalTextItem.lineLimit = 1;
+}
+
+widget.addSpacer();// 往上靠
+
+// 设置小组件
+if (config.runsInWidget) {
+  Script.setWidget(widget);
+} else {
+  widget.presentLarge();
+}
