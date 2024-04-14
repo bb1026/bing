@@ -19,6 +19,11 @@ Pasteboard.copy(scriptList[this.widget_ID].url);
   }
 };
 
+/* 
+以上为获取更新代码
+以下开始运行代码
+*/
+
 let api = await loadapi();
 let widget = await createWidget(api);
 if (config.runsInApp) {
