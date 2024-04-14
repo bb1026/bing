@@ -6,17 +6,27 @@ this.widget_ID = "js-101";
 this.version = "v1.1";
 
 // 检查更新
-const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
-
+let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
 let scriptList = await new Request(scriptListURL).loadJSON();
-
-if (scriptList[this.widget_ID]){
 let scriptversion = scriptList[this.widget_ID].version;
 console.log(scriptversion); 
 if (this.version !== scriptversion) {
-Pasteboard.copy(scriptList[this.widget_ID].url);
-  Safari.open("scriptable:///run?scriptName=安装小助手");
-  }
+    Pasteboard.copy(scriptList[this.widget_ID].url);
+    const fm = FileManager.iCloud();
+    const scriptName = "安装小助手.js"; // 要检查的脚本文件名，包括.js后缀
+    const scriptPath = fm.joinPath(fm.documentsDirectory(), scriptName);
+    const scriptExists = fm.fileExists(scriptPath);
+    if (scriptExists) {
+        Safari.open("scriptable:///run?scriptName=安装小助手");
+    } else {
+        console.log(`${scriptName} 不存在`);
+        const alert = new Alert();
+        alert.message = "安装小助手脚本不存在，请手动安装。";
+        alert.addAction("确定");
+        await alert.present();
+        Safari.open("https://bb1026.github.io/bing/js/1.html");
+    }
+    return;
 };
 
 /* 
