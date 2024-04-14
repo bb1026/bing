@@ -121,7 +121,7 @@ async function createWidget() {
   const widget = new ListWidget();
   // 添加标题文本
   const title = widget.addText(
-    "Singapore Buses\n" + new Date().toLocaleTimeString()
+    "Singapore Bus\n" + new Date().toLocaleTimeString()
   );
   title.font = Font.boldSystemFont(20);
   title.centerAlignText();
@@ -176,7 +176,7 @@ async function createTable() {
   let headerRow = new UITableRow();
   headerRow.isHeader = true;
   let headerCell = headerRow.addCell(
-    UITableCell.text("Bus information  " + new Date().toLocaleTimeString())
+    UITableCell.text("Singapore Bus  " + new Date().toLocaleTimeString())
   );
   table.addRow(headerRow);
 
