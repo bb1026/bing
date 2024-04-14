@@ -8,17 +8,14 @@ this.version = "v1.1";
 // 检查更新
 let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
 let scriptList = await new Request(scriptListURL).loadJSON();
-
 let scriptversion = scriptList[this.widget_ID].version;
 console.log(scriptversion); 
 if (this.version !== scriptversion) {
     Pasteboard.copy(scriptList[this.widget_ID].url);
     const fm = FileManager.iCloud();
     const scriptName = "安装小助手.js"; // 要检查的脚本文件名，包括.js后缀
-
     const scriptPath = fm.joinPath(fm.documentsDirectory(), scriptName);
     const scriptExists = fm.fileExists(scriptPath);
-
     if (scriptExists) {
         Safari.open("scriptable:///run?scriptName=安装小助手");
     } else {
