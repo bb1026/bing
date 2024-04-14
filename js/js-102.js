@@ -1,9 +1,9 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-brown; icon-glyph: sync;
-this.name = "Panda Remit"
-this.widget_ID = "js-102"
-this.version = "v1.5"
+this.name = "Panda Remit";
+this.widget_ID = "js-102";
+this.version = "v1.5";
 
 // 检查更新
 let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
