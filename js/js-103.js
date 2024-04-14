@@ -92,7 +92,7 @@ async function getArrivalInfoForStops() {
               arrivalTime = (arrivalTimeInSeconds / 60).toFixed(1) + "分钟";
             }
             busArrivalTimes[i === 0 ? "First" : "Second"] = `${
-              i === 0 ? "first" : "second"
+              i === 0 ? "First" : "Second"
             }: ${arrivalTime}`;
           }
           busArrivalInfoArray.push({
