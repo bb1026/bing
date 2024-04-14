@@ -17,6 +17,11 @@ Pasteboard.copy(scriptList[this.widget_ID].url);
   }
 };
 
+/* 
+以上为获取更新代码
+以下开始运行代码
+*/
+
 // 创建文件管理器
 const fm = FileManager.iCloud();
 
