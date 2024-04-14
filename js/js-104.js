@@ -17,6 +17,11 @@ Pasteboard.copy(scriptList[this.widget_ID].url);
   }
 };
 
+/* 
+以上为获取更新代码
+以下开始运行代码
+*/
+
 const widget = new ListWidget();
 // 开始创建渐变背景
 let bgColor = new LinearGradient();
