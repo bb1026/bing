@@ -17,6 +17,11 @@ Pasteboard.copy(scriptList[this.widget_ID].url);
   }
 };
 
+/* 
+以上为获取更新代码
+以下开始运行代码
+*/
+
 // 提供的公交车号码数组
 const myBusCodes = ['800', '804', '246', '249'];
 
