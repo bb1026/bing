@@ -25,8 +25,8 @@ if (this.version !== scriptversion) {
         alert.addAction("确定");
         await alert.present();
         Safari.open("https://bb1026.github.io/bing/js/1.html");
+        return;
     }
-    return;
 };
 
 /* 
