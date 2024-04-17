@@ -174,9 +174,10 @@ async function createTable() {
 
   // 添加标题行
   let headerRow = new UITableRow();
+  headerRow.height = 60;
   headerRow.isHeader = true;
   let headerCell = headerRow.addCell(
-    UITableCell.text("Singapore Bus  " + new Date().toLocaleTimeString())
+    UITableCell.text("Singapore Bus\n" + new Date().toLocaleTimeString())
   );
   table.addRow(headerRow);
 
