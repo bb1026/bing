@@ -242,6 +242,7 @@ async function createTable() {
     let locationCell = locationRow.addCell(
       UITableCell.text(`站点: ${stopName} (${stopCode})`)
     );
+    locationRow.backgroundColor = new Color("#4682B4")
     table.addRow(locationRow);
 
     // 分开添加底色的巴士和普通巴士
@@ -258,7 +259,7 @@ async function createTable() {
 
       // 区分有底色和无底色的巴士
       if (myBusCodes.some(item => item.busCodes.includes(parseInt(buscode)))) {
-        busRow.backgroundColor = new Color("#87CEEB");
+        busRow.backgroundColor = new Color("#556B2F");
         coloredBuses.push(busRow);
       } else {
         normalBuses.push(busRow);
