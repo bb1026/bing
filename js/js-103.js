@@ -215,7 +215,7 @@ async function createTable() {
   searchStationRow.onSelect = async () => {
     const input = new Alert();
     input.title = "输入站点号码";
-    let textField = input.addTextField("Station Number", "59241");
+    let textField = input.addTextField("Station Number (59009)", "");
     input.addAction("确定");
     input.addAction("取消");
     const buttonPressed = await input.presentAlert();
