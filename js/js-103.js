@@ -497,15 +497,26 @@ function handleArrivalInfo(stationInfo) {
   const stationCode = stationInfo.stationCode;
   const arrivalInfo = stationInfo.arrivalInfo;
 
-  // 存储巴士名称对应的到达时间
-  const busArrivalTimes = [];
-
-  // 遍历每个到达信息
-  for (const arrival of arrivalInfo) {
-    // 提取巴士名称、始发站和终点站
-    const busName = arrival.bus.name;
-    const startStop = arrival.bus.start_stop.name;
-    const endStop = arrival.bus.end_stop.name;
+        // 存储唯一的巴士名称
+    const uniqueBusNames = new Set();
+    
+    // 存储巴士名称对应的到达时间
+    const busArrivalTimes = [];
+    
+    // 遍历每个到达信息
+    for (const arrival of arrivalInfo) {
+        // 提取巴士名称、始发站和终点站
+        const busName = arrival.bus.name;
+        const startStop = arrival.bus.start_stop.name;
+        const endStop = arrival.bus.end_stop.name;
+        
+      // 检查是否已经添加过该巴士名称，如果已添加则跳过
+        if (uniqueBusNames.has(busName)) {
+            continue;
+        }
+        
+      // 将巴士名称添加到唯一巴士名称集合中
+        uniqueBusNames.add(busName);
 
     // 提取到达时间数组
     const arrivals = arrival.arrivals;
