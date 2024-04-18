@@ -22,10 +22,10 @@
   },
     "js-103": {
     "ID": "js-103",
-    "update": "增加软件内运行\n显示UItable，\n置顶自己的巴士号码\n到每一站顶部。",
+    "update": "全新的4.0\n新增巴士号码搜索\n站点号码搜索",
     "name": "Singapore Bus",
     "url": "https://bb1026.github.io/bing/js/js-103.js",
-    "version": "v3.0"
+    "version": "v4.0"
     },
     "js-104": {
     "ID": "js-104",
