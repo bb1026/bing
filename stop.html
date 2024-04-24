@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stopwatch</title>
+<style>
+ body {
+   font-family: Arial, sans-serif;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   flex-direction: column; /* 添加此行以使元素垂直居中 */
+   height: 100vh;
+   background-color: #f0f0f0; /* 添加背景色 */
+ }
+ .container {
+   text-align: center;
+   margin-bottom: 20px; /* 添加此行以增加间距 */
+ }
+ button {
+   padding: 8px 15px;
+   margin: 0 5px;
+   cursor: pointer;
+ }
+ #stopwatchContainer {
+   position: relative; /* 添加此行以支持绝对定位 */
+   width: 200px; /* 设置容器宽度 */
+   height: 200px; /* 设置容器高度 */
+ }
+ #stopwatchDisplay {
+   font-size: 24px; /* 增加字体大小 */
+   position: absolute; /* 添加此行以绝对定位 */
+   top: 50%; /* 上边距为容器高度的一半 */
+   left: 50%; /* 左边距为容器宽度的一半 */
+   transform: translate(-50%, -50%); /* 居中对齐 */
+ }
+ #stopwatchCircle {
+   stroke: #333; /* 设置圆的边框颜色 */
+   fill: none; /* 不填充圆形 */
+ }
+ #stopwatchPointer {
+   stroke: red; /* 设置指针颜色 */
+   stroke-width: 2; /* 设置指针宽度 */
+   stroke-linecap: round; /* 设置指针末端为圆形 */
+ }
+ .timeMark {
+   font-size: 12px; /* 设置时间标记字体大小 */
+   fill: #333; /* 设置时间标记颜色 */
+   text-anchor: middle; /* 文本居中对齐 */
+ }
+</style>
+</head>
+<body>
+<div class="container">
+<div id="stopwatchContainer">
+<svg id="stopwatchSVG" width="200" height="200">
+<circle id="stopwatchCircle" cx="100" cy="100" r="90"></circle>
+<line id="stopwatchPointer" x1="100" y1="100" x2="100" y2="10"></line>
+<!-- 添加时间标记 -->
+<text class="timeMark" x="100" y="25">60</text>
+<text class="timeMark" x="180" y="105">15</text>
+<text class="timeMark" x="100" y="185">30</text>
+<text class="timeMark" x="20" y="105">45</text>
+<!-- 添加毫秒显示 -->
+<text id="millisecondDisplay" x="100" y="150" font-size="10" fill="#333" text-anchor="middle">000</text>
+</svg>
+<div id="stopwatchDisplay">00:00:00</div>
+</div>
+<button onclick="startStopwatch()">Start</button>
+<button onclick="pauseStopwatch()">Pause</button>
+<button onclick="resetStopwatch()">Reset</button>
+</div>
+<div id="stopwatchRecords" class="container"></div>
+<script>
+let stopwatchTimer;
+let stopwatchRunning = false;
+let stopwatchStartTime;
+let stopwatchElapsedTime = 0;
+let lastPauseTime = 0; // 记录上次暂停时的时间
+const stopwatchRecords = [];
+const maxRecords = 10;
+function startStopwatch() {
+ if (!stopwatchRunning) {
+   stopwatchStartTime = Date.now() - stopwatchElapsedTime;
+   stopwatchRunning = true;
+   stopwatchTimer = setInterval(updateStopwatch, 10); // Update every 10 milliseconds
+ }
+}
+function updateStopwatch() {
+ stopwatchElapsedTime = Date.now() - stopwatchStartTime;
+ updateStopwatchDisplay();
+ updateStopwatchPointer();
+}
+function pauseStopwatch() {
+ clearInterval(stopwatchTimer);
+ stopwatchRunning = false;
+ if (stopwatchElapsedTime !== lastPauseTime) {
+   recordStopwatchTime();
+   lastPauseTime = stopwatchElapsedTime;
+ }
+}
+function resetStopwatch() {
+ if (!stopwatchRunning) { // 只有在暂停时才能重置
+   stopwatchElapsedTime = 0;
+   stopwatchRecords.length = 0;
+   updateStopwatchDisplay();
+   document.getElementById("stopwatchRecords").textContent = ""; // 重置时清空记录
+   lastPauseTime = 0; // 重置上次暂停时间
+   updateStopwatchPointer();
+ }
+}
+function recordStopwatchTime() {
+ if (stopwatchRecords.length >= maxRecords) {
+   stopwatchRecords.shift();
+ }
+ stopwatchRecords.push(stopwatchElapsedTime);
+ updateStopwatchRecords();
+}
+function updateStopwatchRecords() {
+ const recordsDiv = document.getElementById("stopwatchRecords");
+ recordsDiv.innerHTML = "";
+ for (let i = 0; i < stopwatchRecords.length; i++) {
+   const record = stopwatchRecords[i];
+   const minutes = Math.floor(record / (60 * 1000));
+   const seconds = Math.floor((record % (60 * 1000)) / 1000);
+   const milliseconds = Math.floor(record % 1000);
+   const recordDisplay = document.createElement("div");
+   recordDisplay.textContent = `Record ${i + 1}: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+   recordsDiv.appendChild(recordDisplay);
+ }
+}
+function updateStopwatchDisplay() {
+ const hours = Math.floor(stopwatchElapsedTime / (60 * 60 * 1000));
+ const minutes = Math.floor((stopwatchElapsedTime % (60 * 60 * 1000)) / (60 * 1000));
+ const seconds = Math.floor((stopwatchElapsedTime % (60 * 1000)) / 1000);
+ const milliseconds = Math.floor(stopwatchElapsedTime % 1000);
+ document.getElementById("stopwatchDisplay").textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+ document.getElementById("millisecondDisplay").textContent = milliseconds.toString().padStart(3, '0'); // 更新毫秒显示
+}
+function updateStopwatchPointer() {
+ const pointer = document.getElementById("stopwatchPointer");
+ const angle = (stopwatchElapsedTime / 1000) * 6; // 每秒钟转动6度
+ const radians = (angle - 90) * (Math.PI / 180); // 将角度转换为弧度
+ const x = Math.cos(radians) * 80 + 100; // 指针起点的x坐标
+ const y = Math.sin(radians) * 80 + 100; // 指针起点的y坐标
+ pointer.setAttribute("x2", x);
+ pointer.setAttribute("y2", y);
+}
+</script>
+</body>
+</html>
+具有上下文菜单
+
