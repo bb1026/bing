@@ -3,31 +3,31 @@
 // icon-color: deep-brown; icon-glyph: sync;
 this.name = "Panda Remit";
 this.widget_ID = "js-102";
-this.version = "v1.5";
+this.version = "v2.0";
 
 // 检查更新
 let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
 let scriptList = await new Request(scriptListURL).loadJSON();
 let scriptversion = scriptList[this.widget_ID].version;
-console.log(scriptversion); 
+console.log(scriptversion);
 if (this.version !== scriptversion) {
-    Pasteboard.copy(scriptList[this.widget_ID].url);
-    const fm = FileManager.iCloud();
-    const scriptName = "安装小助手.js"; // 要检查的脚本文件名，包括.js后缀
-    const scriptPath = fm.joinPath(fm.documentsDirectory(), scriptName);
-    const scriptExists = fm.fileExists(scriptPath);
-    if (scriptExists) {
-        Safari.open("scriptable:///run?scriptName=安装小助手");
-    } else {
-        console.log(`${scriptName} 不存在`);
-        const alert = new Alert();
-        alert.message = "安装小助手脚本不存在，请手动安装。";
-        alert.addAction("确定");
-        await alert.present();
-        Safari.open("https://bb1026.github.io/bing/js/1.html");
-    }
-    return;
-};
+  Pasteboard.copy(scriptList[this.widget_ID].url);
+  const fm = FileManager.iCloud();
+  const scriptName = "安装小助手.js"; // 要检查的脚本文件名，包括.js后缀
+  const scriptPath = fm.joinPath(fm.documentsDirectory(), scriptName);
+  const scriptExists = fm.fileExists(scriptPath);
+  if (scriptExists) {
+    Safari.open("scriptable:///run?scriptName=安装小助手");
+  } else {
+    console.log(`${scriptName} 不存在`);
+    const alert = new Alert();
+    alert.message = "安装小助手脚本不存在，请手动安装。";
+    alert.addAction("确定");
+    await alert.present();
+    Safari.open("https://bb1026.github.io/bing/js/1.html");
+  }
+  return;
+}
 
 /* 
 以上为获取更新代码
@@ -42,7 +42,7 @@ if (config.runsInApp) {
   Script.setWidget(widget);
 }
 Script.complete();
-console.log(api);
+// console.log(api);
 async function createWidget(api) {
   let appicon = await loadimage();
   appicon.size = new Size(50, 50);
@@ -55,21 +55,14 @@ async function createWidget(api) {
   gradient.colors = [new Color("#EAE5C9"), new Color("#6CC6CB")];
   widget.backgroundGradient = gradient;
 
-  //添加小组件要素
   let titleElement = widget.addStack();
   titleElement.centerAlignContent();
-  //设置排列方式左右
   titleElement.layoutHorizontally();
-  //添加图标
   let appiconElement = titleElement.addImage(appicon);
-  //图标尺寸
   appiconElement.imageSize = new Size(35, 35);
-  //设置间隔
   titleElement.addSpacer(5);
-  //添加标题
   let titletextElement = titleElement.addStack();
   titletextElement.layoutVertically();
-  //添加文字
   let titletext = titletextElement.addText(title);
   titletext.font = Font.systemFont(15);
   titletext.textColor = Color.magenta();
@@ -80,38 +73,36 @@ async function createWidget(api) {
   subtitletext.textColor = Color.gray();
 
   widget.addSpacer(15);
-  //添加内容元素
   let rateElement = widget.addStack();
   rateElement.layoutVertically();
-  //名称
+
   let ratecode = rateElement.addText(`${api.code} → ${api.target}`);
   ratecode.textColor = Color.black();
-  rateElement.addSpacer(5);
+  rateElement.addSpacer();
 
-  //汇率
   let ratemoney = rateElement.addText(api.rate);
   ratemoney.font = Font.blackMonospacedSystemFont(20);
   ratemoney.textColor = Color.black();
+  rateElement.addSpacer();
 
-  widget.addSpacer(15);
-  //添加打开软件按钮
-  let footerElement = widget.addStack();
-  let linkStack = footerElement.addStack();
-  let linkName = linkStack.addText("Open APP");
-  linkName.textColor = Color.blue();
-  linkName.font = Font.systemFont(13);
-  footerElement.addSpacer();
-  //添加小图标🔗
-  // let linkSymobl = SFSymbol.named("link")
-  let linkSymobl = SFSymbol.named("arrow.up.forward");
-  let linkimage = linkStack.addImage(linkSymobl.image);
-  linkimage.imageSize = new Size(11, 11);
-  linkimage.tintColor = Color.blue();
-//   linkimage.url = "PandaRemit://";
+  let updown;
+  let comparecolor;
+  if (api.compareRate.includes("+")) {
+    updown = "↑";
+    comparecolor = Color.red();
+  } else {
+    updown = "↓";
+    comparecolor = Color.blue();
+  }
+  let compare = rateElement.addText("较昨日" + api.compareRate + updown);
+  compare.font = Font.semiboldMonospacedSystemFont(12);
+  compare.textColor = comparecolor;
+
+  widget.addSpacer();
 
   return widget;
 }
-//异步获取数据
+
 async function loadapi() {
   if (config.runsInApp) {
     var currency = "SGD/CNY";
@@ -119,20 +110,20 @@ async function loadapi() {
     var currency = args.widgetParameter;
   }
   let url = "https://prod.pandaremit.com/pricing/rate/" + currency;
-  console.log(url);
   let reqs = new Request(url);
-  //设置网页头
+
   reqs.headers = {
     "User-Agent":
       " Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
   };
   let req = await reqs.loadJSON();
-  console.log(req);
-  //获取并设置数据数组
+  //   console.log(req);
+
   return {
     rate: (req.model.huiOut * 1).toString(),
     code: req.model.code,
-    target: req.model.target
+    target: req.model.target,
+    compareRate: req.model.compareRate
   };
 }
 
