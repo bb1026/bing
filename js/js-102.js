@@ -98,8 +98,8 @@ async function createWidget() {
       const ratecode = textStack.addText(`${code} → ${targetCurrency}`);
       ratecode.font = Font.boldSystemFont(15);
 
-      const rateText = widget.addText(`${huiOut}`);
-      rateText.font = Font.boldSystemFont(20);
+      const rateText = widget.addText(`$${huiOut}`);
+      rateText.font = Font.boldSystemFont(25);
 
       const compare = widget.addText(
     `比较昨日: ${
@@ -108,14 +108,13 @@ async function createWidget() {
         ""
     }${compareRate}`
 );
-      compare.font = Font.systemFont(12);
+      compare.font = Font.boldSystemFont(12);
       compare.textColor = compareRate.includes("+") ? Color.red() :
       compareRate.includes("-") ? Color.blue() : Color.black();
 
-      const feeText = widget.addText(`Fee: ${fee}`);
-      feeText.textColor = fee > 0 ? Color.red() : fee < 0 ? Color.blue() : Color.black();
+      const feeText = widget.addText(`费用: $${fee}`);
+      feeText.textColor = fee > 0 ? Color.black() : Color.red();
 
-      const defaultfeeText = widget.addText(`Default: ${defaultFee}`);
     }
   }
 
