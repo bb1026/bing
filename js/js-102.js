@@ -102,15 +102,18 @@ async function createWidget() {
       rateText.font = Font.boldSystemFont(20);
 
       const compare = widget.addText(
-        `比较昨日: ${compareRate.includes("+") ? "↑" : "↓"}${compareRate}`
-      );
+    `比较昨日: ${
+        compareRate.includes("+") ? "↑" :
+        compareRate.includes("-") ? "↓" :
+        ""
+    }${compareRate}`
+);
       compare.font = Font.systemFont(12);
-      compare.textColor = compareRate.includes("+")
-        ? Color.red()
-        : Color.blue();
+      compare.textColor = compareRate.includes("+") ? Color.red() :
+      compareRate.includes("-") ? Color.blue() : Color.black();
 
       const feeText = widget.addText(`Fee: ${fee}`);
-      feeText.textColor = fee === 0 ? Color.red() : Color.black();
+      feeText.textColor = fee > 0 ? Color.red() : fee < 0 ? Color.blue() : Color.black();
 
       const defaultfeeText = widget.addText(`Default: ${defaultFee}`);
     }
