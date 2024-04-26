@@ -46,50 +46,63 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 let timer;
-let timeLeft;
+let timeLeft = 0;
 let timerRunning = false;
 let stoppedOnce = false;
+
 function startTimer() {
- const minutes = parseInt(document.getElementById("minutesInput").value);
- if (!timerRunning && !isNaN(minutes) && minutes > 0) {
-   timeLeft = minutes * 60 * 1000; // Convert minutes to milliseconds
-   timerRunning = true;
-   stoppedOnce = false;
-   updateTimerDisplay();
-   timer = setInterval(updateTimer, 10); // Update every 10 milliseconds (0.01 seconds)
- } else {
-   alert("Please enter a valid number of minutes.");
- }
+  const minutes = parseInt(document.getElementById("minutesInput").value);
+  if (!isNaN(minutes) && minutes > 0) {
+    if (!timerRunning) {
+      if (timeLeft === 0) {
+        timeLeft = minutes * 60 * 1000; // Convert minutes to milliseconds
+        updateTimerDisplay();
+      }
+      timerRunning = true;
+      stoppedOnce = false;
+      timer = setInterval(updateTimer, 10); // Update every 10 milliseconds (0.01 seconds)
+    } else {
+      clearInterval(timer); // Clear the previous timer
+      timer = setInterval(updateTimer, 10); // Start a new timer
+    }
+  } else {
+    alert("Please enter a valid number of minutes.");
+  }
 }
+
 function updateTimer() {
- if (timeLeft > 0) {
-   timeLeft -= 10; // Subtract 10 milliseconds
-   updateTimerDisplay();
- } else {
-   stopTimer();
- }
+  if (timeLeft > 0) {
+    timeLeft -= 10; // Subtract 10 milliseconds
+    updateTimerDisplay();
+  } else {
+    stopTimer();
+    alert("Time's up!");
+  }
 }
+
 function updateTimerDisplay() {
- const minutes = Math.floor(timeLeft / (60 * 1000));
- const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
- const milliseconds = Math.floor((timeLeft % 1000));
- document.getElementById("timerDisplay").textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+  const minutes = Math.floor(timeLeft / (60 * 1000));
+  const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
+  const milliseconds = Math.floor((timeLeft % 1000));
+  document.getElementById("timerDisplay").textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
 }
+
 function stopTimer() {
- clearInterval(timer);
- timerRunning = false;
- stoppedOnce = true; // 设置标志，表示计时器已经停止过一次
+  clearInterval(timer);
+  timerRunning = false;
+  stoppedOnce = true;
 }
+
 function resetTimer() {
- if (stoppedOnce) { // 只有在计时器停止过一次后才能重置
-   const minutes = parseInt(document.getElementById("minutesInput").value);
-   if (isNaN(minutes) || minutes <= 0) {
-     document.getElementById("timerDisplay").textContent = "";
-   } else {
-     timeLeft = minutes * 60 * 1000;
-     updateTimerDisplay();
-   }
- }
+  if (stoppedOnce) {
+    const minutes = parseInt(document.getElementById("minutesInput").value);
+    if (isNaN(minutes) || minutes <= 0) {
+      document.getElementById("timerDisplay").textContent = "";
+    } else {
+      timeLeft = minutes * 60 * 1000;
+      updateTimerDisplay();
+    }
+  }
 }
 </script>
 </body>
