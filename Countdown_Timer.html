@@ -27,6 +27,9 @@
    margin: 0 5px;
    cursor: pointer;
  }
+ #timerDisplay {
+   font-size: 2em; /* 调整字体大小 */
+ }
 </style>
 </head>
 <body>
@@ -38,6 +41,10 @@
 <div id="timerDisplay"></div>
 </div>
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("timerDisplay").textContent = "00:00.000";
+});
+
 let timer;
 let timeLeft;
 let timerRunning = false;
@@ -60,7 +67,6 @@ function updateTimer() {
    updateTimerDisplay();
  } else {
    stopTimer();
-   alert("Time's up!");
  }
 }
 function updateTimerDisplay() {
