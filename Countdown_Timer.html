@@ -1,119 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DJGT6TL1SB"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-DJGT6TL1SB');
-</script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Custom Countdown Timer</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  .container {
-    text-align: center;
-  }
-  input {
-    padding: 5px;
-    margin-right: 10px;
-    width: 100px; /* 缩小输入框长度 */
-  }
-  button {
-    padding: 8px 15px;
-    margin: 0 5px;
-    cursor: pointer;
-  }
-</style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJGT6TL1SB"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-DJGT6TL1SB');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Countdown Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+        }
+        input {
+            padding: 5px;
+            margin-right: 10px;
+            width: 100px;
+        }
+        button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        #timerDisplay {
+            font-size: 3em;
+        }
+    </style>
 </head>
 <body>
-
 <div class="container">
-  <input type="number" id="minutesInput" placeholder="Enter minutes">
-  <button onclick="startTimer()">Start</button>
-  <button onclick="stopTimer()">Stop</button>
-  <button onclick="resetTimer()">Reset</button>
-  <div id="timerDisplay"></div>
+    <input type="number" id="minutesInput" placeholder="Enter minutes">
+    <button onclick="startTimer()">Start</button>
+    <button onclick="stopTimer()">Stop</button>
+    <button onclick="resetTimer()">Reset</button>
+    <div id="timerDisplay"></div>
 </div>
-
 <script>
-let timer;
-let timeLeft;
-let initialTime;
-let timerRunning = false;
-let stoppedOnce = false;
-let pauseStart = 0;
-let pauseDuration = 0;
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("timerDisplay").textContent = "00:00.000";
+    });
 
-function startTimer() {
-  if (!timerRunning) {
-    const minutes = parseInt(document.getElementById("minutesInput").value);
-    if (!isNaN(minutes) && minutes > 0) {
-      if (stoppedOnce) {
-        timeLeft = timeLeft - pauseDuration;
-      } else {
-        initialTime = minutes * 60 * 1000; // Convert minutes to milliseconds
-        timeLeft = initialTime;
-      }
-      updateTimerDisplay();
-      timer = setInterval(updateTimer, 10); // Update every 10 milliseconds (0.01 seconds)
-      timerRunning = true;
-      stoppedOnce = false;
-    } else {
-      alert("Please enter a valid number of minutes.");
+    let timer;
+    let timeLeft;
+    let initialTime;
+    let timerRunning = false;
+    let stoppedOnce = false;
+    let pauseStart = 0;
+    let pauseDuration = 0;
+
+    function startTimer() {
+        if (!timerRunning) {
+            const minutes = parseInt(document.getElementById("minutesInput").value);
+            if (!isNaN(minutes) && minutes > 0) {
+                if (stoppedOnce) {
+                    timeLeft = timeLeft - pauseDuration;
+                } else {
+                    initialTime = minutes * 60 * 1000; // Convert minutes to milliseconds
+                    timeLeft = initialTime;
+                }
+                updateTimerDisplay();
+                timer = setInterval(updateTimer, 10); // Update every 10 milliseconds (0.01 seconds)
+                timerRunning = true;
+                stoppedOnce = false;
+            } else {
+                alert("Please enter a valid number of minutes.");
+            }
+        }
     }
-  }
-}
 
-function updateTimer() {
-  if (timeLeft > 0) {
-    timeLeft -= 10; // Subtract 10 milliseconds
-    updateTimerDisplay();
-  } else {
-    stopTimer();
-    alert("Time's up!");
-  }
-}
-
-function updateTimerDisplay() {
-  const minutes = Math.floor(timeLeft / (60 * 1000));
-  const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
-  const milliseconds = Math.floor((timeLeft % 1000));
-  document.getElementById("timerDisplay").textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
-}
-
-function stopTimer() {
-  clearInterval(timer);
-  timerRunning = false;
-  stoppedOnce = true;
-  pauseStart = Date.now();
-}
-
-function resetTimer() {
-  if (stoppedOnce) {
-    const minutes = parseInt(document.getElementById("minutesInput").value);
-    if (!isNaN(minutes) && minutes > 0) {
-      initialTime = minutes * 60 * 1000;
-      timeLeft = initialTime;
-      updateTimerDisplay();
-    } else {
-      document.getElementById("timerDisplay").textContent = "";
+    function updateTimer() {
+        if (timeLeft > 0) {
+            timeLeft -= 10; // Subtract 10 milliseconds
+            updateTimerDisplay();
+        } else {
+            stopTimer();
+            //alert("Time's up!");
+        }
     }
-  }
-}
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / (60 * 1000));
+        const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
+        const milliseconds = Math.floor((timeLeft % 1000));
+        document.getElementById("timerDisplay").textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+    }
+
+    function stopTimer() {
+        clearInterval(timer);
+        timerRunning = false;
+        stoppedOnce = true;
+        pauseStart = Date.now();
+    }
+
+    function resetTimer() {
+        if (stoppedOnce) {
+            const minutes = parseInt(document.getElementById("minutesInput").value);
+            if (!isNaN(minutes) && minutes > 0) {
+                initialTime = minutes * 60 * 1000;
+                timeLeft = initialTime;
+                updateTimerDisplay();
+            } else {
+                document.getElementById("timerDisplay").textContent = "";
+            }
+        }
+    }
 </script>
-
 </body>
 </html>
