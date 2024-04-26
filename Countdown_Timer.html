@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+<head>
      <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJGT6TL1SB"></script>
 <script>
@@ -12,64 +14,68 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Countdown_Timer</title>
+<title>Custom Countdown Timer</title>
 <style>
- body {
-   font-family: Arial, sans-serif;
-   margin: 0;
-   padding: 0;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   height: 100vh;
- }
- .container {
-   text-align: center;
- }
- input {
-   padding: 5px;
-   margin-right: 10px;
-   width: 100px; /* 缩小输入框长度 */
- }
- button {
-   padding: 8px 15px;
-   margin: 0 5px;
-   cursor: pointer;
- }
- #timerDisplay {
-   font-size: 2em; /* 调整字体大小 */
- }
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .container {
+    text-align: center;
+  }
+  input {
+    padding: 5px;
+    margin-right: 10px;
+    width: 100px; /* 缩小输入框长度 */
+  }
+  button {
+    padding: 8px 15px;
+    margin: 0 5px;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
-<div class="container">
-<input type="number" id="minutesInput" placeholder="Enter minutes">
-<button onclick="startTimer()">Start</button>
-<button onclick="stopTimer()">Stop</button>
-<button onclick="resetTimer()">Reset</button>
-<div id="timerDisplay"></div>
-</div>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  document.getElementById("timerDisplay").textContent = "00:00.000";
-});
 
+<div class="container">
+  <input type="number" id="minutesInput" placeholder="Enter minutes">
+  <button onclick="startTimer()">Start</button>
+  <button onclick="stopTimer()">Stop</button>
+  <button onclick="resetTimer()">Reset</button>
+  <div id="timerDisplay"></div>
+</div>
+
+<script>
 let timer;
-let timeLeft = 0;
+let timeLeft;
+let initialTime;
 let timerRunning = false;
 let stoppedOnce = false;
+let pauseStart = 0;
+let pauseDuration = 0;
 
 function startTimer() {
-  const minutes = parseInt(document.getElementById("minutesInput").value);
-  if (!isNaN(minutes) && minutes > 0) {
-    timeLeft = minutes * 60 * 1000; // Convert minutes to milliseconds
-    updateTimerDisplay();
-    clearInterval(timer); // Clear any existing timer
-    timer = setInterval(updateTimer, 10); // Start a new timer
-    timerRunning = true;
-    stoppedOnce = false;
-  } else {
-    alert("Please enter a valid number of minutes.");
+  if (!timerRunning) {
+    const minutes = parseInt(document.getElementById("minutesInput").value);
+    if (!isNaN(minutes) && minutes > 0) {
+      if (stoppedOnce) {
+        timeLeft = timeLeft - pauseDuration;
+      } else {
+        initialTime = minutes * 60 * 1000; // Convert minutes to milliseconds
+        timeLeft = initialTime;
+      }
+      updateTimerDisplay();
+      timer = setInterval(updateTimer, 10); // Update every 10 milliseconds (0.01 seconds)
+      timerRunning = true;
+      stoppedOnce = false;
+    } else {
+      alert("Please enter a valid number of minutes.");
+    }
   }
 }
 
@@ -79,7 +85,7 @@ function updateTimer() {
     updateTimerDisplay();
   } else {
     stopTimer();
-    //alert("Time's up!");
+    alert("Time's up!");
   }
 }
 
@@ -94,19 +100,22 @@ function stopTimer() {
   clearInterval(timer);
   timerRunning = false;
   stoppedOnce = true;
+  pauseStart = Date.now();
 }
 
 function resetTimer() {
   if (stoppedOnce) {
     const minutes = parseInt(document.getElementById("minutesInput").value);
-    if (isNaN(minutes) || minutes <= 0) {
-      document.getElementById("timerDisplay").textContent = "";
-    } else {
-      timeLeft = minutes * 60 * 1000;
+    if (!isNaN(minutes) && minutes > 0) {
+      initialTime = minutes * 60 * 1000;
+      timeLeft = initialTime;
       updateTimerDisplay();
+    } else {
+      document.getElementById("timerDisplay").textContent = "";
     }
   }
 }
 </script>
+
 </body>
 </html>
