@@ -3,7 +3,7 @@
 // icon-color: cyan; icon-glyph: bus;
 this.name = "Singapore Bus";
 this.widget_ID = "js-103";
-this.version = "v4.0";
+this.version = "v4.5";
 
 // 检查更新
 let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
@@ -41,8 +41,8 @@ const myBusCodes = [
   { stopCode: "22009", busCodes: [246, 249] },
   { stopCode: "21499", busCodes: [246] },
   { stopCode: "21491", busCodes: [246] },
-  { stopCode: "21321", busCodes: [249] }
-  //   { stopCode: "59073", busCodes: [858] }
+  { stopCode: "21321", busCodes: [249] },
+  { stopCode: "59073", busCodes: [858] }
 ];
 
 async function getStopArrivalInfo(stopId) {
@@ -175,58 +175,72 @@ async function createTable() {
   // 添加标题行
   let headerRow = new UITableRow();
   headerRow.isHeader = true;
-  let headerCell = headerRow.addCell(
-    UITableCell.text("Singapore Bus  " + new Date().toLocaleTimeString())
+  let headerCell = headerRow.addText(
+    "Singapore Bus  " + new Date().toLocaleTimeString()
   );
   table.addRow(headerRow);
 
-  // 添加搜索巴士号码的行
-  const searchBusRow = new UITableRow();
-  searchBusRow.backgroundColor = new Color("#FFA07A");
-  const searchBusCell = searchBusRow.addCell(
-    UITableCell.text("搜索巴士号码...")
-  );
-  table.addRow(searchBusRow);
+  // 添加搜索行
+  const searchRow = new UITableRow();
+  searchRow.backgroundColor = new Color("#FFA07A");
+  const searchBusCell = searchRow.addText("搜索巴士号码...");
+  searchBusCell.titleColor = Color.white();
+  const searchStationCell = searchRow.addText("搜索站点号码...");
+  searchStationCell.titleColor = Color.white();
+  table.addRow(searchRow);
 
-  const searchStationRow = new UITableRow();
-  searchStationRow.backgroundColor = new Color("#FFA07A");
-  const searchstationCell = searchStationRow.addCell(
-    UITableCell.text("搜索站点号码...")
-  );
-  table.addRow(searchStationRow);
+  // 将stopCode分组，每组4个stopCode
+  const stopCodeGroups = [];
+  for (let i = 0; i < myBusCodes.length; i += 7) {
+    stopCodeGroups.push(myBusCodes.slice(i, i + 7).map(item => item.stopCode));
+  }
 
-  // 设置搜索巴士号码行的选择事件
-  searchBusRow.onSelect = async () => {
-    const input = new Alert();
-    input.title = "输入Bus号码";
-    let textField = input.addTextField("Bus Number", "");
-    input.addAction("确定");
-    input.addAction("取消");
-    const buttonPressed = await input.presentAlert();
-    if (buttonPressed === 0) {
-      searchBusCode = input.textFieldValue(0);
-      // 调用searchBus函数，并等待返回的值
-      const result = await searchBus(searchBusCode);
-      uitable(result); // 调用uitable函数并传递结果
+  // 创建行并添加到表格中
+  for (const group of stopCodeGroups) {
+    const row = new UITableRow();
+    row.backgroundColor = new Color("#FFA07A");
+    for (const stopCode of group) {
+      const button = row.addButton(`${stopCode}`);
+      button.titleColor = Color.white();
+      button.onTap = async () => {
+        let searchStationCode = stopCode;
+        const stationInfo = await searchStation(searchStationCode);
+        if (stationInfo) {
+          // 处理获取的到达信息
+          handleArrivalInfo(stationInfo);
+        }
+      };
     }
-  };
+    table.addRow(row);
+  }
 
-  // 设置搜索站点号码行的选择事件
-  searchStationRow.onSelect = async () => {
+  // 设置搜索行的点击事件
+  searchRow.onSelect = async () => {
     const input = new Alert();
-    input.title = "输入站点号码";
-    let textField = input.addTextField("Station Number (59009)", "");
+    input.title = "输入号码";
+    let textField = input.addTextField("输入Bus或Stop Code", "");
     input.addAction("确定");
     input.addAction("取消");
     const buttonPressed = await input.presentAlert();
-    if (buttonPressed === 0) {
-      searchStationCode = input.textFieldValue(0);
-      // 调用searchStation函数，并等待返回的值
-      const stationInfo = await searchStation(searchStationCode);
-      if (stationInfo) {
-        // 处理获取的到达信息
-        handleArrivalInfo(stationInfo);
+    if (buttonPressed === 0 && textField.text) {
+      if (!isNaN(parseFloat(textField.text)) && textField.text.length === 5) {
+        // 如果是数字且长度为 5，表示搜索站点号码
+        searchStationCode = textField.text;
+        // 调用searchStation函数，并等待返回的值
+        const stationInfo = await searchStation(searchStationCode);
+        if (stationInfo) {
+          // 处理获取的到达信息
+          handleArrivalInfo(stationInfo);
+        }
+      } else {
+        // 否则，表示搜索巴士号码
+        searchBusCode = textField.text;
+        // 调用searchBus函数，并等待返回的值
+        const result = await searchBus(searchBusCode);
+        uitable(result); // 调用uitable函数并传递结果
       }
+    } else {
+      QuickLook.present(table);
     }
   };
 
@@ -239,10 +253,9 @@ async function createTable() {
     // 添加站点名称
     let locationRow = new UITableRow();
     locationRow.isHeader = true;
-    let locationCell = locationRow.addCell(
-      UITableCell.text(`站点: ${stopName} (${stopCode})`)
-    );
-    locationRow.backgroundColor = new Color("#4682B4")
+    let locationCell = locationRow.addText(`站点: ${stopName} (${stopCode})`);
+    locationCell.titleColor = Color.white();
+    locationRow.backgroundColor = new Color("#4682B4");
     table.addRow(locationRow);
 
     // 分开添加底色的巴士和普通巴士
@@ -251,16 +264,15 @@ async function createTable() {
     for (let busArrivalItem of busArrivalInfo) {
       const { buscode, arrivaltime } = busArrivalItem;
       let busRow = new UITableRow();
-      let busCell = busRow.addCell(
-        UITableCell.text(
-          `Bus: ${buscode}  ${arrivaltime.First}   ${arrivaltime.Second}`
-        )
+      let busCell = busRow.addText(
+        `Bus: ${buscode}  ${arrivaltime.First}   ${arrivaltime.Second}`
       );
 
       // 区分有底色和无底色的巴士
       if (myBusCodes.some(item => item.busCodes.includes(parseInt(buscode)))) {
         busRow.backgroundColor = new Color("#556B2F");
         coloredBuses.push(busRow);
+        busCell.titleColor = Color.white();
       } else {
         normalBuses.push(busRow);
       }
@@ -387,18 +399,14 @@ async function uitable(busDataArray) {
 
   const busHeaderRow = new UITableRow();
   busHeaderRow.isHeader = true;
-  const busHeaderCell = busHeaderRow.addCell(
-    UITableCell.text("Search Result: " + searchBusCode)
-  );
+  const busHeaderCell = busHeaderRow.addText("Search Result: " + searchBusCode);
   busTable.addRow(busHeaderRow);
 
   for (const bus of busDataArray) {
     const dataRow = new UITableRow();
     dataRow.height = 60;
-    const busCell = dataRow.addCell(
-      UITableCell.text(
-        `Bus Number: ${bus.name}\n${bus.startStopName} → ${bus.endStopName}`
-      )
+    const busCell = dataRow.addText(
+      `Bus Number: ${bus.name}\n${bus.startStopName} → ${bus.endStopName}`
     );
     dataRow.onSelect = async () => {
       await uitableStops(bus);
@@ -415,10 +423,8 @@ async function uitableStops(bus) {
   const stopsHeaderRow = new UITableRow();
   stopsHeaderRow.height = 60;
   stopsHeaderRow.isHeader = true;
-  const stopsHeaderCell = stopsHeaderRow.addCell(
-    UITableCell.text(
-      `Bus Number: ${bus.name}\n${bus.startStopName} → ${bus.endStopName}`
-    )
+  const stopsHeaderCell = stopsHeaderRow.addText(
+    `Bus Number: ${bus.name}\n${bus.startStopName} → ${bus.endStopName}`
   );
   stopsTable.addRow(stopsHeaderRow);
 
@@ -497,26 +503,26 @@ function handleArrivalInfo(stationInfo) {
   const stationCode = stationInfo.stationCode;
   const arrivalInfo = stationInfo.arrivalInfo;
 
-        // 存储唯一的巴士名称
-    const uniqueBusNames = new Set();
-    
-    // 存储巴士名称对应的到达时间
-    const busArrivalTimes = [];
-    
-    // 遍历每个到达信息
-    for (const arrival of arrivalInfo) {
-        // 提取巴士名称、始发站和终点站
-        const busName = arrival.bus.name;
-        const startStop = arrival.bus.start_stop.name;
-        const endStop = arrival.bus.end_stop.name;
-        
-      // 检查是否已经添加过该巴士名称，如果已添加则跳过
-        if (uniqueBusNames.has(busName)) {
-            continue;
-        }
-        
-      // 将巴士名称添加到唯一巴士名称集合中
-        uniqueBusNames.add(busName);
+  // 存储唯一的巴士名称
+  const uniqueBusNames = new Set();
+
+  // 存储巴士名称对应的到达时间
+  const busArrivalTimes = [];
+
+  // 遍历每个到达信息
+  for (const arrival of arrivalInfo) {
+    // 提取巴士名称、始发站和终点站
+    const busName = arrival.bus.name;
+    const startStop = arrival.bus.start_stop.name;
+    const endStop = arrival.bus.end_stop.name;
+
+    // 检查是否已经添加过该巴士名称，如果已添加则跳过
+    if (uniqueBusNames.has(busName)) {
+      continue;
+    }
+
+    // 将巴士名称添加到唯一巴士名称集合中
+    uniqueBusNames.add(busName);
 
     // 提取到达时间数组
     const arrivals = arrival.arrivals;
@@ -570,19 +576,15 @@ function handleArrivalInfo(stationInfo) {
   // 添加标题行
   let headerRow = new UITableRow();
   headerRow.isHeader = true;
-  let headerCell = headerRow.addCell(
-    UITableCell.text(stationName + " (" + stationCode + ")")
-  );
+  let headerCell = headerRow.addText(stationName + " (" + stationCode + ")");
   stationTable.addRow(headerRow);
 
   // 添加巴士到达信息行
   for (const busArrival of busArrivalTimes) {
     let busArrivalRow = new UITableRow();
     busArrivalRow.height = 60;
-    let busArrivalCell = busArrivalRow.addCell(
-      UITableCell.text(
-        `Bus: ${busArrival.busName} ${busArrival.First} ${busArrival.Second}\n${busArrival.startStop} → ${busArrival.endStop}`
-      )
+    let busArrivalCell = busArrivalRow.addText(
+      `Bus: ${busArrival.busName} ${busArrival.First} ${busArrival.Second}\n${busArrival.startStop} → ${busArrival.endStop}`
     );
     stationTable.addRow(busArrivalRow);
   }
