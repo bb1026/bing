@@ -42,7 +42,7 @@ const myBusCodes = [
   { stopCode: "21499", busCodes: [246] },
   { stopCode: "21491", busCodes: [246] },
   { stopCode: "21321", busCodes: [249] },
-  { stopCode: "59073", busCodes: [858] }
+//   { stopCode: "59073", busCodes: [858] }
 ];
 
 async function getStopArrivalInfo(stopId) {
@@ -264,15 +264,20 @@ async function createTable() {
     for (let busArrivalItem of busArrivalInfo) {
       const { buscode, arrivaltime } = busArrivalItem;
       let busRow = new UITableRow();
-      let busCell = busRow.addText(
-        `Bus: ${buscode}  ${arrivaltime.First}   ${arrivaltime.Second}`
-      );
-
+      let busCell = busRow.addText(buscode);
+      let busfirstCell = busRow.addText(arrivaltime.First);
+      let bussecondCell = busRow.addText(arrivaltime.Second);
+      busCell.widthWeight = 15;
+      busfirstCell.widthWeight = 43;
+      bussecondCell.widthWeight = 42;
+      
       // 区分有底色和无底色的巴士
       if (myBusCodes.some(item => item.busCodes.includes(parseInt(buscode)))) {
         busRow.backgroundColor = new Color("#556B2F");
         coloredBuses.push(busRow);
         busCell.titleColor = Color.white();
+        busfirstCell.titleColor = Color.white();
+        bussecondCell.titleColor = Color.white();
       } else {
         normalBuses.push(busRow);
       }
