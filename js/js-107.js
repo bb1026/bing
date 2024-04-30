@@ -3,36 +3,7 @@
 // icon-color: red; icon-glyph: bus;
 this.name = "附近的Bus SG";
 this.widget_ID = "js-107";
-this.version = "v1.0";
-
-// 检查更新
-let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
-let scriptList = await new Request(scriptListURL).loadJSON();
-let scriptversion = scriptList[this.widget_ID].version;
-console.log(scriptversion); 
-if (this.version !== scriptversion) {
-    Pasteboard.copy(scriptList[this.widget_ID].url);
-    const fm = FileManager.iCloud();
-    const scriptName = "安装小助手.js"; // 要检查的脚本文件名，包括.js后缀
-    const scriptPath = fm.joinPath(fm.documentsDirectory(), scriptName);
-    const scriptExists = fm.fileExists(scriptPath);
-    if (scriptExists) {
-        Safari.open("scriptable:///run?scriptName=安装小助手");
-    } else {
-        console.log(`${scriptName} 不存在`);
-        const alert = new Alert();
-        alert.message = "安装小助手脚本不存在，请手动安装。";
-        alert.addAction("确定");
-        await alert.present();
-        Safari.open("https://bb1026.github.io/bing/js/1.html");
-    }
-    return;
-};
-
-/* 
-以上为获取更新代码
-以下开始运行代码
-*/
+this.version = "v1.5";
 
 // 提供的公交车号码数组
 const myBusCodes = ['800', '804', '246', '249'];
@@ -134,6 +105,7 @@ const locationData = await getLocationData();
 // 异步函数：在应用内显示位置数据和公交信息
 async function showLocationAndBusInfoInApp() {
     const locationData = await getLocationData();
+    
     const table = new UITable();
     table.showSeparators = true;
 
@@ -165,10 +137,11 @@ async function showLocationAndBusInfoInApp() {
         for (let bus of myBusArrivalInfo) {
             let busRow = new UITableRow();
             let busCodeText = `Bus: ${bus.bus_code}`;
-            if (myBusCodes.includes(bus.bus_code)) {
+           const busCell =  busRow.addText(busCodeText);
+        if (myBusCodes.includes(bus.bus_code)) {
                 busRow.backgroundColor = new Color("#87CEEB");
+                                        busCell.titleColor = Color.white();
             }
-            busRow.addCell(UITableCell.text(busCodeText));
 
             // 添加公交到站信息，如果状态不为1，则显示为“停运”
             let arrivalTimes = bus.arrivals.map(arrival => {
@@ -186,7 +159,19 @@ async function showLocationAndBusInfoInApp() {
                 }
                 return time;
             });
-             busRow.addCell(UITableCell.text(`${arrivalTimes.join('            ')}`));
+            
+            const busTime1 = busRow.addText(arrivalTimes[0]);
+            const busTime2 = busRow.addText(arrivalTimes[1]);
+            
+                    if (myBusCodes.includes(bus.bus_code)) {
+                busRow.backgroundColor = new Color("#87CEEB");
+                busCell.titleColor = Color.white();
+                busTime1.titleColor = Color.white();
+                busTime2.titleColor = Color.white();
+                busCell.widthWeight = 30;
+                busTime1.widthWeight = 35;
+                busTime2.widthWeight = 35;
+            }
             table.addRow(busRow);
         }
     }
