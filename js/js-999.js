@@ -1,6 +1,7 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: green; icon-glyph: calendar-alt;
+// Lunar_calendar.js
 /**
  * @1900-2100区间内的公历、农历互转
  * @公历转农历：calendar.solar2lunar(1987,11,01); //[you can ignore params of prefix 0]
