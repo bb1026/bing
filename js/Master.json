@@ -54,5 +54,12 @@
     "name": "附近的Bus SG",
     "url": "https://bb1026.github.io/bing/js/js-107.js",
     "version": "v1.5"
+    },
+    "js-999": {
+    "ID": "js-999"
+    "update": "",
+    "name": "Lunar_calendar",
+    "url": "https://bb1026.github.io/bing/js/js-999.js",
+    "version": "v1.0"
     }
 }
