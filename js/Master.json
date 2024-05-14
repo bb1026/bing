@@ -59,7 +59,14 @@
     "ID": "js-999",
     "update": "",
     "name": "Lunar_calendar",
-    "url": "https://bb1026.github.io/bing/js/js-999.js",
+    "url": "https://bb1026.github.io/bing/js/Lunar_calendar.js",
+    "version": "v1.0"
+    },
+    "js-888": {
+    "ID": "js-888",
+    "update": "",
+    "name": "Money Code Exchange",
+    "url": "https://bb1026.github.io/bing/js/Money%20Code%20Exchange.js",
     "version": "v1.0"
     }
 }
