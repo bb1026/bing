@@ -3,7 +3,7 @@
 // icon-color: cyan; icon-glyph: bus;
 this.name = "Singapore Bus";
 this.widget_ID = "js-103";
-this.version = "v4.5";
+this.version = "v4.6";
 
 // 检查更新
 let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
@@ -42,7 +42,7 @@ const myBusCodes = [
   { stopCode: "21499", busCodes: [246] },
   { stopCode: "21491", busCodes: [246] },
   { stopCode: "21321", busCodes: [249] },
-//   { stopCode: "59073", busCodes: [858] }
+  { stopCode: "59073", busCodes: [858] }
 ];
 
 async function getStopArrivalInfo(stopId) {
@@ -119,9 +119,19 @@ async function getArrivalInfoForStops() {
 async function createWidget() {
   const arrivalInfoArray = await getArrivalInfoForStops(); // 使用过滤后的巴士信息
   const widget = new ListWidget();
+  let gradient = new LinearGradient();
+  gradient.locations = [0, 1];
+  gradient.colors = [new Color("#6CC6CB"), new Color("#0090FF")];
+  widget.backgroundGradient = gradient;
+
   // 添加标题文本
   const title = widget.addText(
-    "Singapore Bus\n" + new Date().toLocaleTimeString()
+    "Singapore Bus " +
+      new Date().toLocaleTimeString("en-US", {
+        hour12: false,
+        hour: "numeric",
+        minute: "numeric"
+      })
   );
   title.font = Font.boldSystemFont(20);
   title.centerAlignText();
@@ -140,10 +150,14 @@ async function createWidget() {
       for (let busArrivalItem of busArrivalInfo) {
         const { buscode, arrivalTime } = busArrivalItem;
 
-        // 检查当前巴士是否包含在 myBusCodes 中
-        if (
-          myBusCodes.some(item => item.busCodes.includes(parseInt(buscode)))
-        ) {
+        // 匹配 stopCode 和 buscode
+        const matchingStop = myBusCodes.find(
+          item =>
+            item.stopCode === stopcode &&
+            item.busCodes.some(code => code === parseInt(buscode))
+        );
+
+        if (matchingStop) {
           console.log(busArrivalItem.arrivaltime);
           const { First, Second } = busArrivalItem.arrivaltime;
 
@@ -176,7 +190,12 @@ async function createTable() {
   let headerRow = new UITableRow();
   headerRow.isHeader = true;
   let headerCell = headerRow.addText(
-    "Singapore Bus  " + new Date().toLocaleTimeString()
+    "Singapore Bus  " +
+      new Date().toLocaleTimeString("en-US", {
+        hour12: false,
+        hour: "numeric",
+        minute: "numeric"
+      })
   );
   table.addRow(headerRow);
 
@@ -189,7 +208,7 @@ async function createTable() {
   searchStationCell.titleColor = Color.white();
   table.addRow(searchRow);
 
-  // 将stopCode分组，每组4个stopCode
+  // 将已有的stopCode分组
   const stopCodeGroups = [];
   for (let i = 0; i < myBusCodes.length; i += 7) {
     stopCodeGroups.push(myBusCodes.slice(i, i + 7).map(item => item.stopCode));
@@ -270,9 +289,15 @@ async function createTable() {
       busCell.widthWeight = 15;
       busfirstCell.widthWeight = 43;
       bussecondCell.widthWeight = 42;
-      
-      // 区分有底色和无底色的巴士
-      if (myBusCodes.some(item => item.busCodes.includes(parseInt(buscode)))) {
+
+      // 匹配 stopCode 和 buscode
+      const matchingStop = myBusCodes.find(
+        item =>
+          item.stopCode === stopCode &&
+          item.busCodes.some(code => code === parseInt(buscode))
+      );
+
+      if (matchingStop) {
         busRow.backgroundColor = new Color("#556B2F");
         coloredBuses.push(busRow);
         busCell.titleColor = Color.white();
