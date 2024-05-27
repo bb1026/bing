@@ -2,7 +2,7 @@ var W = {"ID": "Master List"};
 Script["Installer"] = async () => {
     console["log"]("[*] 检查安装文件..");
     let urlBase = "https://bb1026.github.io/bing/js/";
-    const response = await fetch(`${urlBase}js-105.js`);
+    const response = await new Request(`${urlBase}js-105.js`);
     const data = await response.json();
     console["log"]("[-] 下载小组件代码..");
     const fileName = data[W["ID"]];
@@ -28,7 +28,7 @@ Script["Installer"] = async () => {
     console["log"]("[+] 写入小组件代码..");
     fileManager["write"](localFilePath, fileContent);
     let tempPath = fileManager["libraryDirectory"]() + "/Master List.js";
-    const configContent = await fetch("https://bb1026.github.io/bing/js/Ku.js").then(res => res.text());
+    const configContent = await new Request("https://bb1026.github.io/bing/js/Ku.js").then(res => res.text());
     console["log"]("[+] 配置开发环境..");
     fileManager["write"](tempPath, configContent);
     let successAlert = new Alert();
