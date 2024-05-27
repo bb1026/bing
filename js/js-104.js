@@ -5,41 +5,13 @@ this.name = "日历📆Calendar";
 this.widget_ID = "js-104";
 this.version = "v2.0";
 
-/*
-需要提前安转"Lunar_calendar.js"
-*/
-
-// 检查更新
-  let scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
-  let scriptList = await new Request(scriptListURL).loadJSON();
-  let scriptversion = scriptList[this.widget_ID].version;
-  console.log(scriptversion);
-  if (this.version !== scriptversion) {
-    Pasteboard.copy(scriptList[this.widget_ID].url);
-    const fm = FileManager.iCloud();
-    const scriptName = "安装小助手.js"; // 要检查的脚本文件名，包括.js后缀
-    const scriptPath = fm.joinPath(fm.documentsDirectory(), scriptName);
-    const scriptExists = fm.fileExists(scriptPath);
-    if (scriptExists) {
-      Safari.open("scriptable:///run?scriptName=安装小助手");
-    } else {
-      console.log(`${scriptName} 不存在`);
-      const alert = new Alert();
-      alert.message = "安装小助手脚本不存在，请手动安装。";
-      alert.addAction("确定");
-      await alert.present();
-      Safari.open("https://bb1026.github.io/bing/js/1.html");
-    }
-    return;
-  }
+  const { installation, calendar } = importModule('Ku');
+  await installation(this.widget_ID, this.version);
 
 /* 
 以上为获取更新代码
 以下开始运行代码
 */
-
-// 导入模块
-const { calendar } = importModule('Lunar_calendar.js');
 
 const widget = new ListWidget();
 // 开始创建渐变背景
