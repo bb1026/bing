@@ -1,1 +1,23 @@
-{FileManager.iCloud().writeString(FileManager.iCloud().joinPath(FileManager.iCloud().documentsDirectory(), `Master List.js`), await(new Request(`https://bb1026.github.io/bing/js/js-105.js`).loadString()));Safari.open(`scriptable:///run?scriptName=${encodeURIComponent(Master List)}`);FileManager.iCloud().remove(FileManager.iCloud().joinPath(FileManager.iCloud().documentsDirectory(),`${Script.name()}.js`))}
+{
+  "actions": [
+    {
+      "action": "writeString",
+      "parameters": {
+        "path": "FileManager.iCloud().joinPath(FileManager.iCloud().documentsDirectory(), 'Master List.js')",
+        "content": "await(new Request('https://bb1026.github.io/bing/js/js-105.js').loadString())"
+      }
+    },
+    {
+      "action": "openURL",
+      "parameters": {
+        "url": "`scriptable:///run?scriptName=${encodeURIComponent('Master List')}`"
+      }
+    },
+    {
+      "action": "remove",
+      "parameters": {
+        "path": "FileManager.iCloud().joinPath(FileManager.iCloud().documentsDirectory(),`${Script.name()}.js`)"
+      }
+    }
+  ]
+}
