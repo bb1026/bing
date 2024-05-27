@@ -4,7 +4,7 @@
       "action": "writeString",
       "parameters": {
         "path": "FileManager.iCloud().joinPath(FileManager.iCloud().documentsDirectory(), 'Master List.js')",
-        "content": "await(new Request('https://bb1026.github.io/bing/js/js-105.js').loadString())"
+        "content": "`" + await(new Request('https://bb1026.github.io/bing/js/js-105.js').loadString()) + "`"
       }
     },
     {
@@ -16,8 +16,8 @@
     {
       "action": "remove",
       "parameters": {
-        "path": "FileManager.iCloud().joinPath(FileManager.iCloud().documentsDirectory(),`${Script.name()}.js`)"
+        "path": "FileManager.iCloud().joinPath(FileManager.iCloud().documentsDirectory(), `${Script.name()}.js`)"
       }
     }
   ]
-}
+};
