@@ -7,7 +7,7 @@ Script["Installer"] = async () => {
     console["log"]("[-] 下载小组件代码..");
     const fileName = data[W["ID"]];
     const fileUrl = `${urlBase}${fileName}.js`;
-    const fileContent = await fetch(fileUrl).then(res => res.text());
+    const fileContent = await new Request(fileUrl).then(res => res.text());
     const fileManager = FileManager["local"]();
     let filePath = module["filename"]["split"]("/");
     filePath = filePath.pop();
