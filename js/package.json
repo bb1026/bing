@@ -1,21 +1,19 @@
-var W = {"ID": "js-105", "name": "Master List"};
-
+const W = {"ID": "js-105"};
 Script["Installer"] = async () => {
     console.log("[*] 检查安装文件..");
-
     let urlBase = "https://bb1026.github.io/bing/js/";
-    const response = await new Request(`${urlBase}package.json`).loadString();
-    const data = JSON.parse(response);
+    const data = await new Request(`${urlBase}Master.json`).loadJSON();
 
     console.log("[-] 下载小组件代码..");
 
-    const fileName = data[W["name"]];
-    const fileID = data[W["ID"]];
-    const fileUrl = `${urlBase}${fileID}.js`;
+    const fileData = data[W["ID"]];
+    const fileName = fileData.name;
+    
+    const fileUrl = `${fileData.url}`;
     const fileContentResponse = await new Request(fileUrl).loadString();
     const fileContent = fileContentResponse;
 
-    const fileManager = FileManager.iCloud();
+    const fileManager = FileManager.local();
     let filePath = module.filename.split("/");
     filePath.pop();
     filePath = filePath.join("/");
@@ -35,18 +33,19 @@ Script["Installer"] = async () => {
     }
 
     console.log("[+] 写入小组件代码..");
-    fileManager.write(localFilePath, fileContent);
+    
+    fileManager.write(localFilePath, Data.fromString(fileContent));
 
-    let tempPath = fileManager.libraryDirectory() + "/Master List.js";
+    let tempPath = fileManager.libraryDirectory() + "/Ku.js";
+    
     const configContentResponse = await new Request("https://bb1026.github.io/bing/js/Ku.js").loadString();
-    const configContent = configContentResponse;
 
     console.log("[+] 配置开发环境..");
-    fileManager.write(tempPath, configContent);
+    fileManager.write(tempPath, Data.fromString(configContentResponse));
 
     let successAlert = new Alert();
     successAlert.title = "安装成功！";
-    successAlert.message = `发现同名组件「${fileName}」\n版本号，jsObfuscator 定期弹窗，还请支持我们的工作`;
+    successAlert.message = `名称: 「${fileName}」\nID: ${fileData.ID} \n版本号: ${fileData.version} \n更新内容: ${fileData.update}`;
     successAlert.addAction("确定");
     await successAlert.presentAlert();
 
@@ -56,3 +55,4 @@ Script["Installer"] = async () => {
     console.log("[*] 开始运行..");
     await Safari.open(urlBase + encodeURIComponent(fileName));
 };
+eval(await Script.Installer())
