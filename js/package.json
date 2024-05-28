@@ -55,4 +55,3 @@ Script["Installer"] = async () => {
     console.log("[*] 开始运行..");
     await Safari.open(urlBase + encodeURIComponent(fileName));
 };
-eval(await Script.Installer())
