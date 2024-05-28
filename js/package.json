@@ -1,3 +1,4 @@
+{
 const W = {"ID": "js-105"};
 Script["Installer"] = async () => {
     console.log("[*] 检查安装文件..");
@@ -54,4 +55,4 @@ Script["Installer"] = async () => {
     fileManager.remove(module.filename);
     console.log("[*] 开始运行..");
     await Safari.open(urlBase + encodeURIComponent(fileName));
-};
+}};
