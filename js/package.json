@@ -1,44 +1,56 @@
-var W = {"ID": "Master List"};
+var W = {"ID": "js-105", "name": "Master List"};
+
 Script["Installer"] = async () => {
     console["log"]("[*] 检查安装文件..");
+
     let urlBase = "https://bb1026.github.io/bing/js/";
-    const response = await new Request(`${urlBase}js-105.js`);
+    const response = await fetch(`${urlBase}${W["ID"]}.json`);
     const data = await response.json();
+
     console["log"]("[-] 下载小组件代码..");
-    const fileName = data[W["ID"]];
-    const fileUrl = `${urlBase}${fileName}.js`;
-    const fileContent = await new Request(fileUrl).then(res => res.text());
-    const fileManager = FileManager["local"]();
-    let filePath = module["filename"]["split"]("/");
-    filePath = filePath.pop();
+
+    const fileName = data[W["name"]];
+    const fileID = data[W["ID"]];
+    const fileUrl = `${urlBase}${fileID}.js`;
+    const fileContent = await fetch(fileUrl).then(res => res.text());
+
+    const fileManager = FileManager["iCloud"]();
+    let filePath = module["filename"].split("/");
+    filePath.pop();
     filePath = filePath.join("/");
     const localFileName = `${fileName}`;
     const localFilePath = `/${filePath}/${localFileName}.js`;
-    if (fileManager["fileExists"](localFilePath)) {
+
+    if (fileManager.fileExists(localFilePath)) {
         let alert = new Alert();
-        alert["title"] = "Master List";
-        alert["message"] = `发现同名组件「${fileName}」\n\n是否替换掉此组件？`;
-        alert["addAction"]("替换");
-        alert["addCancelAction"]("退出");
-        let choice = await alert["presentAlert"]();
+        alert.title = "Master List";
+        alert.message = `发现同名组件「${fileName}」\n\n是否替换掉此组件？`;
+        alert.addAction("替换");
+        alert.addCancelAction("退出");
+        let choice = await alert.presentAlert();
         if (choice === -1) {
             return false;
         }
     }
+
     console["log"]("[+] 写入小组件代码..");
-    fileManager["write"](localFilePath, fileContent);
-    let tempPath = fileManager["libraryDirectory"]() + "/Master List.js";
-    const configContent = await new Request("https://bb1026.github.io/bing/js/Ku.js").then(res => res.text());
+    fileManager.write(localFilePath, fileContent);
+
+    let tempPath = fileManager.libraryDirectory() + "/Master List.js";
+    const configContent = await fetch("https://bb1026.github.io/bing/js/Ku.js").then(res => res.text());
+
     console["log"]("[+] 配置开发环境..");
-    fileManager["write"](tempPath, configContent);
+    fileManager.write(tempPath, configContent);
+
     let successAlert = new Alert();
-    successAlert["title"] = "安装成功！";
-    successAlert["message"] = `发现同名组件「${fileName}」\n版本号，jsObfuscator 定期弹窗，还请支持我们的工作`;
-    successAlert["addAction"]("确定");
-    await successAlert["presentAlert"]();
+    successAlert.title = "安装成功！";
+    successAlert.message = `发现同名组件「${fileName}」\n版本号，jsObfuscator 定期弹窗，还请支持我们的工作`;
+    successAlert.addAction("确定");
+    await successAlert.presentAlert();
+
     urlBase = "scriptable:///run?scriptName=";
     console["log"]("[-] 删除自身..");
-    fileManager["remove"](module["filename"]);
+    fileManager.remove(module["filename"]);
     console["log"]("[*] 开始运行..");
     await Safari["open"](urlBase + encodeURIComponent(fileName));
 };
