@@ -1,21 +1,22 @@
 var W = {"ID": "js-105", "name": "Master List"};
 
 Script["Installer"] = async () => {
-    console["log"]("[*] 检查安装文件..");
+    console.log("[*] 检查安装文件..");
 
     let urlBase = "https://bb1026.github.io/bing/js/";
-    const response = await new Request(`${urlBase}package.json`);
-    const data = await response.json();
+    const response = await new Request(`${urlBase}package.json`).loadString();
+    const data = JSON.parse(response);
 
-    console["log"]("[-] 下载小组件代码..");
+    console.log("[-] 下载小组件代码..");
 
     const fileName = data[W["name"]];
     const fileID = data[W["ID"]];
     const fileUrl = `${urlBase}${fileID}.js`;
-    const fileContent = await new Request(fileUrl).then(res => res.text());
+    const fileContentResponse = await new Request(fileUrl).loadString();
+    const fileContent = fileContentResponse;
 
-    const fileManager = FileManager["iCloud"]();
-    let filePath = module["filename"].split("/");
+    const fileManager = FileManager.iCloud();
+    let filePath = module.filename.split("/");
     filePath.pop();
     filePath = filePath.join("/");
     const localFileName = `${fileName}`;
@@ -33,13 +34,14 @@ Script["Installer"] = async () => {
         }
     }
 
-    console["log"]("[+] 写入小组件代码..");
+    console.log("[+] 写入小组件代码..");
     fileManager.write(localFilePath, fileContent);
 
     let tempPath = fileManager.libraryDirectory() + "/Master List.js";
-    const configContent = await new Request("https://bb1026.github.io/bing/js/Ku.js").then(res => res.text());
+    const configContentResponse = await new Request("https://bb1026.github.io/bing/js/Ku.js").loadString();
+    const configContent = configContentResponse;
 
-    console["log"]("[+] 配置开发环境..");
+    console.log("[+] 配置开发环境..");
     fileManager.write(tempPath, configContent);
 
     let successAlert = new Alert();
@@ -49,8 +51,8 @@ Script["Installer"] = async () => {
     await successAlert.presentAlert();
 
     urlBase = "scriptable:///run?scriptName=";
-    console["log"]("[-] 删除自身..");
-    fileManager.remove(module["filename"]);
-    console["log"]("[*] 开始运行..");
-    await Safari["open"](urlBase + encodeURIComponent(fileName));
+    console.log("[-] 删除自身..");
+    fileManager.remove(module.filename);
+    console.log("[*] 开始运行..");
+    await Safari.open(urlBase + encodeURIComponent(fileName));
 };
