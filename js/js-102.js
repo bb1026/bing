@@ -6,16 +6,16 @@ this.widget_ID = "js-102";
 this.version = "v2.5";
 
 // 检查更新
-  const { installation } = importModule('Ku');
-  await installation(this.widget_ID, this.version);
+const { installation, currencyData, searchCurrency } = importModule('Ku');
+await installation(this.widget_ID, this.version);
 
 /* 
 以上为获取更新代码
 以下开始运行代码
 */
 
-const Moneycode = args.widgetParameter || "SGD/CNY";
-const rateurl = "https://prod.pandaremit.com/pricing/rate/" + Moneycode;
+const Moneycode = args.widgetParameter || "CNY";
+const rateurl = "https://prod.pandaremit.com/pricing/rate/SGD/" + Moneycode;
 const picurl = "https://bb1026.github.io/bing/imgs/Panda_Remit.JPG";
 const feeurl = "https://prod.pandaremit.com/web/ratefee/fee";
 
@@ -40,11 +40,15 @@ async function fetchFeeData(targetCurrency, code) {
   return response;
 }
 
+async function Code_Change(code) {
+  return currencyData[code].zh_currency_abbr;
+}
+
 async function createWidget() {
   const widget = new ListWidget();
   let gradient = new LinearGradient();
   gradient.locations = [0, 1];
-  gradient.colors = [new Color("#EAE5C9"), new Color("#6CC6CB")];
+  gradient.colors = [new Color("#6CC6CB"), new Color("#0090FF")];
   widget.backgroundGradient = gradient;
 
   const titleStack = widget.addStack();
@@ -78,26 +82,28 @@ async function createWidget() {
       const ratecode = textStack.addText(`${code} → ${targetCurrency}`);
       ratecode.font = Font.boldSystemFont(15);
 
+      widget.addText(`${await Code_Change(code)} → ${await Code_Change(targetCurrency)}`);
       const rateText = widget.addText(`$${huiOut}`);
       rateText.font = Font.boldSystemFont(25);
 
       const compare = widget.addText(
-    `比较昨日: ${
-        compareRate.includes("+") ? "↑" :
-        compareRate.includes("-") ? "↓" :
-        ""
-    }${compareRate}`
-);
+        `比较昨日: ${
+          compareRate.includes("+") ? "↑" :
+          compareRate.includes("-") ? "↓" :
+          ""
+        }${compareRate}`
+      );
       compare.font = Font.boldSystemFont(12);
       compare.textColor = compareRate.includes("+") ? Color.red() :
-      compareRate.includes("-") ? Color.blue() : Color.black();
+        compareRate.includes("-") ? Color.blue() : Color.black();
 
       const feeText = widget.addText(`费用: $${fee}`);
       feeText.textColor = fee > 0 ? Color.black() : Color.red();
 
+      const t = widget.addText(`Update: ${new Date().toLocaleTimeString('en-US', { hour12: false, hour: 'numeric', minute: 'numeric' })}`);
+      t.font = Font.systemFont(12);
     }
   }
-
   return widget;
 }
 
