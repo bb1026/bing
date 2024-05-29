@@ -22,7 +22,7 @@ const myBusCodes = [
   { stopCode: "21499", busCodes: [246] },
   { stopCode: "21491", busCodes: [246] },
   { stopCode: "21321", busCodes: [249] },
-  { stopCode: "59073", busCodes: [858] }
+//   { stopCode: "59073", busCodes: [858] }
 ];
 
 async function getStopArrivalInfo(stopId) {
@@ -586,7 +586,11 @@ function handleArrivalInfo(stationInfo) {
   // 添加标题行
   let headerRow = new UITableRow();
   headerRow.isHeader = true;
-  let headerCell = headerRow.addText(stationName + " (" + stationCode + ")");
+  let headerCell = headerRow.addText(`${stationName}( ${stationCode} ) ${new Date().toLocaleTimeString("en-US", {
+        hour12: false,
+        hour: "numeric",
+        minute: "numeric"
+      })}`);
   stationTable.addRow(headerRow);
 
   // 添加巴士到达信息行
