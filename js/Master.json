@@ -22,10 +22,10 @@
   },
     "js-103": {
     "ID": "js-103",
-    "update": "修复BUG",
+    "update": "更换显示名称",
     "name": "Singapore Bus",
     "url": "https://bb1026.github.io/bing/js/js-103.js",
-    "version": "v4.6"
+    "version": "v4.7"
     },
     "js-104": {
     "ID": "js-104",
