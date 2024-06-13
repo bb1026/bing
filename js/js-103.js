@@ -3,7 +3,7 @@
 // icon-color: cyan; icon-glyph: bus;
 this.name = "Singapore Bus";
 this.widget_ID = "js-103";
-this.version = "v4.6";
+this.version = "v4.7";
 
 // 检查更新
   const { installation } = importModule('Ku');
@@ -16,13 +16,13 @@ this.version = "v4.6";
 
 // 站点代码及对应巴士代码
 const myBusCodes = [
-  { stopCode: "59009", busCodes: [800, 804] },
-  { stopCode: "59241", busCodes: [804] },
-  { stopCode: "22009", busCodes: [246, 249] },
-  { stopCode: "21499", busCodes: [246] },
-  { stopCode: "21491", busCodes: [246] },
-  { stopCode: "21321", busCodes: [249] },
-//   { stopCode: "59073", busCodes: [858] }
+  { busstop: "Yishun Int", stopCode: "59009", busCodes: [800, 804] },
+  { busstop: "Blk 236", stopCode: "59241", busCodes: [804] },
+  { busstop: "Boon Lay Int", stopCode: "22009", busCodes: [246, 249] },
+  { busstop: "Bef Jln Tukang", stopCode: "21499", busCodes: [246] },
+  { busstop: "Bef Intl Rd", stopCode: "21491", busCodes: [246] },
+  { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: [249] },
+//  { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: [858] }
 ];
 
 async function getStopArrivalInfo(stopId) {
@@ -190,14 +190,13 @@ async function createTable() {
 
   // 将已有的stopCode分组
   const stopCodeGroups = [];
-  for (let i = 0; i < myBusCodes.length; i += 7) {
-    stopCodeGroups.push(myBusCodes.slice(i, i + 7).map(item => item.stopCode));
+  for (let i = 0; i < myBusCodes.length; i += 3) {
+    stopCodeGroups.push(myBusCodes.slice(i, i + 3).map(item => item.busstop));
   }
 
   // 创建行并添加到表格中
   for (const group of stopCodeGroups) {
     const row = new UITableRow();
-    row.backgroundColor = new Color("#FFA07A");
     for (const stopCode of group) {
       const button = row.addButton(`${stopCode}`);
       button.titleColor = Color.white();
