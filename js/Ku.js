@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "依赖库";
 this.widget_ID = "js-999";
-this.version = "v1.0";
+this.version = "Best";
 
 //安装脚本库
 async function installation(scriptID, thisVersion) {
@@ -26,6 +26,7 @@ const fm = FileManager.iCloud();
     return;
   }
 
+  let updateinfo = remoteScriptInfo.update
   let remoteVersion = remoteScriptInfo.version;
   console.log(`远程脚本版本: ${remoteVersion}`);
   console.log(`本地脚本版本: ${thisVersion}`);
@@ -43,7 +44,7 @@ const fm = FileManager.iCloud();
     if (fm.fileExists(scriptPath)) {
       const alreadyInstalledAlert = new Alert();
       alreadyInstalledAlert.title = "警告";
-      alreadyInstalledAlert.message = `<${scriptName}>已经存在，是否覆盖安装！`;
+      alreadyInstalledAlert.message = `已有新版本: ${thisVersion} → ${remoteVersion}\n更新内容: ${updateinfo}\n<${scriptName}>已经存在，是否覆盖安装！`;
       alreadyInstalledAlert.addAction("取消安装");
       alreadyInstalledAlert.addAction("覆盖安装");
       const response = await alreadyInstalledAlert.present();
