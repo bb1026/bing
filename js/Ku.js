@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "依赖库";
 this.widget_ID = "js-999";
-this.version = "Best";
+this.version = "v1.1";
 
 //安装脚本库
 async function installation(scriptID, thisVersion) {
