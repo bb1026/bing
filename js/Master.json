@@ -57,9 +57,9 @@
     },
     "js-999": {
     "ID": "js-999",
-    "update": "上传依赖库",
+    "update": "更新提示",
     "name": "依赖库",
     "url": "https://bb1026.github.io/bing/js/Ku.js",
-    "version": "v1.0"
+    "version": "v1.1"
     }
 }
