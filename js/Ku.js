@@ -43,7 +43,7 @@ const fm = FileManager.iCloud();
     // 检查脚本是否已经存在
     if (fm.fileExists(scriptPath)) {
       const alreadyInstalledAlert = new Alert();
-      alreadyInstalledAlert.title = "警告";
+      alreadyInstalledAlert.title = "更新提示";
       alreadyInstalledAlert.message = `已有新版本: ${thisVersion} → ${remoteVersion}\n更新内容: ${updateinfo}\n<${scriptName}>已经存在，是否覆盖安装！`;
       alreadyInstalledAlert.addAction("取消安装");
       alreadyInstalledAlert.addAction("覆盖安装");
@@ -77,13 +77,13 @@ const fm = FileManager.iCloud();
     const successAlert = new Alert();
     successAlert.title = "成功";
     successAlert.message = `<${scriptName}>脚本已成功安装！\n更新内容：${scriptUpdate}\n版本号：${remoteVersion}\n是否立即运行安装的脚本？`;
-    successAlert.addAction("不了");
-    successAlert.addAction("打开");
+    successAlert.addAction("确定");
     const runScript = await successAlert.present();
-    if (runScript === 1) {
+    if (runScript === 0) {
       Safari.open(`scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`);
     }
     console.log(`<${scriptName}>脚本已成功安装！\n更新日期：${scriptUpdate}\n版本号：${remoteVersion}`);
+    exit();
   } else {
     console.log("脚本已是最新版本，无需更新。");
   }
