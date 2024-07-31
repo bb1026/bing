@@ -123,39 +123,42 @@ async function createAccessoryCircular() {
     rate = await fetchRateData();
   } catch (error) {
     console.error("Error fetching rate data:", error);
-    return null; // 或者其他错误处理逻辑
+    return null;
   }
 
   let Acc = new ListWidget();
   let stack = Acc.addStack();
   stack.layoutVertically();
   stack.size = new Size(60, 60);
-  stack.opaque = false;
+  stack.opaque = true;
   stack.respectScreenScale = false;
   stack.cornerRadius = 30;
-  stack.backgroundColor = new Color("#000000", 0.4);
+  stack.backgroundColor = new Color("#ffffff", 0.4);
 
-  stack.addSpacer();
-  let SymbolStack = stack.addStack();
-  SymbolStack.addSpacer();
-  let cnySymbol = SymbolStack.addImage(
-    SFSymbol.named("chineseyuanrenminbisign.arrow.circlepath").image
-  );
-  SymbolStack.addSpacer();
-  cnySymbol.imageSize = new Size(30, 30);
-  cnySymbol.imageOpacity = 0.5;
-  cnySymbol.centerAlignImage();
+  let targetStack = stack.addStack();
+  targetStack.addSpacer();
+  let fontsize = 11;
+  let Target = targetStack.addText(rate.model.target);
+  Target.font = Font.systemFont(fontsize);
+  targetStack.addSpacer();
+  stack.addSpacer(3);
+  
+  let cnyStack = stack.addStack();
+  cnyStack.addSpacer();
+  let cnyrate = cnyStack.addText((rate.model.huiOut * 1).toString());
+  cnyrate.font = Font.systemFont(fontsize);
+  cnyStack.addSpacer();
+  stack.addSpacer(3);
 
-  let rateStack = stack.addStack();
-  rateStack.addSpacer();
-  let cnyRate = rateStack.addText((rate.model.huiOut * 1).toString());
-  rateStack.addSpacer();
-  cnyRate.font = Font.systemFont(15);
-  cnyRate.centerAlignText();
-  stack.addSpacer();
-
+  let compareStack = stack.addStack();
+  compareStack.addSpacer();
+  let Compare = compareStack.addText(rate.model.compareRate);
+  Compare.font = Font.systemFont(fontsize);
+  compareStack.addSpacer();  
+  
   return Acc;
 }
+
 if (config.runsInAccessoryWidget) {
   const Accwidget = await createAccessoryCircular();
   Script.setWidget(Accwidget);
