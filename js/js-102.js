@@ -1,12 +1,13 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-brown; icon-glyph: sync;
+
 this.name = "Panda Remit";
 this.widget_ID = "js-102";
-this.version = "v2.5";
+this.version = "v2.6";
 
 // 检查更新
-const { installation, currencyData, searchCurrency } = importModule('Ku');
+const { installation, currencyData, searchCurrency } = importModule("Ku");
 await installation(this.widget_ID, this.version);
 
 /* 
@@ -82,36 +83,83 @@ async function createWidget() {
       const ratecode = textStack.addText(`${code} → ${targetCurrency}`);
       ratecode.font = Font.boldSystemFont(15);
 
-      widget.addText(`${await Code_Change(code)} → ${await Code_Change(targetCurrency)}`);
+      widget.addText(
+        `${await Code_Change(code)} → ${await Code_Change(targetCurrency)}`
+      );
       const rateText = widget.addText(`$${huiOut}`);
       rateText.font = Font.boldSystemFont(25);
 
       const compare = widget.addText(
         `比较昨日: ${
-          compareRate.includes("+") ? "↑" :
-          compareRate.includes("-") ? "↓" :
-          ""
+          compareRate.includes("+") ? "↑" : compareRate.includes("-") ? "↓" : ""
         }${compareRate}`
       );
       compare.font = Font.boldSystemFont(12);
-      compare.textColor = compareRate.includes("+") ? Color.red() :
-        compareRate.includes("-") ? Color.blue() : Color.black();
+      compare.textColor = compareRate.includes("+")
+        ? Color.red()
+        : compareRate.includes("-")
+        ? Color.blue()
+        : Color.black();
 
       const feeText = widget.addText(`费用: $${fee}`);
       feeText.textColor = fee > 0 ? Color.black() : Color.red();
 
-      const t = widget.addText(`Update: ${new Date().toLocaleTimeString('en-US', { hour12: false, hour: 'numeric', minute: 'numeric' })}`);
+      const t = widget.addText(
+        `Update: ${new Date().toLocaleTimeString("en-US", {
+          hour12: false,
+          hour: "numeric",
+          minute: "numeric"
+        })}`
+      );
       t.font = Font.systemFont(12);
     }
   }
   return widget;
 }
 
-if (config.runsInWidget) {
+async function createAccessoryCircular() {
+  let rate;
+  try {
+    rate = await fetchRateData();
+  } catch (error) {
+    console.error("Error fetching rate data:", error);
+    return null; // 或者其他错误处理逻辑
+  }
+
+  let Acc = new ListWidget();
+  let stack = Acc.addStack();
+  stack.layoutVertically();
+  stack.size = new Size(80, 80);
+  stack.backgroundColor = new Color("#000000", 0.4);
+
+  stack.addSpacer();
+  let SymbolStack = stack.addStack();
+  SymbolStack.addSpacer();
+  let cnySymbol = SymbolStack.addImage(
+    SFSymbol.named("chineseyuanrenminbisign.arrow.circlepath").image
+  );
+  SymbolStack.addSpacer();
+  cnySymbol.imageSize = new Size(30, 30);
+  cnySymbol.imageOpacity = 0.5;
+  cnySymbol.centerAlignImage();
+
+  let rateStack = stack.addStack();
+  rateStack.addSpacer();
+  let cnyRate = rateStack.addText((rate.model.huiOut * 1).toString());
+  rateStack.addSpacer();
+  cnyRate.font = Font.systemFont(15);
+  cnyRate.centerAlignText();
+  stack.addSpacer();
+
+  return Acc;
+}
+if (config.runsInAccessoryWidget) {
+  const Accwidget = await createAccessoryCircular();
+  Script.setWidget(Accwidget);
+} else if (config.runsInWidget) {
   const widget = await createWidget();
   Script.setWidget(widget);
 } else {
   const widget = await createWidget();
   widget.presentSmall();
-  Script.complete();
 }
