@@ -129,7 +129,10 @@ async function createAccessoryCircular() {
   let Acc = new ListWidget();
   let stack = Acc.addStack();
   stack.layoutVertically();
-  stack.size = new Size(80, 80);
+  stack.size = new Size(60, 60);
+  stack.opaque = false;
+  stack.respectScreenScale = false;
+  stack.cornerRadius = 30;
   stack.backgroundColor = new Color("#000000", 0.4);
 
   stack.addSpacer();
