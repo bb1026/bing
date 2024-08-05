@@ -3,7 +3,7 @@
 // icon-color: cyan; icon-glyph: bus;
 this.name = "Singapore Bus";
 this.widget_ID = "js-103";
-this.version = "v4.7";
+this.version = "v4.8";
 
 // 检查更新
   const { installation } = importModule('Ku');
@@ -22,7 +22,7 @@ const myBusCodes = [
   { busstop: "Bef Jln Tukang", stopCode: "21499", busCodes: [246] },
   { busstop: "Bef Intl Rd", stopCode: "21491", busCodes: [246] },
   { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: [249] },
-//  { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: [858] }
+ { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: [858] }
 ];
 
 async function getStopArrivalInfo(stopId) {
@@ -188,20 +188,20 @@ async function createTable() {
   searchStationCell.titleColor = Color.white();
   table.addRow(searchRow);
 
-  // 将已有的stopCode分组
+  // 将已有的stopCode分组，手动选择站点
   const stopCodeGroups = [];
   for (let i = 0; i < myBusCodes.length; i += 3) {
-    stopCodeGroups.push(myBusCodes.slice(i, i + 3).map(item => item.busstop));
+    stopCodeGroups.push(myBusCodes.slice(i, i + 3).map(item => [item.busstop, item.stopCode]));
   }
 
   // 创建行并添加到表格中
   for (const group of stopCodeGroups) {
     const row = new UITableRow();
     for (const stopCode of group) {
-      const button = row.addButton(`${stopCode}`);
+      const button = row.addButton(`${stopCode[0]}`);
       button.titleColor = Color.white();
       button.onTap = async () => {
-        let searchStationCode = stopCode;
+        let searchStationCode = stopCode[1];
         const stationInfo = await searchStation(searchStationCode);
         if (stationInfo) {
           // 处理获取的到达信息
