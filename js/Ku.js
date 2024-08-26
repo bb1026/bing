@@ -3,89 +3,103 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "依赖库";
 this.widget_ID = "js-999";
-this.version = "v1.1";
+this.version = "v2.0";
 
 //安装脚本库
 async function installation(scriptID, thisVersion) {
   const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
 
-const fm = FileManager.iCloud();
+  const fm = FileManager.iCloud();
 
-  // 发起网络请求获取脚本列表
-  let scriptList = await new Request(scriptListURL).loadJSON();
-  let remoteScriptInfo = scriptList[scriptID];
+  try {
+    // 发起网络请求获取脚本列表
+    let scriptList = await new Request(scriptListURL).loadJSON();
+    
+    console.log("✔️连接成功\n检查更新");
+    
+    let remoteScriptInfo = scriptList[scriptID];
 
-  if (!remoteScriptInfo) {
-    // 未找到脚本信息
-    const failureAlert = new Alert();
-    failureAlert.title = "失败";
-    failureAlert.message = `未找到ID为'${scriptID}'的脚本信息。`;
-    failureAlert.addAction("确定");
-    await failureAlert.present();
-    console.log(`未找到ID为'${scriptID}'的脚本信息。`);
-    return;
-  }
+    if (!remoteScriptInfo) {
+      // 未找到脚本信息
+      const failureAlert = new Alert();
+      failureAlert.title = "失败";
+      failureAlert.message = `未找到ID为'${scriptID}'的脚本信息。`;
+      failureAlert.addAction("确定");
+      await failureAlert.present();
+      console.log(`未找到ID为'${scriptID}'的脚本信息。`);
+      return;
+    }
 
-  let updateinfo = remoteScriptInfo.update
-  let remoteVersion = remoteScriptInfo.version;
-  console.log(`远程脚本版本: ${remoteVersion}`);
-  console.log(`本地脚本版本: ${thisVersion}`);
+    let updateinfo = remoteScriptInfo.update;
+    let remoteVersion = remoteScriptInfo.version;
+    console.log(`远程脚本版本: ${remoteVersion}`);
+    console.log(`本地脚本版本: ${thisVersion}`);
 
-  // 仅当版本不匹配时才进行更新
-  if (thisVersion !== remoteVersion) {
-    const scriptURL = `https://bb1026.github.io/bing/js/${scriptID}.js`;
+    // 仅当版本不匹配时才进行更新
+    if (thisVersion !== remoteVersion) {
+      const scriptURL = `https://bb1026.github.io/bing/js/${scriptID}.js`;
 
-    const { name: scriptName, update: scriptUpdate } = remoteScriptInfo;
+      const { name: scriptName, update: scriptUpdate } = remoteScriptInfo;
 
-    // 构建本地脚本路径
-    const scriptPath = fm.joinPath(fm.documentsDirectory(), `${scriptName}.js`);
+      // 构建本地脚本路径
+      const scriptPath = fm.joinPath(
+        fm.documentsDirectory(),
+        `${scriptName}.js`
+      );
 
-    // 检查脚本是否已经存在
-    if (fm.fileExists(scriptPath)) {
-      const alreadyInstalledAlert = new Alert();
-      alreadyInstalledAlert.title = "更新提示";
-      alreadyInstalledAlert.message = `已有新版本: ${thisVersion} → ${remoteVersion}\n更新内容: ${updateinfo}\n<${scriptName}>已经存在，是否覆盖安装！`;
-      alreadyInstalledAlert.addAction("取消安装");
-      alreadyInstalledAlert.addAction("覆盖安装");
-      const response = await alreadyInstalledAlert.present();
+      // 检查脚本是否已经存在
+      if (fm.fileExists(scriptPath)) {
+        const alreadyInstalledAlert = new Alert();
+        alreadyInstalledAlert.title = "更新提示";
+        alreadyInstalledAlert.message = `已有新版本: ${thisVersion} → ${remoteVersion}\n更新内容: ${updateinfo}\n<${scriptName}>已经存在，是否覆盖安装！`;
+        alreadyInstalledAlert.addAction("取消安装");
+        alreadyInstalledAlert.addAction("覆盖安装");
+        const response = await alreadyInstalledAlert.present();
 
-      if (response === 0) {
-        // 用户选择取消安装
-        const cancelAlert = new Alert();
-        cancelAlert.title = "取消安装";
-        cancelAlert.message = `<${scriptName}>已经存在相同名称的脚本，用户取消安装。`;
-        cancelAlert.addAction("确定");
-        await cancelAlert.present();
-        console.log(`<${scriptName}>已经存在相同名称的脚本，用户取消安装。`);
-        return;
+        if (response === 0) {
+          // 用户选择取消安装
+          const cancelAlert = new Alert();
+          cancelAlert.title = "取消安装";
+          cancelAlert.message = `<${scriptName}>已经存在相同名称的脚本，用户取消安装。`;
+          cancelAlert.addAction("确定");
+          await cancelAlert.present();
+          console.log(`<${scriptName}>已经存在相同名称的脚本，用户取消安装。`);
+          return;
+        }
       }
+
+      // 用户选择覆盖安装或脚本不存在，继续安装脚本
+      // 下载脚本
+      const downloadReq = new Request(scriptURL);
+      console.log("[*] 开始下载脚本...");
+      const scriptContent = await downloadReq.loadString();
+      console.log("[+] 脚本下载完成...");
+
+      // 保存脚本到 Scriptable 的脚本目录中
+      console.log("[#] 开始安装脚本...");
+      fm.writeString(scriptPath, scriptContent);
+      console.log("[-] 脚本安装完成...");
+
+      // 显示成功消息
+      const successAlert = new Alert();
+      successAlert.title = "成功";
+      successAlert.message = `<${scriptName}>脚本已成功安装！\n更新内容：${scriptUpdate}\n版本号：${remoteVersion}`;
+      successAlert.addAction("确定");
+      const runScript = await successAlert.present();
+      if (runScript === 0) {
+        Safari.open(
+          `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`
+        );
+      }
+      console.log(
+        `<${scriptName}>脚本已成功安装！\n更新日期：${scriptUpdate}\n版本号：${remoteVersion}`
+      );
+      exit();
+    } else {
+      console.log("脚本已是最新版本，无需更新。");
     }
-
-    // 用户选择覆盖安装或脚本不存在，继续安装脚本
-    // 下载脚本
-    const downloadReq = new Request(scriptURL);
-    console.log("[*] 开始下载脚本...");
-    const scriptContent = await downloadReq.loadString();
-    console.log("[+] 脚本下载完成...");
-
-    // 保存脚本到 Scriptable 的脚本目录中
-    console.log("[#] 开始安装脚本...");
-    fm.writeString(scriptPath, scriptContent);
-    console.log("[-] 脚本安装完成...");
-
-    // 显示成功消息
-    const successAlert = new Alert();
-    successAlert.title = "成功";
-    successAlert.message = `<${scriptName}>脚本已成功安装！\n更新内容：${scriptUpdate}\n版本号：${remoteVersion}\n是否立即运行安装的脚本？`;
-    successAlert.addAction("确定");
-    const runScript = await successAlert.present();
-    if (runScript === 0) {
-      Safari.open(`scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`);
-    }
-    console.log(`<${scriptName}>脚本已成功安装！\n更新日期：${scriptUpdate}\n版本号：${remoteVersion}`);
-    exit();
-  } else {
-    console.log("脚本已是最新版本，无需更新。");
+  } catch (error) {
+    console.log("❌连接失败\n取消本次更新");
   }
 }
 
