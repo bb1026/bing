@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI 计算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        label {
+            margin: 10px 0;
+            display: block;
+        }
+        input[type="number"] {
+            padding: 5px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        #bmi-ranges {
+            margin-top: 20px;
+        }
+        .bmi-range {
+            margin: 5px 0;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #ff5722;
+        }
+    </style>
+</head>
+<body>
+    <h1>BMI 计算器</h1>
+    
+    <label>选择性别:</label>
+    <label><input type="radio" name="gender" value="male" checked> 男</label>
+    <label><input type="radio" name="gender" value="female"> 女</label>
+    
+    <label for="height">身高 (cm):</label>
+    <input type="number" id="height" placeholder="输入身高">
+
+    <label for="weight">体重 (kg):</label>
+    <input type="number" id="weight" placeholder="输入体重">
+
+    <button onclick="calculateBMI()">计算 BMI</button>
+
+    <div id="result"></div>
+
+    <div id="bmi-ranges">
+        <div id="underweight" class="bmi-range">偏瘦: 小于 18.5</div>
+        <div id="normal" class="bmi-range">正常: 18.5 - 24.9</div>
+        <div id="overweight" class="bmi-range">超重: 25 - 29.9</div>
+        <div id="obese" class="bmi-range">肥胖: 30 及以上</div>
+    </div>
+
+    <script>
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById('height').value) / 100;
+            const weight = parseFloat(document.getElementById('weight').value);
+
+            if (isNaN(height) || isNaN(weight)) {
+                document.getElementById('result').innerText = "请输入有效的身高和体重！";
+                return;
+            }
+
+            const bmi = (weight / (height * height)).toFixed(2);
+
+            // 重置所有范围的样式
+            document.getElementById('underweight').classList.remove('highlight');
+            document.getElementById('normal').classList.remove('highlight');
+            document.getElementById('overweight').classList.remove('highlight');
+            document.getElementById('obese').classList.remove('highlight');
+
+            let bmiCategory;
+
+            if (bmi < 18.5) {
+                bmiCategory = "偏瘦";
+                document.getElementById('underweight').classList.add('highlight');
+            } else if (bmi >= 18.5 && bmi < 25) {
+                bmiCategory = "正常";
+                document.getElementById('normal').classList.add('highlight');
+            } else if (bmi >= 25 && bmi < 30) {
+                bmiCategory = "超重";
+                document.getElementById('overweight').classList.add('highlight');
+            } else {
+                bmiCategory = "肥胖";
+                document.getElementById('obese').classList.add('highlight');
+            }
+
+            document.getElementById('result').innerText = `您的 BMI 是 ${bmi}，属于 ${bmiCategory} 范围。`;
+        }
+    </script>
+</body>
+</html>
