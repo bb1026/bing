@@ -1,10 +1,10 @@
 this.name = "Birthday";
 this.widget_ID = "js-108";
-this.version = "v1.8";
+this.version = "v1.9";
 
 // 检查更新
-  const { installation } = importModule('Ku');
-  await installation(this.widget_ID, this.version);
+const { installation } = importModule("Ku");
+await installation(this.widget_ID, this.version);
 
 /* 
 以上为获取更新代码
@@ -12,15 +12,26 @@ this.version = "v1.8";
 */
 
 // 生日数据
-const Birthdays = [
-  { Name: "兵", Birthday: "19990909" }
-];
+const Birthdays = [{ Name: "兵", Birthday: "19990909" }];
 
-  const today = new Date().toLocaleDateString();
+const today = new Date().toLocaleDateString();
 
 // 工具函数：根据出生年份计算生肖
 function getZodiac(year) {
-  const zodiacs = ["猴🐵", "鸡🐔", "狗🐶", "猪🐷", "鼠🐭", "牛🐮", "虎🐯", "兔🐰", "龙🐉", "蛇🐍", "马🐴", "羊🐏"];
+  const zodiacs = [
+    "猴🐵",
+    "鸡🐔",
+    "狗🐶",
+    "猪🐷",
+    "鼠🐭",
+    "牛🐮",
+    "虎🐯",
+    "兔🐰",
+    "龙🐉",
+    "蛇🐍",
+    "马🐴",
+    "羊🐏"
+  ];
   return zodiacs[year % 12];
 }
 
@@ -28,8 +39,12 @@ function getZodiac(year) {
 function daysUntilNextBirthday(birthday) {
   const today = new Date();
   const birthDate = new Date(birthday);
-  const nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
-  
+  const nextBirthday = new Date(
+    today.getFullYear(),
+    birthDate.getMonth(),
+    birthDate.getDate()
+  );
+
   if (today > nextBirthday) {
     nextBirthday.setFullYear(today.getFullYear() + 1);
   }
@@ -50,7 +65,8 @@ function calculateAge(birthday) {
   let age = today.getFullYear() - birthDate.getFullYear();
   if (
     today.getMonth() < birthDate.getMonth() ||
-    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
+    (today.getMonth() === birthDate.getMonth() &&
+      today.getDate() < birthDate.getDate())
   ) {
     age--;
   }
@@ -61,7 +77,10 @@ function calculateAge(birthday) {
 function isTodayBirthday(birthday) {
   const today = new Date();
   const birthDate = new Date(birthday);
-  return today.getMonth() === birthDate.getMonth() && today.getDate() === birthDate.getDate();
+  return (
+    today.getMonth() === birthDate.getMonth() &&
+    today.getDate() === birthDate.getDate()
+  );
 }
 
 // 工具函数：判断是否是上午
@@ -87,7 +106,9 @@ function sendNotificationOnce(name) {
 // 工具函数：生成当日键值
 function getTodayKey(name) {
   const today = new Date();
-  const dateKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+  const dateKey = `${today.getFullYear()}-${
+    today.getMonth() + 1
+  }-${today.getDate()}`;
   return `birthday-notify-${name}-${dateKey}`;
 }
 
@@ -122,13 +143,13 @@ function createWidget() {
   title.font = Font.boldSystemFont(18);
   title.textColor = new Color("#333");
   widget.addSpacer(20);
-  
+
   // 找到距离最近的生日
-let closestBirthday = Birthdays.reduce((prev, curr) => {
-  let prevDays = daysUntilNextBirthday(formatBirthday(prev.Birthday));
-  let currDays = daysUntilNextBirthday(formatBirthday(curr.Birthday));
-  return currDays < prevDays ? curr : prev;
-});
+  let closestBirthday = Birthdays.reduce((prev, curr) => {
+    let prevDays = daysUntilNextBirthday(formatBirthday(prev.Birthday));
+    let currDays = daysUntilNextBirthday(formatBirthday(curr.Birthday));
+    return currDays < prevDays ? curr : prev;
+  });
 
   // 遍历生日数据并添加到小组件
   for (const person of Birthdays) {
@@ -144,32 +165,51 @@ let closestBirthday = Birthdays.reduce((prev, curr) => {
     // 显示生日信息
     let row = widget.addStack();
     row.layoutHorizontally();
-    
+
     let nameText = row.addText(`${Name}`);
-    nameText.font = person === closestBirthday ? Font.boldSystemFont(16) : Font.systemFont(16); // 最近生日加粗
-    nameText.textColor = new Color("#333");
+    nameText.font =
+      person === closestBirthday
+        ? Font.boldSystemFont(16)
+        : Font.systemFont(16); // 最近生日加粗
+    nameText.textColor =
+      person === closestBirthday ? new Color("#333") : new Color("#666");
 
     row.addSpacer(20);
 
     let birthDateText = row.addText(`${formattedBirthday}`);
-    birthDateText.font = person === closestBirthday ? Font.boldSystemFont(16) : Font.systemFont(16); // 最近日期加粗
-    birthDateText.textColor = new Color("#666");
-    
+    birthDateText.font =
+      person === closestBirthday
+        ? Font.boldSystemFont(16)
+        : Font.systemFont(16); // 最近日期加粗
+    birthDateText.textColor =
+      person === closestBirthday ? new Color("#333") : new Color("#666");
+
     let zodiacText = row.addText(` (${zodiac})`);
-    zodiacText.font = person === closestBirthday ? Font.boldSystemFont(16) : Font.systemFont(16); // 最近生肖加粗
-    zodiacText.textColor = new Color("#999");
+    zodiacText.font =
+      person === closestBirthday
+        ? Font.boldSystemFont(16)
+        : Font.systemFont(16); // 最近生肖加粗
+    zodiacText.textColor =
+      person === closestBirthday ? new Color("#333") : new Color("#666");
 
     row.addSpacer();
 
     let ageText = row.addText(`${age} 岁`);
-    ageText.font = person === closestBirthday ? Font.boldSystemFont(16) : Font.systemFont(16); // 最近年龄加粗
-    ageText.textColor = new Color("#333");
+    ageText.font =
+      person === closestBirthday
+        ? Font.boldSystemFont(16)
+        : Font.systemFont(16); // 最近年龄加粗
+    ageText.textColor =
+      person === closestBirthday ? new Color("#333") : new Color("#666");
 
     row.addSpacer();
 
     let birthdayText = row.addText(isToday ? `🎂 今天!` : `${daysLeft} 天后`);
-    birthdayText.font = person === closestBirthday ? Font.boldSystemFont(16) : Font.systemFont(16); // 最近天数加粗
-    birthdayText.textColor = isToday ? new Color("#ff0000") : new Color("#666");
+    birthdayText.font =
+      person === closestBirthday
+        ? Font.boldSystemFont(16)
+        : Font.systemFont(16); // 最近天数加粗
+    birthdayText.textColor = isToday ? new Color("#666") : new Color("#333");
 
     widget.addSpacer();
 
@@ -201,7 +241,9 @@ function createTable() {
     row.addText(formattedBirthday).widthWeight = 8;
     row.addText(`${age}`).widthWeight = 4;
     row.addText(zodiac).widthWeight = 4;
-    row.addText(isTodayBirthday(formattedBirthday) ? "🎂 今天!" : `${daysLeft} 天后`).widthWeight = 6;
+    row.addText(
+      isTodayBirthday(formattedBirthday) ? "🎂 今天!" : `${daysLeft} 天后`
+    ).widthWeight = 6;
     table.addRow(row);
   }
 
@@ -215,9 +257,9 @@ if (config.runsInWidget) {
   Script.setWidget(widget);
   Script.complete();
 } else {
-// 显示表格并输出到控制台
-//   const widget = await createWidget();
-//   widget.presentLarge();
+  // 显示表格并输出到控制台
+  //   const widget = await createWidget();
+  //   widget.presentLarge();
   const table = createTable();
   table.present();
   logBirthdaysToConsole();
