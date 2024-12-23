@@ -55,6 +55,13 @@
     "url": "https://bb1026.github.io/bing/js/js-107.js",
     "version": "v1.5"
     },
+    "js-108": {
+    "ID": "js-108",
+    "update": "上传代码",
+    "name": "Birthday",
+    "url": "https://bb1026.github.io/bing/js/js-108.js",
+    "version": "v1.8"
+    },
     "js-999": {
     "ID": "js-999",
     "update": "检查库是否连接正常，连接失败则取消更新。",
