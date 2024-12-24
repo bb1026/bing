@@ -64,6 +64,7 @@ function sendNotificationOnce(fee, huiOut, fromCurrency, toCurrency) {
     let notification = new Notification();
     notification.title = `手续费降低到${fee} 新币`;
     notification.body = `${fromCurrency} → ${toCurrency}\n当前汇率 ${huiOut}`;
+    notification.openURL = "PandaRemit://";
     notification.schedule();
 
     // 记录已通知状态
