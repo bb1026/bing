@@ -1,16 +1,15 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-brown; icon-glyph: sync;
-
 this.name = "Panda Remit";
 this.widget_ID = "js-102";
-this.version = "v2.6";
+this.version = "v2.7";
 
 // 检查更新
 const { installation, currencyData, searchCurrency } = importModule("Ku");
 await installation(this.widget_ID, this.version);
 
-/* 
+/* 
 以上为获取更新代码
 以下开始运行代码
 */
@@ -45,6 +44,42 @@ async function Code_Change(code) {
   return currencyData[code].zh_currency_abbr;
 }
 
+// 工具函数：加载图片（异步调用）
+async function getImage() {
+  const request = new Request(picurl);
+  return request.loadImage(); // 返回的是一个 Promise
+}
+
+// 确认手续费是否为小于10
+function isLess10(num) {
+  const Less10 = num < 10;
+  return Less10;
+}
+
+// 工具函数：发送通知（限制为当天一次）
+function sendNotificationOnce(fee, huiOut, fromCurrency, toCurrency) {
+  const todayKey = getTodayKey(fee);
+  // 使用手续费生成当天唯一键
+  if (!Keychain.contains(todayKey)) {
+    let notification = new Notification();
+    notification.title = `手续费降低到${fee} 新币`;
+    notification.body = `${fromCurrency} → ${toCurrency}\n当前汇率 ${huiOut}`;
+    notification.schedule();
+
+    // 记录已通知状态
+    Keychain.set(todayKey, "notified");
+  }
+}
+
+// 工具函数：生成当日唯一键值
+function getTodayKey(fee) {
+  const today = new Date();
+  const dateKey = `${today.getFullYear()}-${
+    today.getMonth() + 1
+  }-${today.getDate()}`;
+  return `panda-remit-${fee}-${dateKey}`;
+}
+
 async function createWidget() {
   const widget = new ListWidget();
   let gradient = new LinearGradient();
@@ -55,8 +90,7 @@ async function createWidget() {
   const titleStack = widget.addStack();
   titleStack.layoutHorizontally();
   const imageStack = titleStack.addStack();
-  const imgReq = new Request(picurl);
-  const img = await imgReq.loadImage();
+  const img = await getImage();
   const pic = imageStack.addImage(img);
   pic.imageSize = new Size(50, 50);
 
@@ -74,8 +108,11 @@ async function createWidget() {
     const compareRate = rateResponse.model.compareRate;
     const code = rateResponse.model.code;
 
+    const fromCurrency = await Code_Change(code);
+    const toCurrency = await Code_Change(targetCurrency);
+
     const feeResponse = await fetchFeeData(targetCurrency, code);
-    console.log(feeResponse);
+    console.log(JSON.stringify(feeResponse, null, 2));
     if (feeResponse.suc) {
       const fee = (feeResponse.model.fee * 1).toString();
       const defaultFee = (feeResponse.model.defaultFee * 1).toString();
@@ -83,9 +120,7 @@ async function createWidget() {
       const ratecode = textStack.addText(`${code} → ${targetCurrency}`);
       ratecode.font = Font.boldSystemFont(15);
 
-      widget.addText(
-        `${await Code_Change(code)} → ${await Code_Change(targetCurrency)}`
-      );
+      widget.addText(`${fromCurrency} → ${toCurrency}`);
       const rateText = widget.addText(`$${huiOut}`);
       rateText.font = Font.boldSystemFont(25);
 
@@ -112,6 +147,9 @@ async function createWidget() {
         })}`
       );
       t.font = Font.systemFont(12);
+      if (await isLess10(fee)) {
+        sendNotificationOnce(fee, huiOut, fromCurrency, toCurrency);
+      }
     }
   }
   return widget;
@@ -142,7 +180,7 @@ async function createAccessoryCircular() {
   Target.font = Font.systemFont(fontsize);
   targetStack.addSpacer();
   stack.addSpacer(3);
-  
+
   let cnyStack = stack.addStack();
   cnyStack.addSpacer();
   let cnyrate = cnyStack.addText((rate.model.huiOut * 1).toString());
@@ -154,8 +192,8 @@ async function createAccessoryCircular() {
   compareStack.addSpacer();
   let Compare = compareStack.addText(rate.model.compareRate);
   Compare.font = Font.systemFont(fontsize);
-  compareStack.addSpacer();  
-  
+  compareStack.addSpacer();
+
   return Acc;
 }
 
