@@ -15,10 +15,10 @@
   },
     "js-102": {
     "ID": "js-102",
-    "update": "增加AccessoryCircular圆形小组件",
+    "update": "增加手续费提醒",
     "name": "Panda Remit",
     "url": "https://bb1026.github.io/bing/js/js-102.js",
-    "version": "v2.6"
+    "version": "v2.7"
   },
     "js-103": {
     "ID": "js-103",
