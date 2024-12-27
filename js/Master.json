@@ -22,10 +22,10 @@
   },
     "js-103": {
     "ID": "js-103",
-    "update": "修复站点显示不匹配",
+    "update": "查询巴士显示序号",
     "name": "Singapore Bus",
     "url": "https://bb1026.github.io/bing/js/js-103.js",
-    "version": "v4.8"
+    "version": "v4.9"
     },
     "js-104": {
     "ID": "js-104",
