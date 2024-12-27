@@ -3,7 +3,7 @@
 // icon-color: cyan; icon-glyph: bus;
 this.name = "Singapore Bus";
 this.widget_ID = "js-103";
-this.version = "v4.8";
+this.version = "v4.9";
 
 // 检查更新
   const { installation } = importModule('Ku');
@@ -437,12 +437,13 @@ async function uitableStops(bus) {
   );
   stopsTable.addRow(stopsHeaderRow);
 
+  let index = 1;
   for (const stops of bus.stops) {
     for (const stop of stops) {
       console.log(stop);
       const dataRow = new UITableRow();
       dataRow.height = 60;
-      let stopName = `ᐅ ${stop.code} ${stop.name}`;
+      let stopName = `${index}，ᐅ ${stop.code} ${stop.name}`;
       if (stop.nearbymrt) {
         stopName += "🚇";
       }
@@ -453,6 +454,7 @@ async function uitableStops(bus) {
       }
       dataRow.addText(stopName);
       stopsTable.addRow(dataRow);
+      index++;
     }
   }
 
