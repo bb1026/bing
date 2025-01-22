@@ -6,8 +6,9 @@ this.widget_ID = "js-103";
 this.version = "v4.9";
 
 // 检查更新
-  const { installation } = importModule('Ku');
-  await installation(this.widget_ID, this.version);
+await CheckKu();
+const { installation } = importModule('Ku');
+await installation(this.widget_ID, this.version);
 
 /* 
 以上为获取更新代码
@@ -16,13 +17,14 @@ this.version = "v4.9";
 
 // 站点代码及对应巴士代码
 const myBusCodes = [
-  { busstop: "Yishun Int", stopCode: "59009", busCodes: [800, 804] },
+  { busstop: "Yishun Int", stopCode: "59009", busCodes: [800, 804, /*852*/] },
   { busstop: "Blk 236", stopCode: "59241", busCodes: [804] },
-  { busstop: "Boon Lay Int", stopCode: "22009", busCodes: [246, 249] },
+  { busstop: "Blk 257", stopCode: "59249", busCodes: [800] },
+    { busstop: "Boon Lay Int", stopCode: "22009", busCodes: [246, 249] },
   { busstop: "Bef Jln Tukang", stopCode: "21499", busCodes: [246] },
   { busstop: "Bef Intl Rd", stopCode: "21491", busCodes: [246] },
   { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: [249] },
- { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: [858] }
+//  { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: [858] }
 ];
 
 async function getStopArrivalInfo(stopId) {
@@ -606,6 +608,33 @@ function handleArrivalInfo(stationInfo) {
 
   // 显示表格
   QuickLook.present(stationTable);
+}
+
+async function CheckKu() {
+  const notification = new Notification();
+  const fm = FileManager.iCloud();
+  const KuName = "Ku.js";
+  const scriptPath = fm.joinPath(fm.documentsDirectory(), KuName);
+  const scriptExists = fm.fileExists(scriptPath);
+
+  if (!scriptExists) {
+    try {
+      const downloadReq = new Request("https://bb1026.github.io/bing/js/Ku.js");
+      const scriptContent = await downloadReq.loadString();
+      await fm.writeString(scriptPath, scriptContent);
+
+      notification.title = "依赖库安装完成!";
+      await notification.schedule();
+      console.log("依赖库安装完成!");
+    } catch (error) {
+      console.error("下载或写入文件时出错:", error);
+      notification.title = "依赖库安装失败!";
+      notification.body = error.toString();
+      await notification.schedule();
+    }
+  } else {
+    console.log("依赖库已存在，无需下载。");
+  }
 }
 
 // 运行函数
