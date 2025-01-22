@@ -1,12 +1,14 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
-// icon-color: cyan; icon-glyph: bus;
+// icon-color: cyan; icon-glyph: calendar-alt;
 this.name = "日历📆Calendar";
 this.widget_ID = "js-104";
 this.version = "v2.0";
 
-  const { installation, calendar } = importModule('Ku');
-  await installation(this.widget_ID, this.version);
+// 检查更新
+await CheckKu();
+const { installation, calendar } = importModule('Ku');
+await installation(this.widget_ID, this.version);
 
 /* 
 以上为获取更新代码
@@ -23,7 +25,7 @@ bgColor.colors = [new Color("#EAE5C9"), new Color("#74ff5e")];
 widget.backgroundGradient = bgColor;
 
 const dates = calendar.solar2lunar();
-console.log(dates);
+console.log(JSON.stringify(dates, null, 2));
 const sy = dates.cYear;
 const sm = dates.cMonth;
 const sd = dates.cDay.toString();
@@ -118,21 +120,22 @@ for (i = 0; i < 3; i++) {
     ctitle = events[i].title;
     sstartDate = events[i].startDate;
     textcolor = new Color(events[i].calendar.color.hex);
-    daysLeft = Math.floor((sstartDate - today) / (24 * 3600 * 1000)) + 1;
+//     daysLeft = (sstartDate - today) / (24 * 3600 * 1000);
+        daysLeft = Math.floor((sstartDate - today) / (24 * 3600 * 1000)) + 1;
     console.log(daysLeft);
     var timeText;
-    if (daysLeft == 0 || daysLeft < 0) {
+    if (daysLeft < 1) {
       timeText = "今天全天";
     }
-    if (daysLeft == 1) {
+    if (daysLeft >= 1) {
       timeText = "明天全天";
     }
-    if (daysLeft > 1) {
+    if (daysLeft >= 2) {
       let startTime = events[i].startTime;
       let eee = `${weeks[sstartDate.getDay()]} ${
         sstartDate.getMonth() + 1
       }月${sstartDate.getDate()}日`;
-      timeText = eee + " 还剩" + daysLeft + "天";
+      timeText = eee + " 还剩" + Math.floor(daysLeft) + "天";
     }
     data = {
       title: ctitle,
@@ -150,6 +153,33 @@ for (i = 0; i < 3; i++) {
   widgetcarton2.addSpacer(2);
 }
 /*日历事件*/
+
+async function CheckKu() {
+  const notification = new Notification();
+  const fm = FileManager.iCloud();
+  const KuName = "Ku.js";
+  const scriptPath = fm.joinPath(fm.documentsDirectory(), KuName);
+  const scriptExists = fm.fileExists(scriptPath);
+
+  if (!scriptExists) {
+    try {
+      const downloadReq = new Request("https://bb1026.github.io/bing/js/Ku.js");
+      const scriptContent = await downloadReq.loadString();
+      await fm.writeString(scriptPath, scriptContent);
+
+      notification.title = "依赖库安装完成!";
+      await notification.schedule();
+      console.log("依赖库安装完成!");
+    } catch (error) {
+      console.error("下载或写入文件时出错:", error);
+      notification.title = "依赖库安装失败!";
+      notification.body = error.toString();
+      await notification.schedule();
+    }
+  } else {
+    console.log("依赖库已存在，无需下载。");
+  }
+}
 
 widgetcarton.addSpacer();
 widget.presentMedium();
