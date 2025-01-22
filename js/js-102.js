@@ -6,6 +6,7 @@ this.widget_ID = "js-102";
 this.version = "v2.7";
 
 // 检查更新
+await CheckKu();
 const { installation, currencyData, searchCurrency } = importModule("Ku");
 await installation(this.widget_ID, this.version);
 
@@ -60,7 +61,7 @@ function isLess10(num) {
 function sendNotificationOnce(fee, huiOut, fromCurrency, toCurrency) {
   const todayKey = getTodayKey(fee);
   // 使用手续费生成当天唯一键
-  if (!Keychain.contains(todayKey)) {
+  if (!Keychain.contains(todayKey) && toCurrency === "CNY") {
     let notification = new Notification();
     notification.title = `手续费降低到${fee} 新币`;
     notification.body = `${fromCurrency} → ${toCurrency}\n当前汇率 ${huiOut}`;
@@ -198,6 +199,33 @@ async function createAccessoryCircular() {
   return Acc;
 }
 
+async function CheckKu() {
+  const notification = new Notification();
+  const fm = FileManager.iCloud();
+  const KuName = "Ku.js";
+  const scriptPath = fm.joinPath(fm.documentsDirectory(), KuName);
+  const scriptExists = fm.fileExists(scriptPath);
+
+  if (!scriptExists) {
+    try {
+      const downloadReq = new Request("https://bb1026.github.io/bing/js/Ku.js");
+      const scriptContent = await downloadReq.loadString();
+      await fm.writeString(scriptPath, scriptContent);
+
+      notification.title = "依赖库安装完成!";
+      await notification.schedule();
+      console.log("依赖库安装完成!");
+    } catch (error) {
+      console.error("下载或写入文件时出错:", error);
+      notification.title = "依赖库安装失败!";
+      notification.body = error.toString();
+      await notification.schedule();
+    }
+  } else {
+    console.log("依赖库已存在，无需下载。");
+  }
+}
+
 if (config.runsInAccessoryWidget) {
   const Accwidget = await createAccessoryCircular();
   Script.setWidget(Accwidget);
@@ -206,5 +234,5 @@ if (config.runsInAccessoryWidget) {
   Script.setWidget(widget);
 } else {
   const widget = await createWidget();
-  widget.presentSmall();
+  //   widget.presentSmall();
 }
