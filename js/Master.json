@@ -43,10 +43,10 @@
     },
     "js-106": {
     "ID": "js-106",
-    "update": "修复",
+    "update": "修复无法使用",
     "name": "音乐下载",
     "url": "https://bb1026.github.io/bing/js/js-106.js",
-    "version": "v1.1"
+    "version": "v1.5"
     },
     "js-107": {
     "ID": "js-107",
