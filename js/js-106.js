@@ -3,13 +3,14 @@
 // icon-color: deep-purple; icon-glyph: music;
 this.name = "音乐下载";
 this.widget_ID = "js-106";
-this.version = "v1.1";
+this.version = "v1.5";
 
 // 检查更新
+await CheckKu();
 const { installation } = importModule('Ku');
 await installation(this.widget_ID, this.version);
 
-/* 
+/* 
 以上为获取更新代码
 以下开始运行代码
 */
@@ -65,26 +66,43 @@ for (let item of musicData) {
   let dataRow = new UITableRow();
   dataRow.addCell(UITableCell.text(item.song_title));
   dataRow.addCell(UITableCell.text(item.singer));
-  
+  
   dataRow.onSelect = async () => {
     if (item.href) {
-      const MP3URL = `https://www.fangpi.net/api/play_url?id=${item.href}&json=1`;
+      const MP3URL = `https://www.fangpi.net/music/${item.href}`;
       console.log(`曲名:${item.song_title}, 歌手:${item.singer}, 链接:${MP3URL}`);
-
-      const req = new Request(MP3URL);
-      const data = await req.loadJSON();
-      if (data.msg === "操作成功") {
-        Pasteboard.copy(`${item.song_title}-${item.singer}.mp3`);
-        Safari.open(data.data.url);
-      } else {
-        console.log("操作失败。");
-      }
-    } else {
-      console.log("没有可用的播放链接。");
+        Safari.open(`quark://${MP3URL}`);
     }
   };
-  
+  
   table.addRow(dataRow);
+}
+
+async function CheckKu() {
+  const notification = new Notification();
+  const fm = FileManager.iCloud();
+  const KuName = "Ku.js";
+  const scriptPath = fm.joinPath(fm.documentsDirectory(), KuName);
+  const scriptExists = fm.fileExists(scriptPath);
+
+  if (!scriptExists) {
+    try {
+      const downloadReq = new Request("https://bb1026.github.io/bing/js/Ku.js");
+      const scriptContent = await downloadReq.loadString();
+      await fm.writeString(scriptPath, scriptContent);
+
+      notification.title = "依赖库安装完成!";
+      await notification.schedule();
+      console.log("依赖库安装完成!");
+    } catch (error) {
+      console.error("下载或写入文件时出错:", error);
+      notification.title = "依赖库安装失败!";
+      notification.body = error.toString();
+      await notification.schedule();
+    }
+  } else {
+    console.log("依赖库已存在，无需下载。");
+  }
 }
 
 // 显示表格
