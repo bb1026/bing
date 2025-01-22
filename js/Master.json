@@ -64,9 +64,9 @@
     },
     "js-999": {
     "ID": "js-999",
-    "update": "检查库是否连接正常，连接失败则取消更新。",
-    "name": "依赖库",
+    "update": "更新代码",
+    "name": "Ku",
     "url": "https://bb1026.github.io/bing/js/Ku.js",
-    "version": "v2.0"
+    "version": "v2.1"
     }
 }
