@@ -6,8 +6,9 @@ this.widget_ID = "js-101";
 this.version = "v1.1";
 
 // 检查更新
-  const { installation } = importModule('Ku');
-  await installation(this.widget_ID, this.version);
+await CheckKu();
+const { installation } = importModule('Ku');
+await installation(this.widget_ID, this.version);
 
 /* 
 以上为获取更新代码
@@ -48,9 +49,38 @@ stack.addText("更新时间：" + shijian);
 stack.addSpacer(5);
 stack.addText("汇率：" + huilv);
 
+async function CheckKu() {
+  const notification = new Notification();
+  const fm = FileManager.iCloud();
+  const KuName = "Ku.js";
+  const scriptPath = fm.joinPath(fm.documentsDirectory(), KuName);
+  const scriptExists = fm.fileExists(scriptPath);
+
+  if (!scriptExists) {
+    try {
+      const downloadReq = new Request("https://bb1026.github.io/bing/js/Ku.js");
+      const scriptContent = await downloadReq.loadString();
+      await fm.writeString(scriptPath, scriptContent);
+
+      notification.title = "依赖库安装完成!";
+      await notification.schedule();
+      console.log("依赖库安装完成!");
+    } catch (error) {
+      console.error("下载或写入文件时出错:", error);
+      notification.title = "依赖库安装失败!";
+      notification.body = error.toString();
+      await notification.schedule();
+    }
+  } else {
+    console.log("依赖库已存在，无需下载。");
+  }
+}
+
 // 在应用中显示或设置小组件
 if (config.runsInApp) {
-  await widget.presentMedium();
+  let wb = new WebView();
+  await wb.loadURL(url);
+  await wb.present()
 }
 
 Script.setWidget(widget);
