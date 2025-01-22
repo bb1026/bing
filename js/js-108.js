@@ -1,8 +1,13 @@
+// Variables used by Scriptable.
+// These must be at the very top of the file. Do not edit.
+// icon-color: yellow; icon-glyph: magic;
 this.name = "Birthday";
 this.widget_ID = "js-108";
 this.version = "v1.9";
 
 // 检查更新
+// 调用异步函数
+await CheckKu();
 const { installation } = importModule("Ku");
 await installation(this.widget_ID, this.version);
 
@@ -248,6 +253,33 @@ function createTable() {
   }
 
   return table;
+}
+
+async function CheckKu() {
+  const notification = new Notification();
+  const fm = FileManager.iCloud();
+  const KuName = "Ku.js";
+  const scriptPath = fm.joinPath(fm.documentsDirectory(), KuName);
+  const scriptExists = fm.fileExists(scriptPath);
+
+  if (!scriptExists) {
+    try {
+      const downloadReq = new Request("https://bb1026.github.io/bing/js/Ku.js");
+      const scriptContent = await downloadReq.loadString();
+      await fm.writeString(scriptPath, scriptContent);
+
+      notification.title = "依赖库安装完成!";
+      await notification.schedule();
+      console.log("依赖库安装完成!");
+    } catch (error) {
+      console.error("下载或写入文件时出错:", error);
+      notification.title = "依赖库安装失败!";
+      notification.body = error.toString();
+      await notification.schedule();
+    }
+  } else {
+    console.log("依赖库已存在，无需下载。");
+  }
 }
 
 // 根据运行环境显示内容
