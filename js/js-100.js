@@ -25,43 +25,49 @@ const fm = FileManager.iCloud();
 
 // 从剪贴板中获取链接
 let clipboardLink = await Pasteboard.pasteString();
+let scriptID = null;
 
 if (clipboardLink) {
   if (clipboardLink.includes("js-")) {
-    // 从剪贴板中的 URL 提取脚本 ID
-    let startIndex = clipboardLink.lastIndexOf("js-") + 3;
-    let endIndex = clipboardLink.lastIndexOf(".js");
-    var scriptID = clipboardLink.substring(startIndex, endIndex);
+    let startIndex = clipboardLink.lastIndexOf("js-");
+    let endIndex = clipboardLink.indexOf(".js", startIndex);
+    if (endIndex === -1) endIndex = undefined; // 可能 URL 没有 .js
+    scriptID = clipboardLink.substring(startIndex, endIndex);
   } else {
     console.log("剪贴板中的链接不包含脚本 ID。");
   }
-} else {
-  // 弹出输入框让用户输入脚本 ID
+}
+
+if (!scriptID) {
+  // 用户输入
   const inputAlert = new Alert();
   inputAlert.title = "输入脚本ID";
-  inputAlert.message = "请输入要查找的脚本ID：";
-  inputAlert.addTextField("脚本ID:js-", "");
+  inputAlert.message = "请输入要查找的脚本 ID（格式: js-xxx）：";
+  inputAlert.addTextField("js-", "");
   inputAlert.addAction("确定");
   inputAlert.addCancelAction("取消");
-  const inputResult = await inputAlert.present();
 
-  // 如果用户点击了确定，则获取输入的脚本 ID
+  const inputResult = await inputAlert.present();
   if (inputResult === 0) {
-    scriptID = inputAlert.textFieldValue(0);
+    let userInput = inputAlert.textFieldValue(0).trim();
+    if (!userInput.startsWith("js-")) userInput = "js-" + userInput;
+    scriptID = userInput;
   } else {
     console.log("用户取消了输入。");
     return;
   }
 }
 
-const scriptURL = `https://bb1026.github.io/bing/js/js-${scriptID}.js`;
+console.log(`脚本 ID: ${scriptID}`);
+
+const scriptURL = `https://bb1026.github.io/bing/js/${scriptID}.js`;
 
 // 发起网络请求获取网页内容
 const req = new Request(scriptListURL);
 const responseBody = await req.loadJSON();
 
 // 获取用户输入的脚本信息
-const scriptInfo = responseBody[`js-${scriptID}`];
+const scriptInfo = responseBody[`${scriptID}`];
 
 if (scriptInfo) {
   const scriptName = scriptInfo.name;
