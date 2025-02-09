@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v1.0";
+this.version = "v1.2";
 
 // 检查更新
 await CheckKu();
