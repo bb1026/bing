@@ -3,7 +3,7 @@
 // icon-color: cyan; icon-glyph: theater-masks;
 this.name = "Master List";
 this.widget_ID = "js-105";
-this.version = "v1.0";
+this.version = "v1.1";
 
 // 检查更新
 await CheckKu();
@@ -39,7 +39,7 @@ for (let script of sortedScripts) {
   let row = new UITableRow();
   row.height = 90;
   const TID = row.addText(script.ID.toString());
-  const TNAME = row.addText(script.name);
+  const TNAME = row.addText(`${script.name} ${script.version}`);
   const TUPDATE = row.addText(script.update);
 
   TID.widthWeight = 15;
