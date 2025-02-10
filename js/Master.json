@@ -64,9 +64,9 @@
     },
     "js-109": {
     "ID": "js-109",
-    "update": "修复Bug，修改定位通知，增加定位时的车站距离。",
+    "update": "修复Bug，修复巴士首末班车未显示站点名称，修改定位通知，增加定位时的车站距离。",
     "name": "BusGo",
     "url": "https://bb1026.github.io/bing/js/js-109.js",
-    "version": "v1.2"
+    "version": "v1.3"
     }
 }
