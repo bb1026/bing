@@ -284,7 +284,7 @@ async function createTable(
       const stopRow = new UITableRow();
       stopRow.addText(`${stopInfo.Description} (${stopInfo.BusStopCode})`);
       table.addRow(stopRow);
-      await addBusArrivalRows(table, stopCode, null);
+      await addBusArrivalRows(table, null, stopCode, null);
     } else {
       table.addRow(new UITableRow().addText("未找到该站点"));
     }
