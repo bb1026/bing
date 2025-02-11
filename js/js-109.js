@@ -276,7 +276,7 @@ async function createTable(
           await createTable(stop.BusStopCode);
         };
         table.addRow(stopRow);
-        await addBusArrivalRows(table, stop.BusStopCode, null);
+        await addBusArrivalRows(table, null, stop.BusStopCode, null);
       }
     } else {
       table.addRow(new UITableRow().addText("未找到附近站点"));
