@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v1.3";
+this.version = "v1.4";
 
 // 检查更新
 await CheckKu();
@@ -25,11 +25,11 @@ const accountKey = "XXPgdr5QSdiFeDNhghGGrw==";
 const myBusCodes = [
   { busstop: "Yishun Int", stopCode: "59009", busCodes: ["804"] },
   { busstop: "Blk 236", stopCode: "59241", busCodes: ["804"] },
-//   { busstop: "Blk 257", stopCode: "59249", busCodes: ["800"] },
+  //   { busstop: "Blk 257", stopCode: "59249", busCodes: ["800"] },
   { busstop: "Boon Lay Int", stopCode: "22009", busCodes: ["246", "249"] },
   { busstop: "Bef Jln Tukang", stopCode: "21499", busCodes: ["246"] },
   { busstop: "Bef Intl Rd⭐", stopCode: "21491", busCodes: ["246"] },
-//   { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] },
+  //   { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] },
   { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: ["858"] }
 ];
 
@@ -227,7 +227,7 @@ async function createTable(
     notification.body = "正在定位...\n请稍后...";
     // 显示通知
     notification.schedule();
-    
+
     const loc = await Location.current();
     await createTable(null, null, loc);
   };
@@ -266,7 +266,11 @@ async function createTable(
     if (nearestStops.length) {
       for (const stop of nearestStops) {
         const stopRow = new UITableRow();
-        stopRow.addText(`${stop.Description} (${stop.BusStopCode})- ${(stop.distance * 1000).toFixed(2)} m`);
+        stopRow.addText(
+          `${stop.Description} (${stop.BusStopCode})- ${(
+            stop.distance * 1000
+          ).toFixed(2)} m`
+        );
         // 点击后查看该站点的所有巴士信息
         stopRow.onSelect = async () => {
           await createTable(stop.BusStopCode);
@@ -337,7 +341,7 @@ async function createTable(
         await createTable(stopCode);
       };
       table.addRow(stopRow);
-      
+
       await addBusArrivalRows(table, busstop, stopCode, busCodes);
     }
   }
@@ -345,7 +349,12 @@ async function createTable(
   table.present();
 }
 
-async function addBusArrivalRows(table, busstop, stopCode, allowedBusCodes = null) {
+async function addBusArrivalRows(
+  table,
+  busstop,
+  stopCode,
+  allowedBusCodes = null
+) {
   // 获取站点到达信息
   const stopArrivalInfo = await getStopArrivalInfo(stopCode);
 
@@ -372,7 +381,7 @@ async function addBusArrivalRows(table, busstop, stopCode, allowedBusCodes = nul
 
     // **点击时显示首末班车时间**
     row.onSelect = async () => {
-//       console.log(busstop)
+      //       console.log(busstop)
       await showBusFirstLastTimes(busstop, stopCode, service.ServiceNo);
     };
 
@@ -404,8 +413,32 @@ function getFirstLastBusTimes(stopCode, busCode) {
   };
 }
 
+// **获取该巴士的完整路线**
+function getBusRoute(busCode) {
+  const busRoutes = readCache("busRoutes"); // 读取巴士路线数据
+  const busStops = readCache("busStops"); // 读取站点数据
+
+  const matchedRoutes = busRoutes
+    .filter(route => route.ServiceNo === busCode)
+    .sort(
+      (a, b) => a.Direction - b.Direction || a.StopSequence - b.StopSequence
+    );
+
+  return matchedRoutes.map(route => {
+    const stopInfo = busStops.find(
+      stop => stop.BusStopCode === route.BusStopCode
+    );
+    return {
+      busStopCode: route.BusStopCode,
+      stopName: stopInfo ? stopInfo.Description : "未知站点"
+    };
+  });
+}
+
 async function showBusFirstLastTimes(busstop, stopCode, busCode) {
   const busTimes = getFirstLastBusTimes(stopCode, busCode);
+  const busRoute = getBusRoute(busCode);
+
   if (!busTimes) {
     let table = new UITable();
     table.addRow(new UITableRow().addText("未找到该巴士的首末班车时间"));
@@ -443,6 +476,39 @@ async function showBusFirstLastTimes(busstop, stopCode, busCode) {
   const sundayRow = new UITableRow();
   sundayRow.addText(`🗓️ 星期日: ${busTimes.sunday}`);
   table.addRow(sundayRow);
+
+  // **分隔线**
+  const separatorRow = new UITableRow();
+  separatorRow.isHeader = true;
+  separatorRow.addText("—— 巴士完整路线 ——").centerAligned();
+  table.addRow(separatorRow);
+
+  // **表头**
+  const headerRow = new UITableRow();
+  headerRow.addText("站点代码").widthWeight = 30;
+  headerRow.addText("站点名称").widthWeight = 70;
+  table.addRow(headerRow);
+
+  // **显示巴士路线**
+  for (const route of busRoute) {
+    const row = new UITableRow();
+
+    // 创建文本单元格
+    let stopCodeCell = row.addText(route.busStopCode);
+    let stopNameCell = row.addText(route.stopName);
+
+    // 设置列宽
+    stopCodeCell.widthWeight = 30;
+    stopNameCell.widthWeight = 70;
+
+    // **如果当前站点是目标站点，就加粗**
+    if (route.busStopCode === stopCode) {
+      stopCodeCell.titleFont = Font.boldSystemFont(16);
+      stopNameCell.titleFont = Font.boldSystemFont(16);
+    }
+
+    table.addRow(row);
+  }
 
   table.present();
 }
@@ -663,7 +729,7 @@ if (config.runsInWidget) {
 } else {
   let widget = await createWidget();
   // **运行在软件内测试用小组件**
-//   widget.presentLarge();
+  //   widget.presentLarge();
 
   // **运行Uitable**
   await createTable();
