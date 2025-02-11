@@ -206,7 +206,7 @@ async function createTable(
   // **数据更新按钮**
   const updateRow = new UITableRow();
   updateRow.addButton(
-    `数据更新: ${
+    `本地数据: ${
       fm.fileExists(cachePaths.busStops) ? "正常🟢" : "异常🔴"
     } (上次更新: ${getFormattedUpdateTime()})`
   ).onTap = async () => {
