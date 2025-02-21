@@ -126,7 +126,7 @@
                 currency = data.model.code;
                 targetCurrency = data.model.target;
                 const exchangeRateElement = document.getElementById('exchangeRate');
-                exchangeRateElement.innerHTML = `<p>1 ${currency} = <span id="exchangeRateValue">${exchangeRate}</span> ${targetCurrency}</p>`;
+                exchangeRateElement.innerHTML = `<p style="font-size: 20px; font-weight: bold;">1 ${currency} = <span id="exchangeRateValue">${exchangeRate}</span> ${targetCurrency}</p>`;
                 updateCurrencyText(currency, targetCurrency); // 更新currency和targetCurrency
                 updateResult('num1', 'num2', 'multiply'); // 更新乘法计算
             })
