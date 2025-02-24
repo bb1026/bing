@@ -3,13 +3,11 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v1.4";
+this.version = "v1.5";
 
 // 检查更新
 await CheckKu();
 const { installation } = importModule("Ku");
-await installation(this.widget_ID, this.version);
-
 /* 
 以上为获取更新代码
 以下开始运行代码
@@ -120,6 +118,12 @@ function readCache(cacheKey) {
   return JSON.parse(fm.readString(cachePaths[cacheKey]));
 }
 
+var buttonText = `本地数据: ${
+  fm.fileExists(cachePaths.busStops) ? "正常🟢" : "异常🔴"
+} (上次更新: ${getFormattedUpdateTime()})`;
+
+console.log(buttonText); // 输出按钮文本到控制台
+
 // **计算两点距离（Haversine 公式）**
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const toRadians = deg => deg * (Math.PI / 180),
@@ -186,7 +190,7 @@ async function addBusArrivalRows(table, stopCode, allowedBusCodes = null) {
     }
   } else {
     const noArrivalRow = new UITableRow();
-    noArrivalRow.addText("没有到站信息");
+    noArrivalRow.addText("🚫没有到站信息");
     table.addRow(noArrivalRow);
   }
 }
@@ -205,14 +209,14 @@ async function createTable(
 
   // **数据更新按钮**
   const updateRow = new UITableRow();
-  updateRow.addButton(
-    `本地数据: ${
-      fm.fileExists(cachePaths.busStops) ? "正常🟢" : "异常🔴"
-    } (上次更新: ${getFormattedUpdateTime()})`
-  ).onTap = async () => {
-    await fetchAllData(true);
-    table.reload();
+
+  const button = updateRow.addButton(buttonText);
+
+  button.onTap = async () => {
+    await fetchAllData(true); // 获取数据
+    table.reload(); // 刷新表格
   };
+
   table.addRow(updateRow);
 
   // **三个按钮放在同一行**
@@ -360,7 +364,7 @@ async function addBusArrivalRows(
 
   if (!stopArrivalInfo?.Services?.length) {
     const noArrivalRow = new UITableRow();
-    noArrivalRow.addText("没有到站信息");
+    noArrivalRow.addText("🚫没有到站信息");
     table.addRow(noArrivalRow);
     return;
   }
@@ -631,14 +635,20 @@ async function createWidget() {
 
     if (stopArrivalInfo?.Services?.length) {
       let hasBus = false;
+
       for (const service of stopArrivalInfo.Services) {
-        if (!busCodes.includes(service.ServiceNo)) continue;
+        const serviceNo = service.ServiceNo.trim(); // 去除空格
+
+        if (!busCodes.includes(serviceNo)) {
+          continue;
+        }
+
         hasBus = true;
 
         const row = widget.addStack();
         row.layoutHorizontally();
 
-        const busNumber = row.addText(`🚌${service.ServiceNo}`);
+        const busNumber = row.addText(`🚌${serviceNo}`);
         busNumber.font = Font.mediumSystemFont(14);
         busNumber.textColor = Color.white();
         row.addSpacer(10);
@@ -654,6 +664,7 @@ async function createWidget() {
 
         widget.addSpacer(1);
       }
+
       if (!hasBus) {
         const noBusText = widget.addText("🚫 无符合条件的巴士");
         noBusText.font = Font.systemFont(14);
@@ -727,6 +738,7 @@ if (config.runsInWidget) {
   let widget = await createWidget();
   Script.setWidget(widget);
 } else {
+  await installation(this.widget_ID, this.version);
   let widget = await createWidget();
   // **运行在软件内测试用小组件**
   //   widget.presentLarge();
