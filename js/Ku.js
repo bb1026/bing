@@ -86,10 +86,11 @@ async function installation(scriptID, thisVersion) {
       successAlert.message = `<${scriptName}>脚本已成功安装！\n更新内容：${scriptUpdate}\n版本号：${remoteVersion}`;
       successAlert.addAction("确定");
       const runScript = await successAlert.present();
-      if (runScript === 0) {
-        Safari.open(
-          `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`
-        );
+            if (runScript === 0) {
+//         Safari.open(
+//           `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`
+//         );
+            Safari.open("scriptable:///run?scriptName="); // 强制关闭表格
       }
       console.log(
         `<${scriptName}>脚本已成功安装！\n更新日期：${scriptUpdate}\n版本号：${remoteVersion}`
