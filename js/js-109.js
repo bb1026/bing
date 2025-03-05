@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v1.5";
+this.version = "v1.6";
 
 // 检查更新
 await CheckKu();
@@ -21,12 +21,20 @@ const accountKey = "XXPgdr5QSdiFeDNhghGGrw==";
 
 // 自定义巴士号码
 const myBusCodes = [
-  { busstop: "Yishun Int", stopCode: "59009", busCodes: ["804"] },
+  { busstop: "Yishun Int", stopCode: "59009", busCodes: ["804", "800"] },
   { busstop: "Blk 236", stopCode: "59241", busCodes: ["804"] },
   //   { busstop: "Blk 257", stopCode: "59249", busCodes: ["800"] },
   { busstop: "Boon Lay Int", stopCode: "22009", busCodes: ["246", "249"] },
-  { busstop: "Bef Jln Tukang", stopCode: "21499", busCodes: ["246"] },
-  { busstop: "Bef Intl Rd⭐", stopCode: "21491", busCodes: ["246"] },
+  {
+    busstop: "Bef Jln Tukang(To Lakeside)",
+    stopCode: "21499",
+    busCodes: ["246"]
+  },
+  {
+    busstop: "Bef Intl Rd(To Boon Lay)⭐",
+    stopCode: "21491",
+    busCodes: ["246"]
+  },
   //   { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] },
   { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: ["858"] }
 ];
@@ -62,6 +70,8 @@ async function checkAndFetchData(forceUpdate = false) {
     if (!fm.fileExists(cachePaths[key])) {
       console.log(`${key} 缓存文件不存在，开始更新...`);
       needsUpdate = true;
+    } else {
+      console.log(`${key} 缓存正常`);
     }
   }
   if (needsUpdate) await fetchAllData(forceUpdate);
@@ -84,6 +94,10 @@ async function fetchAndCacheData(apiKey) {
     }
     fm.writeString(cachePath, JSON.stringify(allData));
     console.log(`Saved ${allData.length} records to ${cachePath}`);
+
+    // 记录更新时间
+    const now = new Date().toISOString();
+    fm.writeString(updateTimeCachePath, JSON.stringify({ lastUpdate: now }));
   } catch (error) {
     console.error(`Failed to fetch ${apiKey}: ${error}`);
   }
@@ -98,10 +112,6 @@ async function fetchAllData(forceUpdate = false) {
   for (const key of ["busRoutes", "busServices", "busStops"]) {
     await fetchAndCacheData(key);
   }
-
-  // 记录更新时间
-  const now = new Date().toISOString();
-  fm.writeString(updateTimeCachePath, JSON.stringify({ lastUpdate: now }));
 
   console.log("所有数据已成功更新并缓存！");
   const alert = new Alert();
@@ -118,9 +128,8 @@ function readCache(cacheKey) {
   return JSON.parse(fm.readString(cachePaths[cacheKey]));
 }
 
-var buttonText = `本地数据: ${
-  fm.fileExists(cachePaths.busStops) ? "正常🟢" : "异常🔴"
-} (上次更新: ${getFormattedUpdateTime()})`;
+var buttonText = `数据更新: ${getFormattedUpdateTime()}`;
+var buttonText2 = "清除缓存";
 
 console.log(buttonText); // 输出按钮文本到控制台
 
@@ -207,17 +216,25 @@ async function createTable(
   const table = new UITable();
   table.showSeparators = true;
 
-  // **数据更新按钮**
-  const updateRow = new UITableRow();
+  // **数据更新按钮，清除缓存按钮**
+  const UpdateCleanRow = new UITableRow();
 
-  const button = updateRow.addButton(buttonText);
+  const updatebutton = UpdateCleanRow.addButton(buttonText);
+  updatebutton.widthWeight = 80;
+  const cleanbutton = UpdateCleanRow.addButton(buttonText2);
+  cleanbutton.widthWeight = 30;
+  cleanbutton.titleColor = Color.red();
 
-  button.onTap = async () => {
+  updatebutton.onTap = async () => {
     await fetchAllData(true); // 获取数据
     table.reload(); // 刷新表格
   };
 
-  table.addRow(updateRow);
+  cleanbutton.onTap = async () => {
+    await clearCache(); // 获取数据
+  };
+
+  table.addRow(UpdateCleanRow);
 
   // **三个按钮放在同一行**
   const buttonRow = new UITableRow();
@@ -292,7 +309,7 @@ async function createTable(
       const stopRow = new UITableRow();
       stopRow.addText(`${stopInfo.Description} (${stopInfo.BusStopCode})`);
       table.addRow(stopRow);
-      await addBusArrivalRows(table, null, stopCode, null);
+      await addBusArrivalRows(table, stopInfo.Description, stopCode, null);
     } else {
       table.addRow(new UITableRow().addText("未找到该站点"));
     }
@@ -385,7 +402,6 @@ async function addBusArrivalRows(
 
     // **点击时显示首末班车时间**
     row.onSelect = async () => {
-      //       console.log(busstop)
       await showBusFirstLastTimes(busstop, stopCode, service.ServiceNo);
     };
 
@@ -461,9 +477,6 @@ async function showBusFirstLastTimes(busstop, stopCode, busCode) {
   // **第二行：巴士信息**
   const busRow = new UITableRow();
   busRow.addText(`巴士: ${busTimes.serviceNo}`).widthWeight = 50;
-  busRow.addText(
-    `首班: ${busTimes.firstBus} | 末班: ${busTimes.lastBus}`
-  ).widthWeight = 50;
   table.addRow(busRow);
 
   // **第三行：工作日时间**
@@ -587,7 +600,7 @@ function formatArrivalTime(bus) {
   if (diff > 0) {
     return `${diff} 分钟`;
   } else if (diff >= -2) {
-    return "即将到达"; // 允许一些误差
+    return "Arrived"; // 允许一些误差
   } else {
     return "已离开";
   }
@@ -681,6 +694,36 @@ async function createWidget() {
   widget.addSpacer();
 
   return widget;
+}
+
+// 异步清除缓存的函数
+async function clearCache() {
+  const deletedFiles = []; // 用于存储已删除的文件路径
+
+  for (const key in cachePaths) {
+    const path = cachePaths[key];
+    if (fm.fileExists(path)) {
+      await fm.remove(path); // 异步删除文件
+      const fileName = path.split("/").pop(); // 从路径中提取文件名
+      console.log(`已删除缓存文件: ${fileName}`);
+      deletedFiles.push(fileName); // 记录已删除的文件名
+    } else {
+      console.log(`缓存文件不存在: ${path}`);
+    }
+  }
+
+  console.log("缓存清除完成！");
+
+  // 弹窗提示
+  const alert = new Alert();
+  alert.title = "缓存清除完成";
+  if (deletedFiles.length > 0) {
+    alert.message = `已清除以下缓存文件：\n${deletedFiles.join("\n")}`;
+  } else {
+    alert.message = "没有缓存文件被清除。";
+  }
+  alert.addAction("确定");
+  await alert.present(); // 显示弹窗
 }
 
 // **提示用户输入 stopcode**
