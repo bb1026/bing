@@ -14,9 +14,9 @@ async function installation(scriptID, thisVersion) {
   try {
     // 发起网络请求获取脚本列表
     let scriptList = await new Request(scriptListURL).loadJSON();
-    
+
     console.log("✔️连接成功\n检查更新");
-    
+
     let remoteScriptInfo = scriptList[scriptID];
 
     if (!remoteScriptInfo) {
@@ -80,22 +80,32 @@ async function installation(scriptID, thisVersion) {
       fm.writeString(scriptPath, scriptContent);
       console.log("[-] 脚本安装完成...");
 
+      console.log(
+        `<${scriptName}>脚本已成功安装！\n更新日期：${scriptUpdate}\n版本号：${remoteVersion}`
+      );
       // 显示成功消息
       const successAlert = new Alert();
       successAlert.title = "成功";
       successAlert.message = `<${scriptName}>脚本已成功安装！\n更新内容：${scriptUpdate}\n版本号：${remoteVersion}`;
       successAlert.addAction("确定");
       const runScript = await successAlert.present();
-            if (runScript === 0) {
-//         Safari.open(
-//           `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`
-//         );
-            Safari.open("scriptable:///run?scriptName="); // 强制关闭表格
+      if (runScript === 0) {
+        // 强制关闭表格
+        Safari.open("scriptable:///run?scriptName=");
       }
-      console.log(
-        `<${scriptName}>脚本已成功安装！\n更新日期：${scriptUpdate}\n版本号：${remoteVersion}`
-      );
-      exit();
+      // 创建通知
+      let notification = new Notification();
+      notification.title = `<${scriptName}> 脚本已更新`;
+      notification.body = "点击此处重新运行脚本";
+
+      // 添加点击通知后执行的操作
+      notification.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
+        scriptName
+      )}`;
+      console.log("继续运行新脚本...");
+
+      // 显示通知
+      await notification.schedule();
     } else {
       console.log("脚本已是最新版本，无需更新。");
     }
