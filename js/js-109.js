@@ -47,7 +47,7 @@ const apiUrls = {
     "https://datamall2.mytransport.sg/ltaodataservice/BusServices?$skip=",
   busStops: "https://datamall2.mytransport.sg/ltaodataservice/BusStops?$skip=",
   BusArrival:
-    "http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode="
+    "https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival?BusStopCode="
 };
 
 // 最大 skip 值
