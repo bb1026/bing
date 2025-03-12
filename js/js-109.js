@@ -840,9 +840,9 @@ if (config.runsInWidget) {
   await installation(this.widget_ID, this.version);
   let widget = await createWidget();
   // **运行在软件内测试用小组件**
-  widget.presentLarge();
+  // widget.presentLarge();
 
   // **运行Uitable**
-//   await createTable();
+  await createTable();
 }
 Script.complete();
