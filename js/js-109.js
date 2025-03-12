@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v1.6";
+this.version = "v1.7";
 
 // 检查更新
 await CheckKu();
@@ -182,28 +182,6 @@ function formatArrivalTime(busInfo) {
   return diff < 60 ? "即将到站" : `${Math.ceil(diff / 60)}分钟`;
 }
 
-// **添加到站信息到 UITable**
-async function addBusArrivalRows(table, stopCode, allowedBusCodes = null) {
-  const stopArrivalInfo = await getStopArrivalInfo(stopCode);
-
-  if (stopArrivalInfo?.Services?.length) {
-    for (const service of stopArrivalInfo.Services) {
-      if (allowedBusCodes && !allowedBusCodes.includes(service.ServiceNo))
-        continue; // 过滤不在列表中的巴士
-      const row = new UITableRow();
-      row.addText(service.ServiceNo).widthWeight = 25;
-      [service.NextBus, service.NextBus2, service.NextBus3]
-        .map(formatArrivalTime)
-        .forEach(text => (row.addText(text).widthWeight = 25));
-      table.addRow(row);
-    }
-  } else {
-    const noArrivalRow = new UITableRow();
-    noArrivalRow.addText("🚫没有到站信息");
-    table.addRow(noArrivalRow);
-  }
-}
-
 // **创建 UITable**
 async function createTable(
   stopCode = null,
@@ -379,26 +357,68 @@ async function addBusArrivalRows(
   // 获取站点到达信息
   const stopArrivalInfo = await getStopArrivalInfo(stopCode);
 
+  // 如果没有到站信息
   if (!stopArrivalInfo?.Services?.length) {
-    const noArrivalRow = new UITableRow();
-    noArrivalRow.addText("🚫没有到站信息");
-    table.addRow(noArrivalRow);
+    if (allowedBusCodes) {
+      // 显示每个巴士号码，并提示没有到站信息
+      for (const busCode of allowedBusCodes) {
+        const row = new UITableRow();
+
+        // 显示巴士号码
+        const busNumberCell = row.addText(`🚌 ${busCode}`);
+        busNumberCell.widthWeight = 20;
+        busNumberCell.font = Font.boldSystemFont(16);
+        busNumberCell.textColor = Color.blue();
+
+        // 显示提示信息
+        const noArrivalCell = row.addText("🚫 没有到站信息");
+        noArrivalCell.widthWeight = 80;
+        noArrivalCell.font = Font.systemFont(14);
+        noArrivalCell.textColor = Color.red();
+
+        table.addRow(row);
+      }
+    } else {
+      // 如果没有指定巴士号码，显示通用提示
+      const noArrivalRow = new UITableRow();
+      noArrivalRow.addText("🚫 没有到站信息").centerAligned();
+      table.addRow(noArrivalRow);
+    }
     return;
   }
 
+  let hasAllowedBus = false; // 标记是否有符合条件的巴士
+  const displayedBusCodes = new Set(); // 记录已显示的巴士号码
+
   // **显示每个巴士的到达时间**
   for (const service of stopArrivalInfo.Services) {
-    // 过滤不在允许的巴士列表中的巴士
-    if (allowedBusCodes && !allowedBusCodes.includes(service.ServiceNo))
+    // 过滤不在 allowedBusCodes 列表中的巴士
+    if (
+      allowedBusCodes &&
+      !allowedBusCodes.includes(service.ServiceNo.trim())
+    ) {
       continue;
+    }
+
+    hasAllowedBus = true; // 标记有符合条件的巴士
+    displayedBusCodes.add(service.ServiceNo.trim()); // 记录已显示的巴士号码
 
     const row = new UITableRow();
-    row.addText(service.ServiceNo).widthWeight = 25;
+
+    // 显示巴士号码
+    const busNumberCell = row.addText(`🚌 ${service.ServiceNo.trim()}`);
+    busNumberCell.widthWeight = 25;
+    busNumberCell.font = Font.boldSystemFont(16);
+    busNumberCell.textColor = Color.blue();
 
     // 显示三班车到达时间
     [service.NextBus, service.NextBus2, service.NextBus3]
       .map(formatArrivalTime) // 格式化到达时间
-      .forEach(text => (row.addText(text).widthWeight = 25));
+      .forEach((text, index) => {
+        const timeCell = row.addText(text);
+        timeCell.widthWeight = 25;
+        timeCell.font = Font.systemFont(14);
+      });
 
     // **点击时显示首末班车时间**
     row.onSelect = async () => {
@@ -406,6 +426,48 @@ async function addBusArrivalRows(
     };
 
     table.addRow(row);
+  }
+
+  // 如果没有符合条件的巴士
+  if (allowedBusCodes && !hasAllowedBus) {
+    for (const busCode of allowedBusCodes) {
+      const row = new UITableRow();
+
+      // 显示巴士号码
+      const busNumberCell = row.addText(`🚌 ${busCode}`);
+      busNumberCell.widthWeight = 20;
+      busNumberCell.font = Font.boldSystemFont(16);
+      busNumberCell.textColor = Color.blue();
+
+      // 显示提示信息
+      const noAllowedBusCell = row.addText("⚠️该站点未找到此巴士号码");
+      noAllowedBusCell.widthWeight = 80;
+      noAllowedBusCell.font = Font.systemFont(14);
+      noAllowedBusCell.textColor = Color.red();
+
+      table.addRow(row);
+    }
+  } else if (allowedBusCodes) {
+    // 检查 allowedBusCodes 中未显示的巴士号码
+    for (const busCode of allowedBusCodes) {
+      if (!displayedBusCodes.has(busCode.trim())) {
+        const row = new UITableRow();
+
+        // 显示巴士号码
+        const busNumberCell = row.addText(`🚌 ${busCode}`);
+        busNumberCell.widthWeight = 20;
+        busNumberCell.font = Font.boldSystemFont(16);
+        busNumberCell.textColor = Color.blue();
+
+        // 显示提示信息
+        const noAllowedBusCell = row.addText("⚠️该站点未找到此巴士号码");
+        noAllowedBusCell.widthWeight = 80;
+        noAllowedBusCell.font = Font.systemFont(14);
+        noAllowedBusCell.textColor = Color.red();
+
+        table.addRow(row);
+      }
+    }
   }
 }
 
@@ -642,46 +704,40 @@ async function createWidget() {
     const stopArrivalInfo = await getStopArrivalInfo(stopCode);
     const stopTitle = widget.addText(`🚏${busstop} (${stopCode})`);
     stopTitle.font = Font.mediumSystemFont(14);
-    stopTitle.textColor = Color.cyan(); // ✅ 修正错误
+    stopTitle.textColor = Color.cyan();
 
     widget.addSpacer(1);
 
     if (stopArrivalInfo?.Services?.length) {
-      let hasBus = false;
-
-      for (const service of stopArrivalInfo.Services) {
-        const serviceNo = service.ServiceNo.trim(); // 去除空格
-
-        if (!busCodes.includes(serviceNo)) {
-          continue;
-        }
-
-        hasBus = true;
+      for (const busCode of busCodes) {
+        const service = stopArrivalInfo.Services.find(
+          s => s.ServiceNo.trim() === busCode
+        );
 
         const row = widget.addStack();
         row.layoutHorizontally();
 
-        const busNumber = row.addText(`🚌${serviceNo}`);
+        const busNumber = row.addText(`🚌${busCode}`);
         busNumber.font = Font.mediumSystemFont(14);
         busNumber.textColor = Color.white();
-        row.addSpacer(10);
+        row.addSpacer(25);
 
-        [service.NextBus, service.NextBus2, service.NextBus3]
-          .map(formatArrivalTime)
-          .forEach((text, i) => {
-            if (i > 0) row.addSpacer(18);
-            const timeText = row.addText(text);
-            timeText.font = Font.systemFont(14);
-            timeText.textColor = new Color("#FFD700");
-          });
+        if (service) {
+          [service.NextBus, service.NextBus2, service.NextBus3]
+            .map(formatArrivalTime)
+            .forEach((text, i) => {
+              if (i > 0) row.addSpacer(25);
+              const timeText = row.addText(text);
+              timeText.font = Font.systemFont(14);
+              timeText.textColor = new Color("#FFD700");
+            });
+        } else {
+          const noBusText = row.addText("⚠️该站点未找到此巴士号码");
+          noBusText.font = Font.systemFont(14);
+          noBusText.textColor = Color.red();
+        }
 
         widget.addSpacer(1);
-      }
-
-      if (!hasBus) {
-        const noBusText = widget.addText("🚫 无符合条件的巴士");
-        noBusText.font = Font.systemFont(14);
-        noBusText.textColor = Color.red();
       }
     } else {
       const noDataText = widget.addText("🚫 没有到站信息");
@@ -784,9 +840,9 @@ if (config.runsInWidget) {
   await installation(this.widget_ID, this.version);
   let widget = await createWidget();
   // **运行在软件内测试用小组件**
-  //   widget.presentLarge();
+  widget.presentLarge();
 
   // **运行Uitable**
-  await createTable();
+//   await createTable();
 }
 Script.complete();
