@@ -64,9 +64,9 @@
     },
     "js-109": {
     "ID": "js-109",
-    "update": "修改代码",
+    "update": "增加刷新按钮。",
     "name": "BusGo",
     "url": "https://bb1026.github.io/bing/js/js-109.js",
-    "version": "v1.7"
+    "version": "v1.8"
     }
 }
