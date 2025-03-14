@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v1.8";
+this.version = "v1.7";
 
 // 检查更新
 await CheckKu();
@@ -128,6 +128,11 @@ function readCache(cacheKey) {
   return JSON.parse(fm.readString(cachePaths[cacheKey]));
 }
 
+var buttonText = `数据更新: ${getFormattedUpdateTime()}`;
+var buttonText2 = "清除缓存";
+
+console.log(buttonText); // 输出按钮文本到控制台
+
 // **计算两点距离（Haversine 公式）**
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const toRadians = deg => deg * (Math.PI / 180),
@@ -177,59 +182,49 @@ function formatArrivalTime(busInfo) {
   return diff < 60 ? "即将到站" : `${Math.ceil(diff / 60)}分钟`;
 }
 
-let table = new UITable();
-table.showSeparators = true;
-table.present(); // 在外部调用，确保表格只显示一次
-
-const buttonText = `🗂️数据缓存: ${getFormattedUpdateTime()}`;
-const buttonText2 = "🗑️清除缓存";
-const buttonText3 = "🔄刷新";
-console.log(buttonText); // 输出按钮文本到控制台
-
+// **创建 UITable**
 async function createTable(
   stopCode = null,
   busCode = null,
   useLocation = false
 ) {
-  table.removeAllRows(); // 清空旧数据
-
   const busStops = readCache("busStops");
   const busRoutes = readCache("busRoutes");
 
+  const table = new UITable();
+  table.showSeparators = true;
+
   // **数据更新按钮，清除缓存按钮**
   const UpdateCleanRow = new UITableRow();
+
   const updatebutton = UpdateCleanRow.addButton(buttonText);
-  updatebutton.widthWeight = 60;
+  updatebutton.widthWeight = 80;
   const cleanbutton = UpdateCleanRow.addButton(buttonText2);
   cleanbutton.widthWeight = 30;
-  const refreshButton = UpdateCleanRow.addButton(buttonText3);
-  refreshButton.widthWeight = 30;
-
-  refreshButton.onTap = async () => {
-    await createTable(stopCode, busCode, useLocation); // 使用当前参数
-  };
+  cleanbutton.titleColor = Color.red();
 
   updatebutton.onTap = async () => {
-    await fetchAllData(true); // 获取最新数据
-    await createTable(stopCode, busCode, useLocation); // 刷新表格
+    await fetchAllData(true); // 获取数据
+    table.reload(); // 刷新表格
   };
 
   cleanbutton.onTap = async () => {
-    await clearCache(); // 清除缓存
-    await createTable(stopCode, busCode, useLocation); // 刷新表格
+    await clearCache(); // 获取数据
   };
 
   table.addRow(UpdateCleanRow);
 
   // **三个按钮放在同一行**
   const buttonRow = new UITableRow();
+
   // **附近站点（点击时才获取定位）**
   const nearbyButton = buttonRow.addButton("🛰️ 附近站点");
-  nearbyButton.widthWeight = 0;
+  nearbyButton.widthWeight = 33;
   nearbyButton.onTap = async () => {
     let notification = new Notification();
     notification.title = Script.name();
     notification.body = "正在定位...\n请稍后...";
+    // 显示通知
     notification.schedule();
 
     const loc = await Location.current();
@@ -238,7 +233,7 @@ async function createTable(
 
   // **搜索站点**
   const searchStopButton = buttonRow.addButton("🚉 搜索站点");
-  searchStopButton.widthWeight = 0;
+  searchStopButton.widthWeight = 33;
   searchStopButton.onTap = async () => {
     const code = await promptUserForStopCode();
     if (code) await createTable(code);
@@ -246,7 +241,7 @@ async function createTable(
 
   // **搜索巴士**
   const searchBusButton = buttonRow.addButton("🚌 搜索巴士");
-  searchBusButton.widthWeight = 0;
+  searchBusButton.widthWeight = 33;
   searchBusButton.onTap = async () => {
     const code = await promptUserForBusCode();
     if (code) await createTable(null, code);
@@ -270,12 +265,12 @@ async function createTable(
     if (nearestStops.length) {
       for (const stop of nearestStops) {
         const stopRow = new UITableRow();
-        stopRow.isHeader = true;
         stopRow.addText(
-          `${stop.Description} (${stop.BusStopCode}) - ${(
+          `${stop.Description} (${stop.BusStopCode})- ${(
             stop.distance * 1000
           ).toFixed(2)} m`
         );
+        // 点击后查看该站点的所有巴士信息
         stopRow.onSelect = async () => {
           await createTable(stop.BusStopCode);
         };
@@ -290,7 +285,6 @@ async function createTable(
     const stopInfo = busStops.find(stop => stop.BusStopCode === stopCode);
     if (stopInfo) {
       const stopRow = new UITableRow();
-      stopRow.isHeader = true;
       stopRow.addText(`${stopInfo.Description} (${stopInfo.BusStopCode})`);
       table.addRow(stopRow);
       await addBusArrivalRows(table, stopInfo.Description, stopCode, null);
@@ -323,6 +317,7 @@ async function createTable(
         row.addText(route.BusStopCode).widthWeight = 30;
         row.addText(stopName).widthWeight = 70;
 
+        // **点击查询该站点的巴士到站信息**
         row.onSelect = async () => {
           await createTable(route.BusStopCode);
         };
@@ -339,8 +334,8 @@ async function createTable(
       if (!stopInfo) continue;
 
       const stopRow = new UITableRow();
-      stopRow.isHeader = true;
       stopRow.addText(`${busstop} (${stopCode})`);
+      // 点击后查看该站点的所有巴士信息
       stopRow.onSelect = async () => {
         await createTable(stopCode);
       };
@@ -350,11 +345,8 @@ async function createTable(
     }
   }
 
-  table.reload(); // 刷新表格
+  table.present();
 }
-
-// 初次加载表格
-createTable();
 
 async function addBusArrivalRows(
   table,
