@@ -100,6 +100,7 @@ async function fetchAndCacheData(apiKey) {
     fm.writeString(updateTimeCachePath, JSON.stringify({ lastUpdate: now }));
   } catch (error) {
     console.error(`Failed to fetch ${apiKey}: ${error}`);
+    throw error; // 抛出错误以便在调用函数中处理
   }
 }
 
@@ -109,16 +110,48 @@ const updateTimeCachePath = fm.joinPath(
   "updateTimeCache.json"
 );
 async function fetchAllData(forceUpdate = false) {
-  for (const key of ["busRoutes", "busServices", "busStops"]) {
-    await fetchAndCacheData(key);
-  }
+  try {
+    // 提示开始
+    const startNotification = new Notification();
+    startNotification.title = "数据更新开始";
+    startNotification.body = "正在更新数据，请稍候...";
+    await startNotification.schedule();
 
-  console.log("所有数据已成功更新并缓存！");
-  const alert = new Alert();
-  alert.title = "数据更新完成";
-  alert.message = "所有数据已成功更新！";
-  alert.addAction("好的");
-  await alert.present();
+    const tasks = ["busRoutes", "busServices", "busStops"];
+    const failedTasks = [];
+
+    for (const key of tasks) {
+      try {
+        await fetchAndCacheData(key);
+      } catch (error) {
+        failedTasks.push(key); // 记录失败的任务
+        console.error(`Task ${key} failed: ${error}`);
+      }
+    }
+
+    // 提示结束
+    if (failedTasks.length === 0) {
+      const endNotification = new Notification();
+      endNotification.title = "数据更新完成";
+      endNotification.body = "所有数据已成功更新！";
+      await endNotification.schedule();
+    } else {
+      const errorNotification = new Notification();
+      errorNotification.title = "数据更新部分失败";
+      errorNotification.body = `以下任务更新失败: ${failedTasks.join(", ")}`;
+      await errorNotification.schedule();
+    }
+
+    console.log("数据更新任务完成");
+  } catch (error) {
+    // 提示全局错误
+    const errorNotification = new Notification();
+    errorNotification.title = "数据更新失败";
+    errorNotification.body = `更新数据时出错: ${error.message}`;
+    await errorNotification.schedule();
+
+    console.error(`数据更新失败: ${error}`);
+  }
 }
 
 // **读取缓存数据**
@@ -127,11 +160,6 @@ function readCache(cacheKey) {
     throw new Error(`${cacheKey} 数据不存在`);
   return JSON.parse(fm.readString(cachePaths[cacheKey]));
 }
-
-var buttonText = `数据更新: ${getFormattedUpdateTime()}`;
-var buttonText2 = "清除缓存";
-
-console.log(buttonText); // 输出按钮文本到控制台
 
 // **计算两点距离（Haversine 公式）**
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -182,6 +210,15 @@ function formatArrivalTime(busInfo) {
   return diff < 60 ? "即将到站" : `${Math.ceil(diff / 60)}分钟`;
 }
 
+const buttonText = `🗂️ 数据更新: ${getFormattedUpdateTime()}`;
+console.log(buttonText); // 输出按钮文本到控制台
+const buttonText2 = "🗑️ 清除缓存";
+const buttonText3 = "🔄 刷新";
+const buttonText4 = "🛰️ 附近站点";
+const buttonText5 = "🚉 搜索站点";
+const buttonText6 = "🚌 搜索巴士";
+const buttonText7 = "💟 收藏";
+
 // **创建 UITable**
 async function createTable(
   stopCode = null,
@@ -198,18 +235,25 @@ async function createTable(
   const UpdateCleanRow = new UITableRow();
 
   const updatebutton = UpdateCleanRow.addButton(buttonText);
-  updatebutton.widthWeight = 80;
+  updatebutton.widthWeight = 70;
   const cleanbutton = UpdateCleanRow.addButton(buttonText2);
-  cleanbutton.widthWeight = 30;
-  cleanbutton.titleColor = Color.red();
+  cleanbutton.widthWeight = 35;
+  const refreshButton =
+UpdateCleanRow.addButton(buttonText3);
+  refreshButton.widthWeight = 35;
+
+  refreshButton.onTap = async () => {
+    await createTable(stopCode, busCode, useLocation); // 使用当前参数
+  };
 
   updatebutton.onTap = async () => {
-    await fetchAllData(true); // 获取数据
-    table.reload(); // 刷新表格
+    await fetchAllData(true); // 获取最新数据
+    await createTable(stopCode, busCode, useLocation); // 刷新表格
   };
 
   cleanbutton.onTap = async () => {
-    await clearCache(); // 获取数据
+    await clearCache(); // 清除缓存
+    await createTable(stopCode, busCode, useLocation); // 刷新表格
   };
 
   table.addRow(UpdateCleanRow);
@@ -235,7 +279,7 @@ async function createTable(
   const searchStopButton = buttonRow.addButton("🚉 搜索站点");
   searchStopButton.widthWeight = 33;
   searchStopButton.onTap = async () => {
-    const code = await promptUserForStopCode();
+    const code = await promptUserForInput("stop");
     if (code) await createTable(code);
   };
 
@@ -243,7 +287,7 @@ async function createTable(
   const searchBusButton = buttonRow.addButton("🚌 搜索巴士");
   searchBusButton.widthWeight = 33;
   searchBusButton.onTap = async () => {
-    const code = await promptUserForBusCode();
+    const code = await promptUserForInput("bus");
     if (code) await createTable(null, code);
   };
 
@@ -294,13 +338,15 @@ async function createTable(
   } else if (busCode) {
     // **搜索巴士号码，显示路线**
     let matchedRoutes = busRoutes.filter(route => route.ServiceNo === busCode);
-
     if (matchedRoutes.length) {
       matchedRoutes.sort(
         (a, b) => a.Direction - b.Direction || a.StopSequence - b.StopSequence
       );
 
       // **表头**
+      const headerBus = new UITableRow();
+      headerBus.addText(`Bus: ${busCode} 路线`)
+      table.addRow(headerBus);
       const headerRow = new UITableRow();
       headerRow.addText("站点代码").widthWeight = 30;
       headerRow.addText("站点名称").widthWeight = 70;
@@ -319,7 +365,7 @@ async function createTable(
 
         // **点击查询该站点的巴士到站信息**
         row.onSelect = async () => {
-          await createTable(route.BusStopCode);
+  await createTable(route.BusStopCode);
         };
 
         table.addRow(row);
@@ -763,6 +809,7 @@ async function clearCache() {
       const fileName = path.split("/").pop(); // 从路径中提取文件名
       console.log(`已删除缓存文件: ${fileName}`);
       deletedFiles.push(fileName); // 记录已删除的文件名
+Safari.open("scriptable:///run?scriptName=");
     } else {
       console.log(`缓存文件不存在: ${path}`);
     }
@@ -782,21 +829,11 @@ async function clearCache() {
   await alert.present(); // 显示弹窗
 }
 
-// **提示用户输入 stopcode**
-async function promptUserForStopCode() {
+// **提示用户输入站点代码或巴士号码**
+async function promptUserForInput(type) {
   const alert = new Alert();
-  alert.title = "搜索站点";
-  alert.addTextField("站点代码", "");
-  alert.addAction("确定");
-  alert.addCancelAction("取消");
-  return (await alert.present()) === 0 ? alert.textFieldValue(0) : null;
-}
-
-// **提示用户输入巴士号码**
-async function promptUserForBusCode() {
-  const alert = new Alert();
-  alert.title = "搜索巴士";
-  alert.addTextField("巴士号码", "");
+  alert.title = type === "stop" ? "搜索站点" : "搜索巴士";
+  alert.addTextField(type === "stop" ? "站点代码" : "巴士号码", "");
   alert.addAction("确定");
   alert.addCancelAction("取消");
   return (await alert.present()) === 0 ? alert.textFieldValue(0) : null;
