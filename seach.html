@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>获取输入框的值</title>
+    <title>隐藏查询参数</title>
     <style>
         body {
             background-color: #f2f2f2;
@@ -39,48 +39,39 @@
         <input type="text" autocomplete="off" id="keyInput" onkeydown="checkKey(event)">
     </div>
     
-    <div id="result"></div> <!-- 用于显示结果 -->
+    <div id="result"></div>
 
     <script>
-        // 当页面加载完毕时，自动填充输入框并查询
-        document.addEventListener("DOMContentLoaded", function() {
-            // 获取 URL 中的 key 参数
-            const urlParams = new URLSearchParams(window.location.search);
-            const key = urlParams.get('key'); // 获取 key 参数的值
-
-            if (key) {
-                // 如果获取到 key 参数，就自动填充输入框
-                document.getElementById("keyInput").value = key;
-                submitForm(key); // 自动查询
+        // 页面加载时检查 localStorage 中是否有保存的 key
+        window.onload = function() {
+            const savedKey = localStorage.getItem('key');
+            if (savedKey) {
+                document.getElementById("keyInput").value = savedKey;
+                submitForm(savedKey); // 如果有，直接查询
             }
-        });
+        };
 
-        // 按回车触发查询
         function checkKey(event) {
             if (event.keyCode === 13) {
-                const key = document.getElementById("keyInput").value.trim();  // 获取输入框的值
+                const key = document.getElementById("keyInput").value.trim();
+                localStorage.setItem('key', key); // 保存到 localStorage
                 submitForm(key);
             }
         }
 
-        // 查询函数
         function submitForm(key) {
-            if (!key) return; // 如果没有输入内容，不执行查询
-
-            // 发起 GET 请求获取 JSON 文件并查询对应的链接
-            fetch('https://bb1026.github.io/bing/multiple_content.json')
-                .then(response => response.json())  // 解析 JSON 响应
+            return fetch('https://bb1026.github.io/bing/multiple_content.json')
+                .then(response => response.json())
                 .then(data => {
-                    // 根据输入的 key 查找对应的链接
-                    if (data[key]) {
+                    if (data.hasOwnProperty(key)) {
                         document.getElementById("result").innerHTML = `<a href="${data[key]}" target="_blank">${data[key]}</a>`;
                     } else {
-                        document.getElementById("result").innerHTML = "<span style='color: red;'>没有找到对应的链接</span>";
+                        document.getElementById("result").innerHTML = "<span style='color: red;'>输入有误</span>";
                     }
                 })
                 .catch(error => {
                     console.error('获取数据时发生错误:', error);
-                    document.getElementById("result").innerHTML = "<span style='color: red;'>查询失败，请稍后重试</span>";
+                    document.getElementById("result").innerHTML = "<span style='color: red;'>错误</span>";
                 });
         }
     </script>
