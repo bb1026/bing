@@ -1,63 +1,16 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>隐藏查询参数</title>
-    <style>
-        body {
-            background-color: #f2f2f2;
-            color: #333;
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-        a {
-            color: blue;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-
-    <div id="result"></div>
-
-    <script>
-        // 获取 URL 中的 key 参数
-        function getQueryParam(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
-        }
-
-        // 获取多个内容 JSON 数据
-        function fetchData() {
-            return fetch('https://bb1026.github.io/bing/multiple_content.json')
+<div id="result"></div>
+<script>
+    window.onload = function() {
+        const key = new URLSearchParams(window.location.search).get('key');
+        if (key) {
+            fetch('https://bb1026.github.io/bing/multiple_content.json')
                 .then(response => response.json())
-                .catch(error => {
-                    console.error('获取数据时发生错误:', error);
-                    return {};
-                });
-        }
-
-        // 页面加载时根据 key 从 URL 获取数据
-        document.addEventListener("DOMContentLoaded", function() {
-            const key = getQueryParam("key");
-            if (key) {
-                fetchData().then(data => {
-                    // 如果找到匹配的 key，显示结果
-                    if (data.hasOwnProperty(key)) {
-                        document.getElementById("result").innerHTML = `<a href="${data[key]}" target="_blank">${data[key]}</a>`;
+                .then(data => {
+                    if (data[key]) {
+                        document.getElementById("result").innerHTML = data[key];
                     }
-                });
-            }
-        });
-    </script>
-
-</body>
-</html>
+                })
+                .catch(console.error);
+        }
+    };
+</script>
