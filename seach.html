@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJGT6TL1SB"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DJGT6TL1SB');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bing的网站</title>
+    <link rel="icon" href="imgs/logo.ico" type="image/x-icon">
+    <style>
+        body {
+            background-color: #f2f2f2;
+            color: #333;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #keyInputContainer {
+            margin-top: 50px;
+        }
+        #keyInput {
+            border: 2px solid #ccc;
+            font-size: 16px;
+            padding: 8px;
+            width: 200px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        a {
+            color: blue;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="keyInputContainer">
+        <input type="text" autocomplete="off" id="keyInput" onkeydown="checkKey(event)">
+    </div>
+    
+    <div id="result"></div> <!-- 用于显示结果 -->
+
+    <script>
+        function checkKey(event) {
+            if (event.keyCode === 13) {
+                submitForm().then(url => {
+                    if (url) {
+                        document.getElementById("result").innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+                    } else {
+                        document.getElementById("result").innerHTML = "<span style='color: red;'>输入有误</span>";
+                    }
+                });
+            }
+        }
+
+        function submitForm() {
+            var key = document.getElementById("keyInput").value.trim();
+
+            return fetch('https://bb1026.github.io/bing/multiple_content.json') // 直接获取 JSON 文件
+                .then(response => response.json())
+                .then(data => data[key] || null) // 直接查找 key
+                .catch(error => {
+                    console.error('获取数据时发生错误:', error);
+                    return null;
+                });
+        }
+    </script>
+
+</body>
+</html>
