@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seach</title>
+    <title>隐藏查询参数</title>
     <style>
         body {
             background-color: #f2f2f2;
@@ -37,7 +37,7 @@
 
         // 获取多个内容 JSON 数据
         function fetchData() {
-            return fetch('multiple_content.json')
+            return fetch('https://bb1026.github.io/bing/multiple_content.json')
                 .then(response => response.json())
                 .catch(error => {
                     console.error('获取数据时发生错误:', error);
@@ -50,15 +50,11 @@
             const key = getQueryParam("key");
             if (key) {
                 fetchData().then(data => {
-                    // 根据 key 显示对应的链接
+                    // 如果找到匹配的 key，显示结果
                     if (data.hasOwnProperty(key)) {
                         document.getElementById("result").innerHTML = `<a href="${data[key]}" target="_blank">${data[key]}</a>`;
-                    } else {
-                        document.getElementById("result").innerHTML = "<span style='color: red;'>未找到相关数据</span>";
                     }
                 });
-            } else {
-                document.getElementById("result").innerHTML = "<span style='color: red;'>未传递 key 参数</span>";
             }
         });
     </script>
