@@ -1,6 +1,12 @@
 <script>
     fetch("multiple_content.json")
         .then(response => response.json())
-        .then(data => document.body.innerText = data[new URLSearchParams(window.location.search).get("key")] || "")
+        .then(data => {
+            const key = new URLSearchParams(window.location.search).get("key");
+            const result = data[key] || "";
+            const div = document.createElement("div");
+            div.innerText = result;
+            document.body.appendChild(div);
+        })
         .catch(console.error);
 </script>
