@@ -60,17 +60,15 @@
     <div class="exchange-rate" id="exchangeRate">
         <p>加载中...</p>
     </div>
-
-    <div class="calculator">
-        <input type="number" id="num1" value="100" oninput="updateResult('num1', 'num2', 'multiply')" onblur="removeLeadingZero('num1')">
-        <select id="fromCurrency" onchange="fetchExchangeRate()"></select>
-        <br>
-        <button class="swap-btn" onclick="swapCurrencies()">↑ ↓</button>
-        <br>
-        <input type="number" id="num2" oninput="updateResult('num2', 'num1', 'divide')" onblur="removeLeadingZero('num2')">
-        <select id="toCurrency" onchange="fetchExchangeRate()"></select>
-    </div>
-
+	<div class="calculator">
+ 	   <input type="number" id="num1" value="100" oninput="updateResult('num1', 'num2', 'multiply')" onblur="removeLeadingZero('num1')">
+ 	   <select id="fromCurrency" onchange="fetchExchangeRate()"></select>
+ 	   <br>
+ 	   <input type="number" id="num2" oninput="updateResult('num2', 'num1', 'divide')" onblur="removeLeadingZero('num2')">
+  	  <select id="toCurrency" onchange="fetchExchangeRate()"></select>
+  	  <br>
+  	  <button class="swap-btn" onclick="swapCurrencies()">↑ ↓</button>
+	</div>
     <div class="source">
         数据来源 <a href="https://www.pandaremit.com/zh" target="_blank">熊猫汇款(Panda Remit)</a>
     </div>
