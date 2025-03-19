@@ -3,67 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>搜索页面</title>
+    <title>隐藏查询参数</title>
     <style>
         body {
-            text-align: center;
-            font-family: Arial, sans-serif;
             background-color: #f2f2f2;
             color: #333;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #keyInputContainer {
+            margin-top: 50px;
         }
         #keyInput {
-            margin-top: 50px;
+            border: 2px solid #ccc;
             font-size: 16px;
             padding: 8px;
             width: 200px;
-            border: 2px solid #ccc;
         }
         #result {
             margin-top: 20px;
             font-size: 18px;
         }
+        a {
+            color: blue;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
-    <input type="text" id="keyInput" autocomplete="off">
-    <div id="result"></div> <!-- 显示从 JSON 获取的结果 -->
+    <div id="keyInputContainer">
+        <input type="text" autocomplete="off" id="keyInput" onkeydown="checkKey(event)">
+    </div>
+    
+    <div id="result"></div>
 
     <script>
-        // 获取 URL 参数
-        function getQueryParam(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
+        // 页面加载时检查 localStorage 中是否有保存的 key
+        window.onload = function() {
+            const savedKey = localStorage.getItem('key');
+            if (savedKey) {
+                document.getElementById("keyInput").value = savedKey;
+                submitForm(savedKey); // 如果有，直接查询
+            }
+        };
+
+        function checkKey(event) {
+            if (event.keyCode === 13) {
+                const key = document.getElementById("keyInput").value.trim();
+                localStorage.setItem('key', key); // 保存到 localStorage
+                submitForm(key);
+            }
         }
 
-        // 获取多个内容 JSON 数据
-        function fetchData() {
-            return fetch('https://bb1026.github.io/bing/multiple_content.json')
+        function submitForm(key) {
+            return fetch('multiple_content.json')
                 .then(response => response.json())
-                .catch(error => {
-                    console.error('获取数据时发生错误:', error);
-                    return {};
-                });
-        }
-
-        // 页面加载时填充输入框和显示内容
-        document.addEventListener("DOMContentLoaded", function() {
-            const key = getQueryParam("key");
-            if (key) {
-                fetchData().then(data => {
-                    // 根据 key 填充输入框
+                .then(data => {
                     if (data.hasOwnProperty(key)) {
-                        document.getElementById("keyInput").value = key;
                         document.getElementById("result").innerHTML = `<a href="${data[key]}" target="_blank">${data[key]}</a>`;
                     } else {
-                        document.getElementById("result").innerHTML = "<span style='color: red;'>未找到相关数据</span>";
+                        document.getElementById("result").innerHTML = "<span style='color: red;'>输入有误</span>";
                     }
-
-                    // 隐藏 URL 中的 key 参数
-                    window.history.replaceState({}, document.title, window.location.pathname);
+                })
+                .catch(error => {
+                    console.error('获取数据时发生错误:', error);
+                    document.getElementById("result").innerHTML = "<span style='color: red;'>错误</span>";
                 });
-            }
-        });
+        }
     </script>
 
 </body>
