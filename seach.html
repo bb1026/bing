@@ -1,16 +1,31 @@
-<div id="result"></div>
-<script>
-    window.onload = function() {
-        const key = new URLSearchParams(window.location.search).get('key');
-        if (key) {
-            fetch('https://bb1026.github.io/bing/multiple_content.json')
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div id="result"></div>
+    <script>
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const key = urlParams.get('key');
+            if (key) {
+                submitForm(key);
+            }
+        };
+        function submitForm(key) {
+            return fetch('multiple_content.json')
                 .then(response => response.json())
                 .then(data => {
-                    if (data[key]) {
+                    if (data.hasOwnProperty(key)) {
                         document.getElementById("result").innerHTML = data[key];
                     }
                 })
-                .catch(console.error);
+                .catch(error => {
+                    console.error('获取数据时发生错误:', error);
+                });
         }
-    };
-</script>
+    </script>
+</body>
+</html>
