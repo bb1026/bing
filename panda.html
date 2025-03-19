@@ -21,8 +21,8 @@
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            width: 100px; /* 调整文本框宽度 */
-            margin: 10px 0; /* 调整文本框上下间距 */
+            width: 100px;
+            margin: 10px 5px;
         }
         .exchange-rate {
             margin-top: 20px;
@@ -34,14 +34,23 @@
             font-size: 12px;
             color: #666;
         }
-        .country-code {
-            font-size: 14px; /* 调整国家代码字体大小 */
-        }
         select {
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            margin-left: 5px; /* 调整选择框左边距 */
+        }
+        .swap-btn {
+            padding: 5px 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background: #007BFF;
+            color: white;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        .swap-btn:hover {
+            background: #0056b3;
         }
     </style>
 </head>
@@ -54,31 +63,12 @@
 
     <div class="calculator">
         <input type="number" id="num1" value="100" oninput="updateResult('num1', 'num2', 'multiply')" onblur="removeLeadingZero('num1')">
-        <select id="fromCurrency" onchange="fetchExchangeRate()">
-            <option value="CNY">CNY 中国</option>
-            <option value="SGD">SGD 新加坡</option>
-            <option value="MYR">MYR 马来西亚</option>
-            <option value="HKD">HKD 香港</option>
-            <option value="USD">USD 美国</option>
-            <option value="JPY">JPY 日本</option>
-            <option value="AUD">AUD 澳大利亚</option>
-            <option value="KRW">KRW 韩国</option>
-        </select>
+        <select id="fromCurrency" onchange="fetchExchangeRate()"></select>
+        <br>
+        <button class="swap-btn" onclick="swapCurrencies()">↑ ↓</button>
         <br>
         <input type="number" id="num2" oninput="updateResult('num2', 'num1', 'divide')" onblur="removeLeadingZero('num2')">
-        <select id="toCurrency" onchange="fetchExchangeRate()">
-            <option value="CNY">CNY 中国</option>
-            <option value="SGD">SGD 新加坡</option>
-            <option value="MYR">MYR 马来西亚</option>
-            <option value="HKD">HKD 香港</option>
-            <option value="USD">USD 美国</option>
-            <option value="JPY">JPY 日本</option>
-            <option value="AUD">AUD 澳大利亚</option>
-            <option value="KRW">KRW 韩国</option>
-        </select>
-        <br>
-        <span class="country-code" id="currency"></span>
-        <span class="country-code" id="targetCurrency"></span>
+        <select id="toCurrency" onchange="fetchExchangeRate()"></select>
     </div>
 
     <div class="source">
@@ -86,60 +76,98 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            fetchExchangeRate();
-            updateResult('num1', 'num2', 'multiply');
+        const currencyOptions = [
+            { value: "CNY", text: "CNY 中国" },
+            { value: "SGD", text: "SGD 新加坡" },
+            { value: "MYR", text: "MYR 马来西亚" },
+            { value: "HKD", text: "HKD 香港" },
+            { value: "USD", text: "USD 美国" },
+            { value: "JPY", text: "JPY 日本" },
+            { value: "AUD", text: "AUD 澳大利亚" },
+            { value: "KRW", text: "KRW 韩国" }
+        ];
+
+        function initCurrencySelect(id) {
+            const select = document.getElementById(id);
+            currencyOptions.forEach(option => {
+                let opt = document.createElement("option");
+                opt.value = option.value;
+                opt.textContent = option.text;
+                select.appendChild(opt);
+            });
+        }
+    	document.addEventListener("DOMContentLoaded", function() {
+        	initCurrencySelect("fromCurrency");
+        	initCurrencySelect("toCurrency");
+
+        	// 设置默认货币对 SGD → CNY
+        	document.getElementById("fromCurrency").value = "SGD";
+        	document.getElementById("toCurrency").value = "CNY";
+
+        	fetchExchangeRate();
         });
 
-        let currency, targetCurrency; // 定义currency和targetCurrency变量
-
-        function updateCurrencyText(currencyCode, targetCurrencyCode) {
-            currency = currencyCode;
-            targetCurrency = targetCurrencyCode;
+        function swapCurrencies() {
+            let fromCurrency = document.getElementById("fromCurrency");
+            let toCurrency = document.getElementById("toCurrency");
+            let tempValue = fromCurrency.value;
+            fromCurrency.value = toCurrency.value;
+            toCurrency.value = tempValue;
+            fetchExchangeRate(); // 交换后更新汇率
         }
 
         function updateResult(inputId, outputId, operation) {
-            const inputNumber = parseFloat(document.getElementById(inputId).value) || 0;
-            let result;
+            const inputElement = document.getElementById(inputId);
+            const outputElement = document.getElementById(outputId);
+            const exchangeRateElement = document.getElementById("exchangeRateValue");
 
-            const exchangeRate = parseFloat(document.getElementById('exchangeRateValue').innerText); // 将汇率值转换为数值
+            if (!exchangeRateElement) return;
 
-            if (operation === 'multiply') {
-                result = (inputNumber * exchangeRate).toFixed(2);
-            } else if (operation === 'divide' && inputNumber !== 0) {
-                result = (inputNumber / exchangeRate).toFixed(2);
-            } else {
-                result = '';
+            const inputNumber = parseFloat(inputElement.value) || 0;
+            const exchangeRate = parseFloat(exchangeRateElement.innerText);
+
+            if (!exchangeRate) {
+                outputElement.value = "";
+                return;
             }
 
-            document.getElementById(outputId).value = result;
+            let result;
+            if (operation === "multiply") {
+                result = (inputNumber * exchangeRate).toFixed(2);
+            } else if (operation === "divide" && inputNumber !== 0) {
+                result = (inputNumber / exchangeRate).toFixed(2);
+            } else {
+                result = "";
+            }
+
+            outputElement.value = result;
         }
 
         function removeLeadingZero(inputId) {
             const inputElement = document.getElementById(inputId);
-            inputElement.value = inputElement.value.replace(/^0+(?=\d)/, '');
+            inputElement.value = inputElement.value.replace(/^0+(?=\d)/, '') || "0";
         }
 
-        // 获取汇率数据
         function fetchExchangeRate() {
             const fromCurrency = document.getElementById("fromCurrency").value;
             const toCurrency = document.getElementById("toCurrency").value;
             fetch(`https://prod.pandaremit.com/pricing/rate/${fromCurrency}/${toCurrency}`)
-            .then(response => response.json())
-            .then(data => {
-                const exchangeRate = parseFloat(data.model.pandaRate).toFixed(4); // 显示四位小数
-                currency = data.model.code;
-                targetCurrency = data.model.target;
-                const exchangeRateElement = document.getElementById('exchangeRate');
-                exchangeRateElement.innerHTML = `<p style="font-size: 20px; font-weight: bold;">1 ${currency} = <span id="exchangeRateValue">${exchangeRate}</span> ${targetCurrency}</p>`;
-                updateCurrencyText(currency, targetCurrency); // 更新currency和targetCurrency
-                updateResult('num1', 'num2', 'multiply'); // 更新乘法计算
-            })
-            .catch(error => {
-                console.error('获取汇率数据错误:', error);
-                const exchangeRateElement = document.getElementById('exchangeRate');
-                exchangeRateElement.innerHTML = `<p>获取汇率数据错误，请稍后再试。</p>`;
-            });
+                .then(response => response.json())
+                .then(data => {
+                    const exchangeRate = parseFloat(data.model.pandaRate).toFixed(4);
+                    const currency = data.model.code;
+                    const targetCurrency = data.model.target;
+                    document.getElementById("exchangeRate").innerHTML = `
+                        <p style="font-size: 20px; font-weight: bold;">
+                            1 ${currency} = <span id="exchangeRateValue">${exchangeRate}</span> ${targetCurrency}
+                        </p>
+                    `;
+                    updateResult('num1', 'num2', 'multiply');
+                })
+                .catch(error => {
+                    console.error('获取汇率数据错误:', error);
+                    document.getElementById("exchangeRate").innerHTML = `<p>获取汇率数据错误，请稍后再试。</p>`;
+                });
         }
     </script>
 </body>
