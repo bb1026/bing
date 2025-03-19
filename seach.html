@@ -1,37 +1,13 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
-    <div id="result"></div>
-    <script>
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const key = urlParams.get('key');
-            if (key) {
-                submitForm(key);
-            }
-        };
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const key = params.get("key");
 
-        function submitForm(key) {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', 'multiple_content.json', true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    try {
-                        const data = JSON.parse(xhr.responseText);
-                        if (data.hasOwnProperty(key)) {
-                            document.getElementById("result").innerHTML = data[key];
-                        }
-                    } catch (error) {
-                        console.error('解析数据时发生错误:', error);
-                    }
-                }
-            };
-            xhr.send();
-        }
-    </script>
-</body>
-</html>
+    fetch("multiple_content.json")
+        .then(response => response.json())
+        .then(data => {
+            if (data[key]) {
+                document.body.innerText = data[key];
+            }
+        })
+        .catch(console.error);
+</script>
