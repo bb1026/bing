@@ -1,18 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJGT6TL1SB"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-DJGT6TL1SB');
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bing的网站</title>
-    <link rel="icon" href="imgs/logo.ico" type="image/x-icon">
+    <title>获取输入框的值</title>
     <style>
         body {
             background-color: #f2f2f2;
@@ -51,27 +42,45 @@
     <div id="result"></div> <!-- 用于显示结果 -->
 
     <script>
+        // 当页面加载完毕时，自动填充输入框并查询
+        document.addEventListener("DOMContentLoaded", function() {
+            // 获取 URL 中的 key 参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const key = urlParams.get('key'); // 获取 key 参数的值
+
+            if (key) {
+                // 如果获取到 key 参数，就自动填充输入框
+                document.getElementById("keyInput").value = key;
+                submitForm(key); // 自动查询
+            }
+        });
+
+        // 按回车触发查询
         function checkKey(event) {
             if (event.keyCode === 13) {
-                submitForm().then(url => {
-                    if (url) {
-                        document.getElementById("result").innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
-                    } else {
-                        document.getElementById("result").innerHTML = "<span style='color: red;'>输入有误</span>";
-                    }
-                });
+                const key = document.getElementById("keyInput").value.trim();  // 获取输入框的值
+                submitForm(key);
             }
         }
 
-        function submitForm() {
-            var key = document.getElementById("keyInput").value.trim();
+        // 查询函数
+        function submitForm(key) {
+            if (!key) return; // 如果没有输入内容，不执行查询
 
-            return fetch('https://bb1026.github.io/bing/multiple_content.json') // 直接获取 JSON 文件
-                .then(response => response.json())
-                .then(data => data[key] || null) // 直接查找 key
+            // 发起 GET 请求获取 JSON 文件并查询对应的链接
+            fetch('https://bb1026.github.io/bing/multiple_content.json')
+                .then(response => response.json())  // 解析 JSON 响应
+                .then(data => {
+                    // 根据输入的 key 查找对应的链接
+                    if (data[key]) {
+                        document.getElementById("result").innerHTML = `<a href="${data[key]}" target="_blank">${data[key]}</a>`;
+                    } else {
+                        document.getElementById("result").innerHTML = "<span style='color: red;'>没有找到对应的链接</span>";
+                    }
+                })
                 .catch(error => {
                     console.error('获取数据时发生错误:', error);
-                    return null;
+                    document.getElementById("result").innerHTML = "<span style='color: red;'>查询失败，请稍后重试</span>";
                 });
         }
     </script>
