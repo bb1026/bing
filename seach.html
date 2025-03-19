@@ -3,22 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>隐藏查询参数</title>
+    <title>Seach</title>
     <style>
         body {
             background-color: #f2f2f2;
             color: #333;
             text-align: center;
             font-family: Arial, sans-serif;
-        }
-        #keyInputContainer {
-            margin-top: 50px;
-        }
-        #keyInput {
-            border: 2px solid #ccc;
-            font-size: 16px;
-            padding: 8px;
-            width: 200px;
         }
         #result {
             margin-top: 20px;
@@ -35,45 +26,41 @@
 </head>
 <body>
 
-    <div id="keyInputContainer">
-        <input type="text" autocomplete="off" id="keyInput" onkeydown="checkKey(event)">
-    </div>
-    
     <div id="result"></div>
 
     <script>
-        // 页面加载时检查 localStorage 中是否有保存的 key
-        window.onload = function() {
-            const savedKey = localStorage.getItem('key');
-            if (savedKey) {
-                document.getElementById("keyInput").value = savedKey;
-                submitForm(savedKey); // 如果有，直接查询
-            }
-        };
-
-        function checkKey(event) {
-            if (event.keyCode === 13) {
-                const key = document.getElementById("keyInput").value.trim();
-                localStorage.setItem('key', key); // 保存到 localStorage
-                submitForm(key);
-            }
+        // 获取 URL 中的 key 参数
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
         }
 
-        function submitForm(key) {
+        // 获取多个内容 JSON 数据
+        function fetchData() {
             return fetch('multiple_content.json')
                 .then(response => response.json())
-                .then(data => {
+                .catch(error => {
+                    console.error('获取数据时发生错误:', error);
+                    return {};
+                });
+        }
+
+        // 页面加载时根据 key 从 URL 获取数据
+        document.addEventListener("DOMContentLoaded", function() {
+            const key = getQueryParam("key");
+            if (key) {
+                fetchData().then(data => {
+                    // 根据 key 显示对应的链接
                     if (data.hasOwnProperty(key)) {
                         document.getElementById("result").innerHTML = `<a href="${data[key]}" target="_blank">${data[key]}</a>`;
                     } else {
-                        document.getElementById("result").innerHTML = "<span style='color: red;'>输入有误</span>";
+                        document.getElementById("result").innerHTML = "<span style='color: red;'>未找到相关数据</span>";
                     }
-                })
-                .catch(error => {
-                    console.error('获取数据时发生错误:', error);
-                    document.getElementById("result").innerHTML = "<span style='color: red;'>错误</span>";
                 });
-        }
+            } else {
+                document.getElementById("result").innerHTML = "<span style='color: red;'>未传递 key 参数</span>";
+            }
+        });
     </script>
 
 </body>
