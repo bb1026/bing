@@ -1,26 +1,6 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>输出网址</title>
-</head>
-<body>
-    <script>
-        fetch("multiple_content.json")
-            .then(response => response.json())
-            .then(data => {
-                // 获取 URL 查询参数中的 key
-                const key = new URLSearchParams(window.location.search).get("key");
-                // 根据 key 获取对应的值
-                const url = data[key] || "";
-                // 将网址输出到 body
-                document.body.innerText = url; // 只输出网址，不包含其他内容
-            })
-            .catch(error => {
-                console.error("加载数据失败:", error);
-                document.body.innerText = "加载数据失败"; // 错误提示
-            });
-    </script>
-</body>
-</html>
+<script>
+    fetch("multiple_content.json")
+        .then(response => response.json())
+        .then(data => document.body.innerText = data[new URLSearchParams(window.location.search).get("key")] || "")
+        .catch(console.error);
+</script>
