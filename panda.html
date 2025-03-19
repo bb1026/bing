@@ -55,21 +55,26 @@
     <div class="calculator">
         <input type="number" id="num1" value="100" oninput="updateResult('num1', 'num2', 'multiply')" onblur="removeLeadingZero('num1')">
         <select id="fromCurrency" onchange="fetchExchangeRate()">
-            <option value="SGD">SGD</option>
-            <option value="CNY">CNY</option>
-            <option value="HKD">HKD</option>
-            <option value="USD">USD</option>
-            <option value="JPY">JPY</option>
+            <option value="CNY">CNY 中国</option>
+            <option value="SGD">SGD 新加坡</option>
+            <option value="MYR">MYR 马来西亚</option>
+            <option value="HKD">HKD 香港</option>
+            <option value="USD">USD 美国</option>
+            <option value="JPY">JPY 日本</option>
+            <option value="AUD">AUD 澳大利亚</option>
+            <option value="KRW">KRW 韩国</option>
         </select>
         <br>
         <input type="number" id="num2" oninput="updateResult('num2', 'num1', 'divide')" onblur="removeLeadingZero('num2')">
         <select id="toCurrency" onchange="fetchExchangeRate()">
-            <option value="CNY">CNY</option>
-            <option value="SGD">SGD</option>
-            <option value="MYR">MYR</option>
-            <option value="HKD">HKD</option>
-            <option value="USD">USD</option>
-            <option value="JPY">JPY</option>
+            <option value="CNY">CNY 中国</option>
+            <option value="SGD">SGD 新加坡</option>
+            <option value="MYR">MYR 马来西亚</option>
+            <option value="HKD">HKD 香港</option>
+            <option value="USD">USD 美国</option>
+            <option value="JPY">JPY 日本</option>
+            <option value="AUD">AUD 澳大利亚</option>
+            <option value="KRW">KRW 韩国</option>
         </select>
         <br>
         <span class="country-code" id="currency"></span>
