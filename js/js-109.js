@@ -665,7 +665,7 @@ function getFormattedUpdateTime() {
         .toString()
         .padStart(2, "0");
       const updateDay = updateDate.getDate().toString().padStart(2, "0");
-      return `${updateDate.getFullYear()}-${updateMonth}-${updateDay} ${timeStr}`;
+      return `${updateDate.getFullYear()}-${updateMonth}-${updateDay}`;
     }
   } catch (error) {
     console.error("Error reading update time:", error);
