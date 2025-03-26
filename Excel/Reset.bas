@@ -1,3 +1,4 @@
+Attribute VB_Name = "Reset"
 Sub ResetWorksheetFormulas()
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
