@@ -64,9 +64,9 @@
     },
     "js-109": {
     "ID": "js-109",
-    "update": "修正BUG",
+    "update": "更新顶部菜单，刷新功能，优化代码",
     "name": "BusGo",
     "url": "https://bb1026.github.io/bing/js/js-109.js",
-    "version": "v1.7"
+    "version": "v2.0"
     }
 }
