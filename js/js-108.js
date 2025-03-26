@@ -3,18 +3,7 @@
 // icon-color: yellow; icon-glyph: magic;
 this.name = "Birthday";
 this.widget_ID = "js-108";
-this.version = "v1.9";
-
-// 检查更新
-// 调用异步函数
-await CheckKu();
-const { installation } = importModule("Ku");
-await installation(this.widget_ID, this.version);
-
-/* 
-以上为获取更新代码
-以下开始运行代码
-*/
+this.version = "v2.0";
 
 // 生日数据
 const Birthdays = [{ Name: "兵", Birthday: "19990909" }];
@@ -144,17 +133,12 @@ function createWidget() {
   widget.setPadding(10, 10, 10, 10);
 
   // 添加标题
-  let title = widget.addText(`🎉 生日提醒  ${today}`);
+  let title = widget.addText(
+    `今天:${dates.cYear}年${dates.cMonth}月${dates.cDay}日,${dates.ncWeek}\n农历:${dates.Animal}年${dates.IMonthCn}${dates.IDayCn}`
+  );
   title.font = Font.boldSystemFont(18);
   title.textColor = new Color("#333");
   widget.addSpacer(20);
-
-  // 找到距离最近的生日
-  let closestBirthday = Birthdays.reduce((prev, curr) => {
-    let prevDays = daysUntilNextBirthday(formatBirthday(prev.Birthday));
-    let currDays = daysUntilNextBirthday(formatBirthday(curr.Birthday));
-    return currDays < prevDays ? curr : prev;
-  });
 
   // 遍历生日数据并添加到小组件
   for (const person of Birthdays) {
@@ -214,7 +198,8 @@ function createWidget() {
       person === closestBirthday
         ? Font.boldSystemFont(16)
         : Font.systemFont(16); // 最近天数加粗
-    birthdayText.textColor = isToday ? new Color("#666") : new Color("#333");
+
+    birthdayText.textColor = isToday ? new Color("#199") : new Color("#333");
 
     widget.addSpacer();
 
@@ -226,6 +211,12 @@ function createWidget() {
 
   return widget;
 }
+// 找到距离最近的生日
+let closestBirthday = Birthdays.reduce((prev, curr) => {
+  let prevDays = daysUntilNextBirthday(formatBirthday(prev.Birthday));
+  let currDays = daysUntilNextBirthday(formatBirthday(curr.Birthday));
+  return currDays < prevDays ? curr : prev;
+});
 
 // 创建表格视图
 function createTable() {
@@ -242,18 +233,42 @@ function createTable() {
 
     let row = new UITableRow();
     row.height = 70;
-    row.addText(Name).widthWeight = 5;
-    row.addText(formattedBirthday).widthWeight = 8;
-    row.addText(`${age}`).widthWeight = 4;
-    row.addText(zodiac).widthWeight = 4;
-    row.addText(
+
+    // 添加文本单元格
+    let nameCell = row.addText(Name);
+    nameCell.widthWeight = 5;
+
+    let dateCell = row.addText(formattedBirthday);
+    dateCell.widthWeight = 8;
+
+    let ageCell = row.addText(`${age}`);
+    ageCell.widthWeight = 4;
+
+    let zodiacCell = row.addText(zodiac);
+    zodiacCell.widthWeight = 4;
+
+    let daysLeftCell = row.addText(
       isTodayBirthday(formattedBirthday) ? "🎂 今天!" : `${daysLeft} 天后`
-    ).widthWeight = 6;
+    );
+    daysLeftCell.widthWeight = 6;
+
+    // 如果是最近的生日，加粗字体
+    if (person === closestBirthday) {
+      nameCell.titleFont = Font.boldSystemFont(16);
+      dateCell.titleFont = Font.boldSystemFont(16);
+      ageCell.titleFont = Font.boldSystemFont(16);
+      zodiacCell.titleFont = Font.boldSystemFont(16);
+      daysLeftCell.titleFont = Font.boldSystemFont(16);
+    }
+
     table.addRow(row);
   }
 
   return table;
 }
+
+// 生成表格
+let table = createTable();
 
 async function CheckKu() {
   const notification = new Notification();
@@ -289,6 +304,9 @@ if (config.runsInWidget) {
   Script.setWidget(widget);
   Script.complete();
 } else {
+  await CheckKu();
+  const { installation } = importModule("Ku");
+  await installation(this.widget_ID, this.version);
   // 显示表格并输出到控制台
   //   const widget = await createWidget();
   //   widget.presentLarge();
