@@ -8,6 +8,15 @@ this.version = "v2.0";
 // 生日数据
 const Birthdays = [{ Name: "兵", Birthday: "19990909" }];
 
+// 检查更新
+  await CheckKu();
+  const { installation, calendar } = importModule("Ku");
+  await installation(this.widget_ID, this.version);
+/* 
+以上为获取更新代码
+以下开始运行代码
+*/
+
 const today = new Date().toLocaleDateString();
 
 // 工具函数：根据出生年份计算生肖
@@ -125,6 +134,8 @@ function logBirthdaysToConsole() {
     console.log("--------------------");
   }
 }
+
+const dates = calendar.solar2lunar();
 
 // 创建小组件
 function createWidget() {
@@ -304,13 +315,10 @@ if (config.runsInWidget) {
   Script.setWidget(widget);
   Script.complete();
 } else {
-  await CheckKu();
-  const { installation } = importModule("Ku");
-  await installation(this.widget_ID, this.version);
   // 显示表格并输出到控制台
-  //   const widget = await createWidget();
-  //   widget.presentLarge();
+  const widget = await createWidget();
+  widget.presentLarge();
   const table = createTable();
-  table.present();
+//   table.present();
   logBirthdaysToConsole();
 }
