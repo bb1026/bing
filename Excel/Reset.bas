@@ -111,6 +111,8 @@ Sub ResetWorksheetFormulas2()
         On Error Resume Next
         ws.Range("B7").Formula = "=IFERROR(VLOOKUP(VALUE(E6),'" & Link & "'!$A:$C,3,0),"""")"
         If Err.Number <> 0 Then
+            MsgBox "Worksheet must be selected."
+            Call ResetWorksheetFormulas
             GoTo CleanUp
         End If
         On Error GoTo ErrorHandler
