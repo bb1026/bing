@@ -5,11 +5,6 @@ this.name = "BusGo";
 this.widget_ID = "js-109";
 this.version = "v2.0";
 
-const fm = FileManager.local();
-
-const accountKey = "XXPgdr5QSdiFeDNhghGGrw==";
-
-// 自定义巴士号码
 const myBusCodes = [
   { busstop: "Yishun Int", stopCode: "59009", busCodes: ["804", "800"] },
   { busstop: "Blk 236", stopCode: "59241", busCodes: ["804"] },
@@ -28,6 +23,8 @@ const myBusCodes = [
   { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: ["858"] }
 ];
 
+const fm = FileManager.local();
+
 const apiUrls = {
   busRoutes:
     "https://datamall2.mytransport.sg/ltaodataservice/BusRoutes?$skip=",
@@ -40,14 +37,12 @@ const apiUrls = {
 
 const maxSkip = { busRoutes: 26000, busServices: 1000, busStops: 5500 };
 
-// 缓存文件路径
 const cachePaths = {
   busRoutes: fm.joinPath(fm.documentsDirectory(), "busRoutesCache.json"),
   busServices: fm.joinPath(fm.documentsDirectory(), "busServicesCache.json"),
   busStops: fm.joinPath(fm.documentsDirectory(), "busStopsCache.json")
 };
 
-// **检查数据是否需要更新**
 async function checkAndFetchData(forceUpdate = false) {
   let needsUpdate = forceUpdate;
   for (const key in cachePaths) {
@@ -61,8 +56,10 @@ async function checkAndFetchData(forceUpdate = false) {
   if (needsUpdate) await fetchAllData(forceUpdate);
 }
 
-// **分页获取并缓存数据**
-const headers = { AccountKey: accountKey, Accept: "application/json" };
+const headers = {
+  AccountKey: atob("WFhQZ2RyNVFTZGlGZUROaGdoR0dydz09"),
+  Accept: "application/json"
+};
 
 async function fetchAndCacheData(apiKey) {
   const apiUrl = apiUrls[apiKey],
@@ -81,7 +78,6 @@ async function fetchAndCacheData(apiKey) {
     fm.writeString(cachePath, JSON.stringify(allData));
     console.log(`Saved ${allData.length} records to ${cachePath}`);
 
-    // 记录更新时间
     const now = new Date().toISOString();
     fm.writeString(updateTimeCachePath, JSON.stringify({ lastUpdate: now }));
   } catch (error) {
@@ -95,7 +91,6 @@ const updateTimeCachePath = fm.joinPath(
   "updateTimeCache.json"
 );
 
-// **获取所有数据并缓存**
 async function fetchAllData(forceUpdate = false) {
   try {
     const startNotification = new Notification();
@@ -138,14 +133,12 @@ async function fetchAllData(forceUpdate = false) {
   }
 }
 
-// **读取缓存数据**
 function readCache(cacheKey) {
   if (!fm.fileExists(cachePaths[cacheKey]))
     throw new Error(`${cacheKey} 数据不存在`);
   return JSON.parse(fm.readString(cachePaths[cacheKey]));
 }
 
-// **计算两点距离（Haversine 公式）**
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const toRadians = deg => deg * (Math.PI / 180),
     R = 6371;
@@ -159,7 +152,6 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// **获取最近的 10 个公交站点**
 function getNearestBusStops(userLat, userLon, busStops) {
   return busStops
     .map(stop => ({
@@ -175,7 +167,6 @@ function getNearestBusStops(userLat, userLon, busStops) {
     .slice(0, 10);
 }
 
-// **获取指定公交站点的到站信息**
 async function getStopArrivalInfo(stopCode) {
   try {
     const req = new Request(apiUrls.BusArrival + stopCode);
@@ -187,14 +178,12 @@ async function getStopArrivalInfo(stopCode) {
   }
 }
 
-// **格式化到达时间**
 function formatArrivalTime(busInfo) {
   if (!busInfo || !busInfo.EstimatedArrival) return "未发车";
   const diff = (new Date(busInfo.EstimatedArrival) - new Date()) / 1000;
   return diff < 60 ? "即将到站" : `${Math.ceil(diff / 60)}分钟`;
 }
 
-// **主函数**
 await checkAndFetchData();
 
 let table = new UITable();
@@ -208,7 +197,6 @@ const buttonText5 = "🚉 搜索站点";
 const buttonText6 = "🚌 搜索巴士";
 const buttonText7 = "💟 收藏";
 
-// **数据更新按钮，清除缓存按钮**
 const UpdateCleanRow = new UITableRow();
 const updatebutton = UpdateCleanRow.addButton(buttonText);
 updatebutton.widthWeight = 70;
@@ -227,7 +215,6 @@ searchBusButton.widthWeight = 0;
 const favoriteBusButton = buttonRow.addButton(buttonText7);
 favoriteBusButton.widthWeight = 0;
 
-// **初始化表格**
 async function initializeTable() {
   try {
     table.removeAllRows();
@@ -239,7 +226,6 @@ async function initializeTable() {
   }
 }
 
-// **添加表头**
 function addTableHeader(busCode) {
   if (!busCode) {
     const headerRow = new UITableRow();
@@ -250,7 +236,6 @@ function addTableHeader(busCode) {
   }
 }
 
-// **添加附近站点**
 async function addNearestStops(latitude, longitude, busStops) {
   const nearestStops = getNearestBusStops(latitude, longitude, busStops);
   if (nearestStops.length) {
@@ -274,7 +259,6 @@ async function addNearestStops(latitude, longitude, busStops) {
   }
 }
 
-// **添加站点信息**
 async function addStopInfo(stopCode, busStops) {
   const stopInfo = busStops.find(stop => stop.BusStopCode === stopCode);
   if (stopInfo) {
@@ -288,7 +272,6 @@ async function addStopInfo(stopCode, busStops) {
   }
 }
 
-// **添加巴士路线**
 async function addBusRoutes(busCode, busRoutes, busStops) {
   let matchedRoutes = busRoutes.filter(route => route.ServiceNo === busCode);
 
@@ -302,7 +285,6 @@ async function addBusRoutes(busCode, busRoutes, busStops) {
     headerRow.addText("站点名称").widthWeight = 70;
     table.addRow(headerRow);
 
-    // **显示巴士路线**
     for (const route of matchedRoutes) {
       const stopInfo = busStops.find(
         stop => stop.BusStopCode === route.BusStopCode
@@ -325,7 +307,6 @@ async function addBusRoutes(busCode, busRoutes, busStops) {
   }
 }
 
-// **添加收藏的站点**
 async function addMyBusCodes(myBusCodes, busStops) {
   for (const { busstop, stopCode, busCodes } of myBusCodes) {
     const stopInfo = busStops.find(stop => stop.BusStopCode === stopCode);
@@ -348,7 +329,6 @@ let currentStopCode = null;
 let currentBusCode = null;
 let currentUseLocation = false;
 
-// **创建表格**
 async function createTable(
   stopCode = null,
   busCode = null,
@@ -382,7 +362,6 @@ async function createTable(
   }
 }
 
-// **按钮事件处理**
 refreshButton.onTap = async () => {
   await createTable(currentStopCode, currentBusCode, currentUseLocation);
 };
@@ -426,15 +405,12 @@ async function addBusArrivalRows(
   stopCode,
   allowedBusCodes = null
 ) {
-  // 获取站点到达信息
   const stopArrivalInfo = await getStopArrivalInfo(stopCode);
 
-  let hasAllowedBus = false; // 标记是否有符合条件的巴士
-  const displayedBusCodes = new Set(); // 记录已显示的巴士号码
+  let hasAllowedBus = false;
+  const displayedBusCodes = new Set();
 
-  // **显示每个巴士的到达时间**
   for (const service of stopArrivalInfo.Services) {
-    // 过滤不在 allowedBusCodes 列表中的巴士
     if (
       allowedBusCodes &&
       !allowedBusCodes.includes(service.ServiceNo.trim())
@@ -442,17 +418,15 @@ async function addBusArrivalRows(
       continue;
     }
 
-    hasAllowedBus = true; // 标记有符合条件的巴士
-    displayedBusCodes.add(service.ServiceNo.trim()); // 记录已显示的巴士号码
+    hasAllowedBus = true;
+    displayedBusCodes.add(service.ServiceNo.trim());
 
     const row = new UITableRow();
 
-    // 显示巴士号码
     const busNumberCell = row.addText(`🚌 ${service.ServiceNo.trim()}`);
     busNumberCell.widthWeight = 25;
     busNumberCell.font = Font.boldSystemFont(16);
 
-    // 显示三班车到达时间
     [service.NextBus, service.NextBus2, service.NextBus3]
       .map(formatArrivalTime)
       .forEach((text, index) => {
@@ -467,7 +441,6 @@ async function addBusArrivalRows(
     table.addRow(row);
   }
 
-  // 如果没有符合条件的巴士
   if (allowedBusCodes && !hasAllowedBus) {
     for (const busCode of allowedBusCodes) {
       const row = new UITableRow();
@@ -507,7 +480,6 @@ function getFirstLastBusTimes(stopCode, busCode) {
   };
 }
 
-// **获取该巴士的完整路线**
 function getBusRoute(busCode) {
   const busRoutes = readCache("busRoutes");
   const busStops = readCache("busStops");
@@ -569,7 +541,6 @@ async function showBusFirstLastTimes(busstop, stopCode, busCode) {
   headerRow.addText("站点名称").widthWeight = 70;
   table.addRow(headerRow);
 
-  // **显示巴士路线**
   for (const route of busRoute) {
     const row = new UITableRow();
 
@@ -583,7 +554,6 @@ async function showBusFirstLastTimes(busstop, stopCode, busCode) {
     stopCodeCell.widthWeight = 30;
     stopNameCell.widthWeight = 70;
 
-    // **如果当前站点是目标站点，就加粗**
     if (route.busStopCode === stopCode) {
       stopCodeCell.titleFont = Font.boldSystemFont(16);
       stopNameCell.titleFont = Font.boldSystemFont(16);
@@ -594,7 +564,6 @@ async function showBusFirstLastTimes(busstop, stopCode, busCode) {
   table.present();
 }
 
-// 获取特定站点和巴士的到站信息
 async function getArrivalInfoForStop(stopCode, busCodes) {
   const busArrivalInfo = [];
 
@@ -652,7 +621,6 @@ function getFormattedUpdateTime() {
   }
 }
 
-// 格式化到站时间
 function formatArrivalTime(bus) {
   if (!bus?.EstimatedArrival) return "未发车";
 
@@ -668,7 +636,6 @@ function formatArrivalTime(bus) {
   }
 }
 
-// 获取当前时间并格式化
 function getCurrentTime() {
   const now = new Date();
   const hours = now.getHours().toString().padStart(2, "0");
@@ -677,7 +644,6 @@ function getCurrentTime() {
   return `${hours}:${minutes}:${seconds}`;
 }
 
-// 创建小组件
 async function createWidget() {
   const widget = new ListWidget();
   let gradient = new LinearGradient();
@@ -824,9 +790,8 @@ if (config.runsInWidget) {
   await installation(this.widget_ID, this.version);
   let widget = await createWidget();
 
-  // **运行Uitable**
   await createTable();
   table.present();
-  widget.presentLarge();
+  //   widget.presentLarge();
 }
 Script.complete();
