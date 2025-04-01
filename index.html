@@ -2,14 +2,14 @@
 <html lang="zh-CN">
 <head>
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-DJGT6TL1SB"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJGT6TL1SB"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
 
-  gtag('config', 'G-DJGT6TL1SB');
-</script>
+        gtag('config', 'G-DJGT6TL1SB');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bing的网站</title>
@@ -26,7 +26,7 @@
             font-size: 16px;
             padding: 8px;
         }
-        
+
         body {
             background-color: #f2f2f2;
             color: #333;
@@ -39,49 +39,60 @@
     </div>
     <iframe id="pageFrame" width="100%" height="650px" frameborder="0"></iframe>
 
-<script>
-    function checkKey(event) {
-        if (event.keyCode === 13) {
-            submitForm();
+    <script>
+        function checkKey(event) {
+            if (event.keyCode === 13) {
+                submitForm();
+            }
         }
-    }
 
-    function submitForm() {
-    var key = document.getElementById("keyInput").value.trim();
-    var pageFrame = document.getElementById("pageFrame");
-
-    fetch('multiple_content.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('网络响应不正确');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.hasOwnProperty(key)) {
-                var url = data[key];
-
-                // 如果 URL 包含特定的关键字，则在新窗口中打开链接
-                if (url.includes("shortcuts") || url.includes("birthday") || url.includes("dcxxl")) {
-                    window.open(url);
-                } else {
-                    // 否则在 iframe 中加载 URL 或内容
-                    if (!url.startsWith("http")) {
-                        pageFrame.src = "";  // 清空 iframe 内容
-                        pageFrame.contentWindow.document.write(data[key]);
-                    } else {
-                        pageFrame.src = url;
-                    }
-                }
+        // 📌 这个函数决定如何打开 URL
+        function openUrl(url) {
+            if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+                // 📱 手机端：在当前窗口打开
+                window.location.href = url;
             } else {
-                pageFrame.src = "";
-                pageFrame.contentWindow.document.write("<div style='text-align: center; margin-top: 50px;'>输入有误</div>");
+                // 💻 电脑端：在新窗口打开
+                window.open(url, '_blank');
             }
-        })
-        .catch(error => {
-            console.error('获取数据时发生错误:', error);
-        });
-}
-</script>
+        }
+
+        function submitForm() {
+            var key = document.getElementById("keyInput").value.trim();
+            var pageFrame = document.getElementById("pageFrame");
+
+            fetch('https://bb1026.github.io/bing/multiple_content.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应不正确');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.hasOwnProperty(key)) {
+                        var url = data[key];
+
+                        // 🎯 使用 openUrl() 来打开特定的 URL
+                        if (url.includes("shortcuts") || url.includes("birthday") || url.includes("dcxxl")) {
+                            openUrl(url);
+                        } else {
+                            // 否则在 iframe 中加载 URL 或内容
+                            if (!url.startsWith("http")) {
+                                pageFrame.src = "";  // 清空 iframe 内容
+                                pageFrame.contentWindow.document.write(data[key]);
+                            } else {
+                                pageFrame.src = url;
+                            }
+                        }
+                    } else {
+                        pageFrame.src = "";
+                        pageFrame.contentWindow.document.write("<div style='text-align: center; margin-top: 50px;'>输入有误</div>");
+                    }
+                })
+                .catch(error => {
+                    console.error('获取数据时发生错误:', error);
+                });
+        }
+    </script>
 </body>
 </html>
