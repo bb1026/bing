@@ -228,6 +228,12 @@ async function initializeTable() {
 
 function addTableHeader(busCode) {
   if (!busCode) {
+    const timeRow = new UITableRow();
+    timeRow.height = 20;
+    const timeCell = timeRow.addText(new Date().toLocaleString());
+    timeCell.titleColor = Color.green();
+    timeCell.centerAligned();
+    table.addRow(timeRow);
     const headerRow = new UITableRow();
     ["巴士", "第一班", "第二班", "第三班"].forEach(
       text => (headerRow.addText(text).widthWeight = 25)
