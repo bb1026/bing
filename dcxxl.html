@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词消消乐</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; max-width: 800px; margin: 20px auto; }
+        .card { 
+            width: 80px; height: 80px; background: #4CAF50; color: white; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; border-radius: 5px; font-size: 15px; transition: 0.3s;
+        }
+        .selected { background: yellow; color: black; }
+        .matched {
+            animation: explode 0.5s forwards;
+        }
+        .wrong { border: 2px solid red; }
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <h1>单词消消乐</h1>
+    <p>剩余时间: <span id="time">60</span> 秒</p>
+    <p>得分: <span id="score">0</span></p>
+    <button onclick="startGame()">开始游戏</button>
+    <div class="grid" id="gameBoard"></div>
+    <script>
+	let wordPairs = [];
+
+    // 获取 JSON 数据
+    fetch('https://raw.githubusercontent.com/bb1026/bing/refs/heads/main/js/Word.json')
+        .then(response => response.json())
+        .then(data => {
+            wordPairs = data; // 将获取到的 JSON 数据赋值给 wordPairs
+            console.log(wordPairs); // 打印 wordPairs 以检查是否正确获取
+        })
+        .catch(error => {
+            console.error('获取单词对失败:', error);
+        });
+
+        let firstCard = null, score = 0, timeLeft = 60, timer;
+
+        function startGame() {
+            score = 0;
+            document.getElementById("score").textContent = score;
+            timeLeft = 60;
+            document.getElementById("time").textContent = timeLeft;
+            clearInterval(timer);
+            timer = setInterval(() => {
+                if (--timeLeft <= 0) {
+                    clearInterval(timer);
+                    alert("游戏结束！得分: " + score);
+                }
+                document.getElementById("time").textContent = timeLeft;
+            }, 1000);
+            setupGameBoard();
+        }
+
+        function setupGameBoard() {
+            let gameBoard = document.getElementById("gameBoard");
+            gameBoard.innerHTML = "";
+            // 随机选择20对单词，即40个单词
+            let words = wordPairs.sort(() => Math.random() - 0.5).slice(0, 20).flatMap(pair => pair);
+            words = words.sort(() => Math.random() - 0.5);
+            words.forEach(word => {
+                let card = document.createElement("div");
+                card.className = "card";
+                card.textContent = word;
+                card.dataset.word = word;
+                card.onclick = () => flipCard(card);
+                gameBoard.appendChild(card);
+            });
+        }
+
+        function flipCard(card) {
+            if (!firstCard) {
+                firstCard = card;
+                card.classList.add("selected");
+            } else {
+                if (isMatchingPair(firstCard.dataset.word, card.dataset.word)) {
+                    score += 10;
+                    document.getElementById("score").textContent = score;
+                    firstCard.classList.add("matched");
+                    card.classList.add("matched");
+                    setTimeout(() => {
+                        firstCard.style.visibility = "hidden";
+                        card.style.visibility = "hidden";
+                        firstCard = null;
+                    }, 500);
+                } else {
+                    card.classList.add("wrong");
+                    firstCard.classList.add("wrong");
+                    setTimeout(() => {
+                        firstCard.classList.remove("selected", "wrong");
+                        card.classList.remove("wrong");
+                        firstCard = null;
+                    }, 500);
+                }
+            }
+        }
+
+        function isMatchingPair(word1, word2) {
+            return wordPairs.some(pair => (pair[0] === word1 && pair[1] === word2) || (pair[1] === word1 && pair[0] === word2));
+        }
+    </script>
+</body>
+</html>
