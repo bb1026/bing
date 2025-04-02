@@ -159,11 +159,6 @@ if (scriptInfo) {
     );
   }
 } else {
-  const successAlert = new Alert();
-  successAlert.title = "失败";
-  successAlert.message = `未找到ID为'${scriptID}'的脚本信息。`;
-  successAlert.addAction("确定");
-  await successAlert.present();
   console.log(`未找到ID为'${scriptID}'的脚本信息。`);
 }
 
