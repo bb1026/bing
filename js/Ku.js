@@ -21,11 +21,6 @@ async function installation(scriptID, thisVersion) {
 
     if (!remoteScriptInfo) {
       // 未找到脚本信息
-      const failureAlert = new Alert();
-      failureAlert.title = "失败";
-      failureAlert.message = `未找到ID为'${scriptID}'的脚本信息。`;
-      failureAlert.addAction("确定");
-      await failureAlert.present();
       console.log(`未找到ID为'${scriptID}'的脚本信息。`);
       return;
     }
