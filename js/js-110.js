@@ -7,6 +7,8 @@ this.version = "v1.0";
 
 await CheckKu();
 const { installation, calendar } = importModule("Ku");
+// 检查更新
+await installation(this.widget_ID, this.version);
 
 // 全局常量
 const WEEK_DAYS = ["日", "一", "二", "三", "四", "五", "六"];
@@ -281,8 +283,6 @@ async function createCalendarWidget() {
 }
 
 await createCalendarWidget();
-// 检查更新
-await installation(this.widget_ID, this.version);
 
 async function CheckKu() {
   const notification = new Notification();
