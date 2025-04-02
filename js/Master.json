@@ -68,5 +68,12 @@
     "name": "BusGo",
     "url": "https://bb1026.github.io/bing/js/js-109.js",
     "version": "v2.0"
+    },
+    "js-110": {
+    "ID": "js-110",
+    "update": "发布代码",
+    "name": "农历",
+    "url": "https://bb1026.github.io/bing/js/js-110.js",
+    "version": "v1.0"
     }
 }
