@@ -19,9 +19,9 @@
 document.getElementById("copyButton").addEventListener("click", function() {
     var text = document.getElementById("randomText").innerText;
     navigator.clipboard.writeText(text).then(function() {
-        alert("代码复制成功，正在打开Scriptable...");
+        alert("代码复制成功，请打开Scriptable...，并粘贴代码运行");
         // Open Scriptable app
-        window.location.href = 'scriptable://';
+        window.location.href = 'scriptable:///add';
     }, function(err) {
         console.error('Failed to copy: ', err);
     });
