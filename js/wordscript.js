@@ -312,7 +312,7 @@ return words.filter(pair => pair.en.length <= maxLength);
 		}, 500);
 
 		// 3.3 游戏区域
-		elements.levelDisplay.textContent = "Lv0.萌新";
+		elements.levelDisplay.textContent = "Lv0.萌新 | 简单(≤5)";
 		elements.correctAnswers.innerHTML = "";
 		elements.userInput.textContent = "";
 		elements.message.textContent = "";
