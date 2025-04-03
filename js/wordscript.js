@@ -67,8 +67,6 @@ wordPairs = rawData.map(pair => ({ en: pair[0].trim(), zh: pair[1].trim() }))
 
 setupEventListeners();
 
-const difficultyName = elements.difficulty.options[elements.difficulty.selectedIndex].text;
-
 } catch (error) {
 console.error('获取单词数据失败:', error);
 alert("加载单词失败，请刷新重试");
