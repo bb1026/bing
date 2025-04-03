@@ -68,7 +68,6 @@ wordPairs = rawData.map(pair => ({ en: pair[0].trim(), zh: pair[1].trim() }))
 setupEventListeners();
 
 const difficultyName = elements.difficulty.options[elements.difficulty.selectedIndex].text;
-alert(`已选择难度：${difficultyName}\n\n简单：≤5字母\n困难：≤7字母\n噩梦：不限长度`);
 
 } catch (error) {
 console.error('获取单词数据失败:', error);
