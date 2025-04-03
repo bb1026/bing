@@ -306,7 +306,7 @@ return words.filter(pair => pair.en.length <= maxLength);
 		// 3.2 进度条（带动画效果）
 		elements.progressBar.style.transition = "width 0.5s ease";
 		elements.progressBar.style.width = "0%";
-		elements.progressBar.textContent = "0 / 100";
+		elements.progressBar.textContent = "0 / 0 / 100";
 		setTimeout(() => {
 		elements.progressBar.style.transition = "";
 		}, 500);
@@ -323,11 +323,7 @@ return words.filter(pair => pair.en.length <= maxLength);
 		document.querySelectorAll(".letter.selected").forEach(letter => {
 		letter.classList.remove("selected");
 		});
-
-		// ===== 4. 调试输出 =====
-		console.log("游戏已完全重置");
-		console.log("当前分数:", score, "进度:", elements.progressBar.style.width);
-		}
+   }
 
 		function resetRound() {
 		// 清除所有字母的选中状态
@@ -345,7 +341,7 @@ return words.filter(pair => pair.en.length <= maxLength);
 		// 更新进度条
 		const progress = Math.min(100, (score / MAX_QUESTIONS) * 100);
 		elements.progressBar.style.width = `${progress}%`;
-		elements.progressBar.textContent = `${totalWords} / 100`;
+		elements.progressBar.textContent = `${correctAnswers} / ${totalWords} / 100`;
 
 		// 确定当前等级（从高到低查找）
 		let currentLevel = levels[0]; // 默认萌新
