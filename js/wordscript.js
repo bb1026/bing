@@ -306,7 +306,7 @@ return words.filter(pair => pair.en.length <= maxLength);
 		// 3.2 进度条（带动画效果）
 		elements.progressBar.style.transition = "width 0.5s ease";
 		elements.progressBar.style.width = "0%";
-		elements.progressBar.textContent = "0%";
+		elements.progressBar.textContent = "0 / 100";
 		setTimeout(() => {
 		elements.progressBar.style.transition = "";
 		}, 500);
@@ -345,7 +345,7 @@ return words.filter(pair => pair.en.length <= maxLength);
 		// 更新进度条
 		const progress = Math.min(100, (score / MAX_QUESTIONS) * 100);
 		elements.progressBar.style.width = `${progress}%`;
-		elements.progressBar.textContent = `${Math.round(progress)}%`;
+		elements.progressBar.textContent = `${totalWords} / 100`;
 
 		// 确定当前等级（从高到低查找）
 		let currentLevel = levels[0]; // 默认萌新
