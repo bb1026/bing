@@ -147,6 +147,15 @@ h1 {
   background-color: #4caf50 !important;
 }
 
+/* 禁用按钮样式 */
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+  background-color: #4caf50 !important; /* 保持原色但变灰 */
+}
+
 #endButton {
   background-color: #f44336;
 }
