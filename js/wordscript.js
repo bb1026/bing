@@ -218,6 +218,11 @@ function checkAnswer() {
   } else {
     wrongAttempts++;
     showFeedback("✗ 错误，请重试!", "wrong-message");
+    
+    setTimeout(() => {
+      elements.submitButton.disabled = false;
+      elements.hintButton.disabled = false;
+    }, 1000);
   }
 }
 
