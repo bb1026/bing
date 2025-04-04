@@ -1,0 +1,50 @@
+{
+  "天气": [
+    {"Sunny": "晴天"}, {"Cloudy": "多云"}, {"Overcast": "阴天"}, {"Rainy": "下雨"}, {"Stormy": "暴风雨"},
+    {"Snowy": "下雪"}, {"Windy": "有风"}, {"Foggy": "有雾"}, {"Hazy": "雾霾"}, {"Thunder": "雷"},
+    {"Lightning": "闪电"}, {"Drizzle": "毛毛雨"}, {"Shower": "阵雨"}, {"Hail": "冰雹"}, {"Tornado": "龙卷风"},
+    {"Hurricane": "飓风"}, {"Typhoon": "台风"}, {"Drought": "干旱"}, {"Flood": "洪水"}, {"Rainbow": "彩虹"},
+    {"Mist": "薄雾"}, {"Breeze": "微风"}, {"Gale": "大风"}, {"Heatwave": "热浪"}, {"Coldwave": "寒潮"},
+    {"Frost": "霜"}, {"Dew": "露水"}, {"Humidity": "湿度"}, {"Temperature": "温度"}, {"Pressure": "气压"},
+    {"Climate": "气候"}, {"Weatherforecast": "天气预报"}, {"Meteorology": "气象学"}, {"Season": "季节"}, {"Spring": "春天"},
+    {"Summer": "夏天"}, {"Autumn": "秋天"}, {"Winter": "冬天"}, {"Equinox": "昼夜平分点"}, {"Solstice": "至日"},
+    {"Tropical": "热带"}, {"Polar": "极地"}, {"Continental": "大陆性"}, {"Maritime": "海洋性"}, {"Monsoon": "季风"},
+    {"Cyclone": "气旋"}, {"Anticyclone": "反气旋"}, {"Fogbank": "雾带"}, {"Chill": "寒冷"}, {"Sultry": "闷热"}
+  ],
+  "自然": [
+    {"Mountain": "山"}, {"Hill": "丘陵"}, {"Valley": "山谷"}, {"Cave": "洞穴"}, {"Forest": "森林"},
+    {"Jungle": "丛林"}, {"River": "河流"}, {"Lake": "湖泊"}, {"Ocean": "海洋"}, {"Sea": "大海"},
+    {"Island": "岛屿"}, {"Desert": "沙漠"}, {"Oasis": "绿洲"}, {"Glacier": "冰川"}, {"Volcano": "火山"},
+    {"Waterfall": "瀑布"}, {"Cliff": "悬崖"}, {"Canyon": "峡谷"}, {"Swamp": "沼泽"}, {"Pond": "池塘"},
+    {"Coralreef": "珊瑚礁"}, {"Geyser": "间歇泉"}, {"Meadow": "草地"}, {"Savanna": "热带草原"}, {"Tundra": "苔原"},
+    {"Rainforest": "热带雨林"}, {"Mangrove": "红树林"}, {"Bay": "海湾"}, {"Gulf": "海湾"}, {"Strait": "海峡"},
+    {"Plateau": "高原"}, {"Prairie": "大草原"}, {"Steppe": "干草原"}, {"Fjord": "峡湾"}, {"Dune": "沙丘"},
+    {"Estuary": "河口"}, {"Delta": "三角洲"}, {"Archipelago": "群岛"}, {"Atoll": "环礁"}, {"Peak": "山峰"},
+    {"Crest": "山脊"}, {"Slope": "斜坡"}, {"Abyss": "深渊"}, {"Cavern": "大洞穴"}, {"Brook": "小溪"},
+    {"Marsh": "湿地"}, {"Bog": "泥沼"}, {"Limestone": "石灰岩"}, {"Granite": "花岗岩"}, {"Basalt": "玄武岩"}
+  ],
+  "动作": [
+    {"Run": "跑"}, {"Walk": "走"}, {"Jump": "跳"}, {"Sit": "坐"}, {"Stand": "站"},
+    {"Clap": "鼓掌"}, {"Wave": "挥手"}, {"Point": "指"}, {"Throw": "投"}, {"Catch": "接"},
+    {"Push": "推"}, {"Pull": "拉"}, {"Lift": "举"}, {"Kick": "踢"}, {"Punch": "拳打"},
+    {"Dance": "跳舞"}, {"Sing": "唱"}, {"Shout": "喊"}, {"Cry": "哭"}, {"Laugh": "笑"},
+    {"Smile": "微笑"}, {"Nod": "点头"}, {"Shake": "摇头"}, {"Turn": "转"}, {"Stretch": "伸展"},
+    {"Bend": "弯曲"}, {"Crawl": "爬行"}, {"Hop": "单脚跳"}, {"Skip": "跳跃"}, {"Roll": "滚动"},
+    {"Hide": "躲藏"}, {"Peek": "偷看"}, {"Scratch": "抓痒"}, {"Pat": "轻拍"}, {"Hug": "拥抱"},
+    {"Kiss": "亲吻"}, {"Bite": "咬"}, {"Lick": "舔"}, {"Sniff": "嗅"}, {"Blink": "眨眼"},
+    {"Wink": "眨一只眼"}, {"Yawn": "打哈欠"}, {"Sneeze": "打喷嚏"}, {"Cough": "咳嗽"}, {"Breathe": "呼吸"},
+    {"Snore": "打鼾"}, {"Whisper": "耳语"}, {"Chew": "咀嚼"}, {"Swallow": "吞咽"}, {"Snap": "打响指"}
+  ],
+  "身体器官": [
+    {"Head": "头"}, {"Face": "脸"}, {"Forehead": "额头"}, {"Eyebrow": "眉毛"}, {"Eye": "眼睛"},
+    {"Eyelash": "睫毛"}, {"Nose": "鼻子"}, {"Ear": "耳朵"}, {"Mouth": "嘴"}, {"Lip": "嘴唇"},
+    {"Tongue": "舌头"}, {"Tooth": "牙齿"}, {"Cheek": "脸颊"}, {"Chin": "下巴"}, {"Neck": "脖子"},
+    {"Shoulder": "肩膀"}, {"Arm": "手臂"}, {"Elbow": "手肘"}, {"Wrist": "手腕"}, {"Hand": "手"},
+    {"Palm": "手掌"}, {"Finger": "手指"}, {"Thumb": "拇指"}, {"Nail": "指甲"}, {"Chest": "胸部"},
+    {"Back": "背部"}, {"Waist": "腰"}, {"Abdomen": "腹部"}, {"Hip": "臀部"}, {"Leg": "腿"},
+    {"Thigh": "大腿"}, {"Knee": "膝盖"}, {"Calf": "小腿"}, {"Ankle": "脚踝"}, {"Foot": "脚"},
+    {"Heel": "脚后跟"}, {"Toe": "脚趾"}, {"Skin": "皮肤"}, {"Muscle": "肌肉"}, {"Bone": "骨头"},
+    {"Joint": "关节"}, {"Lung": "肺"}, {"Heart": "心脏"}, {"Liver": "肝脏"}, {"Stomach": "胃"},
+    {"Intestine": "肠"}, {"Kidney": "肾脏"}, {"Brain": "大脑"}, {"Spine": "脊椎"}, {"Vein": "静脉"}
+  ]
+}
