@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>英语单词拼写游戏</title>
-    <link rel="stylesheet" href="css/wordstyles.css">
+    <link rel="stylesheet" href="wordstyles.css">
 </head>
 <body>
     <h1>英语单词拼写游戏</h1>
-        <div id="progress-container" style="width: 100%; background: #eee; border-radius: 5px;">
-            <div id="progress-bar">0 / 100</div>
-        </div>
+<div id="progress-container">
+    <div id="progress-bar">
+        <span id="progress-text">0 / 0 / 100</span>
+    </div>
+</div>
     <div id="level">Lv0.萌新 | 简单(≤5)</div>
 
     <div class="control-group">
@@ -51,6 +53,6 @@
 
     <div id="correct-answers"></div>
 
-    <script src="js/wordscript.js"></script>
+    <script src="wordscript.js"></script>
 </body>
 </html>
