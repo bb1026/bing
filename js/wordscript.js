@@ -27,15 +27,15 @@ let isChangingWord = false;
 // 游戏配置
 const levels = [
   { score: 0, name: "Lv0.萌新" },
-  { score: 3, name: "Lv1.菜鸟" },
-  { score: 8, name: "Lv2.初学者" },
-  { score: 14, name: "Lv3.熟练者" },
-  { score: 21, name: "Lv4.专家" },
-  { score: 32, name: "Lv5.大神" },
-  { score: 50, name: "Lv6.宗师" },
-  { score: 66, name: "Lv7.传奇" },
-  { score: 72, name: "Lv8.王者" },
-  { score: 85, name: "Lv9.至尊" },
+  { score: 10, name: "Lv1.菜鸟" },
+  { score: 20, name: "Lv2.初学者" },
+  { score: 30, name: "Lv3.熟练者" },
+  { score: 40, name: "Lv4.专家" },
+  { score: 50, name: "Lv5.大神" },
+  { score: 60, name: "Lv6.宗师" },
+  { score: 70, name: "Lv7.传奇" },
+  { score: 80, name: "Lv8.王者" },
+  { score: 90, name: "Lv9.至尊" },
   { score: 100, name: "Lv10.神话" }
 ];
 const MAX_QUESTIONS = 100;
@@ -72,6 +72,111 @@ async function initGame() {
     console.error("获取单词数据失败:", error);
     alert("加载单词失败，请刷新重试");
   }
+const levelElement = document.getElementById('level');
+  levelElement.addEventListener('click', showLevelsPopup);
+document.getElementById('progress-container').addEventListener('click', showGameStats);
+}
+
+// 创建等级提示弹窗
+function showLevelsPopup() {
+// 创建弹窗容器
+  const popup = document.createElement('div');
+  popup.className = 'levels-popup';
+  
+  // 创建弹窗内容
+  popup.innerHTML = `
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3>游戏等级说明</h3>
+        <span class="close-btn">&times;</span>
+      </div>
+      <div class="popup-body">
+        <ul>
+          ${levels.map(level => `
+            <li>
+              <span class="level-name">${level.name}</span>
+              <span class="level-score">${level.score}分</span>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    </div>
+  `;
+
+  // 添加关闭功能
+  popup.querySelector('.close-btn').addEventListener('click', () => {
+    document.body.removeChild(popup);
+  });
+
+  // 点击空白处关闭
+  popup.addEventListener('click', (e) => {
+    if (e.target === popup) {
+      document.body.removeChild(popup);
+    }
+  });
+
+  // 添加到页面
+  document.body.appendChild(popup);
+}
+
+// 2. 创建显示统计的函数
+function showGameStats() {
+  if (gameState === GAME_STATE.NOT_STARTED) return;
+  
+  const now = new Date();
+  const totalSeconds = gameState === GAME_STATE.PLAYING 
+    ? Math.round((now - startTime) / 1000)
+    : Math.round((endTime - startTime) / 1000);
+  
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const accuracy = totalWords > 0 
+    ? Math.round((score / totalWords) * 100)
+    : 0;
+  const currentLevel = getCurrentLevel();
+
+  const popup = document.createElement('div');
+  popup.className = 'stats-popup';
+  popup.innerHTML = `
+    <div class="stats-popup-content">
+      <span class="stats-popup-close">&times;</span>
+      <h3 class="stats-popup-title">🎮 游戏统计</h3>
+      <div class="stats-popup-details">
+        <div><span class="stats-icon">🕒</span> 总用时: ${minutes}分${seconds}秒</div>
+        <div><span class="stats-icon">📊</span> 总单词数: ${totalWords}个</div>
+        <div><span class="stats-icon">✅</span> 正确次数: ${score}次</div>
+        <div><span class="stats-icon">❌</span> 错误次数: ${wrongAttempts}次</div>
+        <div><span class="stats-icon">🔍</span> 查看答案次数: ${totalHintsUsed}次</div>
+        <div><span class="stats-icon">📈</span> 准确率: ${accuracy}%</div>
+        <div class="stats-popup-divider"></div>
+        <div style="font-weight:bold; color: #4CAF50;">
+          <span class="stats-icon">🏆</span> 最终等级: ${currentLevel.name}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 关闭功能
+  popup.querySelector('.stats-popup-close').addEventListener('click', () => {
+    document.body.removeChild(popup);
+  });
+
+  popup.addEventListener('click', (e) => {
+    if (e.target === popup) {
+      document.body.removeChild(popup);
+    }
+  });
+
+  document.body.appendChild(popup);
+}
+
+function getCurrentLevel() {
+  for (let i = levels.length - 1; i >= 0; i--) {
+    if (score >= levels[i].score) {
+      return levels[i];
+    }
+  }
+  return levels[0];
 }
 
 function setupEventListeners() {
@@ -225,7 +330,7 @@ setTimeout(() => {
       elements.hintButton.disabled = false;
     }, 1000);
   }
-  totalWords++;
+totalWords++;
 }
 
 function showAnswer() {
@@ -377,7 +482,7 @@ function resetGame() {
   }, 50);
 
   // 3.3 游戏区域
-  elements.levelDisplay.textContent = "Lv0.萌新 | 简单(≤5)";
+  elements.levelDisplay.textContent = "Lv0.萌新 | 简单(≤5字母)";
   elements.correctAnswers.innerHTML = "";
   elements.userInput.textContent = "";
   elements.message.textContent = "";
