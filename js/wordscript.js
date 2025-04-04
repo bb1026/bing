@@ -27,14 +27,14 @@ let isChangingWord = false;
 // 游戏配置
 const levels = [
   { score: 0, name: "Lv0.萌新" },
-  { score: 3, name: "Lv1.菜鸟" },
-  { score: 8, name: "Lv2.初学者" },
-  { score: 15, name: "Lv3.熟练者" },
-  { score: 24, name: "Lv4.专家" },
-  { score: 35, name: "Lv5.大神" },
-  { score: 48, name: "Lv6.宗师" },
-  { score: 63, name: "Lv7.传奇" },
-  { score: 77, name: "Lv8.王者" },
+  { score: 10, name: "Lv1.菜鸟" },
+  { score: 20, name: "Lv2.初学者" },
+  { score: 30, name: "Lv3.熟练者" },
+  { score: 40, name: "Lv4.专家" },
+  { score: 50, name: "Lv5.大神" },
+  { score: 60, name: "Lv6.宗师" },
+  { score: 70, name: "Lv7.传奇" },
+  { score: 80, name: "Lv8.王者" },
   { score: 90, name: "Lv9.至尊" },
   { score: 100, name: "Lv10.神话" }
 ];
@@ -61,7 +61,7 @@ const elements = {
 // 初始化游戏
 async function initGame() {
   try {
-    const response = await fetch("js/Word.json");
+    const response = await fetch("https://bb1026.github.io/bing/js/Word.json");
     const rawData = await response.json();
     wordPairs = rawData
       .map(pair => ({ en: pair[0].trim(), zh: pair[1].trim() }))
@@ -108,7 +108,7 @@ function startGame() {
     const difficultyName =
       elements.difficulty.options[elements.difficulty.selectedIndex].text;
     alert(`当前难度（${difficultyName}）的所有单词已用完！`);
-    isChangingWord = false;
+    isChangingWord = false; // 重置状态
     elements.startButton.disabled = false; // 重新启用按钮
     return;
   }
@@ -206,6 +206,7 @@ function checkAnswer() {
     score++;
     answerDisplayCount++;
     updateProgress();
+    // 修复：确保正确显示答案
     displayCorrectAnswer(currentWord);
 
     setTimeout(() => {
@@ -218,8 +219,8 @@ function checkAnswer() {
   } else {
     wrongAttempts++;
     showFeedback("✗ 错误，请重试!", "wrong-message");
-    
-    setTimeout(() => {
+
+setTimeout(() => {
       elements.submitButton.disabled = false;
       elements.hintButton.disabled = false;
     }, 1000);
@@ -312,6 +313,7 @@ function endGame() {
 		--------------------------
 		`);
 
+  // 修复：确保重置所有状态和UI
   resetGame();
 }
 
@@ -334,11 +336,15 @@ function resetGame() {
   shuffledLetters = [];
 
   // ===== 3. 重置UI界面 =====
+  // 3.1 控制面板
   elements.hintCount.textContent = hintCount;
   elements.startButton.textContent = "开始游戏";
   elements.endButton.style.display = "none";
+  elements.submitButton.disabled = false;
+  elements.hintButton.disabled = false;
+  elements.startButton.disabled = false;
 
-  // 重置进度显示
+  // 修复进度显示 - 终极版
   const progressContainer = document.getElementById("progress-container");
   const progressBar = document.getElementById("progress-bar");
   const progressText = document.getElementById("progress-text");
@@ -368,13 +374,14 @@ function resetGame() {
     progressText.style.transition = "transform 0.2s ease";
   }, 50);
 
+  // 3.3 游戏区域
   elements.levelDisplay.textContent = "Lv0.萌新 | 简单(≤5)";
   elements.correctAnswers.innerHTML = "";
   elements.userInput.textContent = "";
   elements.message.textContent = "";
   elements.chineseWord.textContent = "";
 
-  // 字母按钮
+  // 3.4 字母按钮
   elements.letterChoices.innerHTML = "";
   document.querySelectorAll(".letter.selected").forEach(letter => {
     letter.classList.remove("selected");
@@ -382,7 +389,8 @@ function resetGame() {
 }
 
 function resetRound() {
-document.querySelectorAll(".letter.selected").forEach(letter => {
+  // 清除所有字母的选中状态
+  document.querySelectorAll(".letter.selected").forEach(letter => {
     letter.classList.remove("selected");
   });
 
@@ -393,6 +401,8 @@ document.querySelectorAll(".letter.selected").forEach(letter => {
 }
 
 function updateProgress() {
+  // 更新进度条
+
   const progress = Math.min(100, (score / MAX_QUESTIONS) * 100);
   const progressBar = document.getElementById("progress-bar");
   const progressText = document.getElementById("progress-text");
@@ -409,8 +419,9 @@ function updateProgress() {
     }
   }
 
+  // 更新显示
   const difficultyName =
-elements.difficulty.options[elements.difficulty.selectedIndex].text;
+    elements.difficulty.options[elements.difficulty.selectedIndex].text;
   elements.levelDisplay.textContent = `${currentLevel.name} | ${difficultyName}`;
 
   // 等级提升特效
