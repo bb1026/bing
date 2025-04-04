@@ -9,14 +9,14 @@ body {
 
 h1 {
   color: #2c3e50;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   font-size: 25px;
 }
 
 /* 进度条容器 */
 #progress-container {
   width: 100%;
-  max-width: 600px; /* 限制最大宽度 */
+  max-width: 600px;
   height: 30px;
   background: #eee;
   border-radius: 5px;
@@ -45,13 +45,13 @@ h1 {
   justify-content: center;
   color: #000;
   font-weight: bold;
-  line-height: 30px;
-  pointer-events: none;
+  line-height: 30px; /* 确保垂直居中 */
+  pointer-events: none; /* 防止阻挡点击事件 */
 }
 
 .progress-label {
     text-align: center;
-    font-size: 12px;
+    font-size: 13px;
     color: #666;
     margin-bottom: 5px;
 }
@@ -63,9 +63,9 @@ h1 {
 }
 
 .word-box {
-  font-size: 24px;
-  margin: 20px;
-  min-height: 40px;
+  font-size: 20px;
+  margin: 10px !important;
+  min-height: 30px !important;
   color: #2c3e50;
 }
 
@@ -82,7 +82,7 @@ h1 {
   align-items: center;
   justify-content: center;
   flex-wrap: nowrap;
-  gap: 10px;
+  gap: 5px;
 }
 
 /* 标签样式 */
@@ -117,7 +117,7 @@ h1 {
   margin: 25px auto;
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: 5px;
 }
 
 .button {
@@ -144,16 +144,7 @@ h1 {
   cursor: not-allowed;
   transform: none !important;
   box-shadow: none !important;
-  background-color: #4caf50 !important;
-}
-
-/* 禁用按钮样式 */
-.button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
-  background-color: #4caf50 !important; /* 保持原色但变灰 */
+  background-color: #4caf50 !important; 
 }
 
 #endButton {
@@ -166,7 +157,7 @@ h1 {
 
 /* 输入框容器 */
 .input-box {
-  min-height: 80px;
+  min-height: 50px;
   border: 2px dashed #000;
   padding: 10px;
   margin: 20px auto;
@@ -176,14 +167,14 @@ h1 {
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   text-align: center;
 }
 
 /* 用户输入区域 */
 #userInput {
-  min-height: 30px;
+  min-height: 20px;
   font-size: 24px;
   margin: 0 auto;
   width: 100%;
@@ -195,7 +186,7 @@ h1 {
 /* 提示消息 */
 #message {
   position: absolute;
-  bottom: 10px;
+  bottom: 5px;
   left: 0;
   right: 0;
   font-size: 16px;
