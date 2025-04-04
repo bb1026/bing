@@ -19,7 +19,7 @@ h1 {
   height: 30px;
   background: #eee;
   border-radius: 5px;
-  margin: 20px auto; /* 居中显示 */
+  margin: 20px auto;
   overflow: hidden;
   position: relative;
 }
@@ -27,12 +27,12 @@ h1 {
 /* 进度条本身 */
 #progress-bar {
   height: 100%;
-  width: 0%; /* 初始为0 */
+  width: 0%;
   background-color: #4caf50;
   transition: width 0.3s ease;
 }
 
-/* 进度文字 - 修复版 */
+/* 进度文字 */
 #progress-text {
   position: absolute;
   top: 0;
@@ -44,8 +44,14 @@ h1 {
   justify-content: center;
   color: #000;
   font-weight: bold;
-  line-height: 30px; /* 确保垂直居中 */
-  pointer-events: none; /* 防止阻挡点击事件 */
+  line-height: 30px;
+  pointer-events: none;
+}
+
+.progress-label {
+    text-align: center;
+    color: #666;
+    margin-bottom: 5px;
 }
 
 #level {
@@ -136,7 +142,7 @@ h1 {
   cursor: not-allowed;
   transform: none !important;
   box-shadow: none !important;
-  background-color: #4caf50 !important; /* 保持原色但变灰 */
+  background-color: #4caf50 !important;
 }
 
 #endButton {
