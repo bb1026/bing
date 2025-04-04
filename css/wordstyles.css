@@ -12,22 +12,40 @@ h1 {
     margin-bottom: 20px;
 }
 
-#progress-container { 
-    width: 80%; 
-    background-color: #ddd; 
-    margin: 20px auto; 
+/* 进度条容器 */
+#progress-container {
+    width: 100%;
+    max-width: 600px;  /* 限制最大宽度 */
+    height: 30px;
+    background: #eee;
     border-radius: 5px;
+    margin: 20px auto;  /* 居中显示 */
     overflow: hidden;
+    position: relative;
 }
 
-#progress-bar { 
-    height: 30px; 
-    width: 100%; 
-    background-color: #4CAF50; 
-    text-align: center; 
-    line-height: 30px; 
-    color: white; 
-    transition: width 0.3s;
+/* 进度条本身 */
+#progress-bar {
+    height: 100%;
+    width: 0%;  /* 初始为0 */
+    background-color: #4CAF50;
+    transition: width 0.3s ease;
+}
+
+/* 进度文字 - 修复版 */
+#progress-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: bold;
+    line-height: 30px; /* 确保垂直居中 */
+    pointer-events: none; /* 防止阻挡点击事件 */
 }
 
 #level { 
@@ -224,7 +242,7 @@ h1 {
     animation: levelUp 0.5s ease-in-out;
 }
 
-/* 响应式调整 */
+/* 响应式调整 - 移动端 (≤600px) */
 @media (max-width: 600px) {
     .control-row {
         flex-direction: column;
@@ -242,5 +260,27 @@ h1 {
         width: 40px;
         height: 40px;
         line-height: 40px;
+    }
+    
+    /* 移动端进度条调整 */
+    #progress-container {
+        width: 90%;
+        max-width: 500px;
+    }
+}
+
+/* 平板/小电脑端 (≥768px) */
+@media (min-width: 768px) {
+    #progress-container {
+        width: 70%;
+        max-width: 600px;
+    }
+}
+
+/* 大电脑端 (≥1200px) */
+@media (min-width: 1200px) {
+    #progress-container {
+        width: 50%;
+        max-width: 800px;
     }
 }
