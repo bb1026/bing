@@ -60,7 +60,7 @@ hintCount: document.getElementById("hint-count")
 // 初始化游戏
 async function initGame() {
 try {
-const response = await fetch('js/Word.json');
+const response = await fetch('https://bb1026.github.io/bing/js/Word.json');
 const rawData = await response.json();
 wordPairs = rawData.map(pair => ({ en: pair[0].trim(), zh: pair[1].trim() }))
 .filter(pair => pair.en && pair.zh);
@@ -112,6 +112,7 @@ elements.chineseWord.textContent = randomPair.zh;
 
 shuffledLetters = shuffleLetters(currentWord, extraCount);
 renderLetters(shuffledLetters);
+updateProgress();
 
 totalWords++;
 }
@@ -174,28 +175,29 @@ return words.filter(pair => pair.en.length <= maxLength);
 	}
 	}
 
-	function checkAnswer() {
-	if (gameState !== GAME_STATE.PLAYING) return;
+function checkAnswer() {
+    if (gameState !== GAME_STATE.PLAYING) return;
 
-	const userAnswer = elements.userInput.textContent.trim();
+    const userAnswer = elements.userInput.textContent.trim();
 
-	if (userAnswer === currentWord) {
-	showFeedback("✓ 正确!", "correct-message");
-	score++;
-	answerDisplayCount++;
-	updateProgress();
-	displayCorrectAnswer(currentWord);
+    if (userAnswer === currentWord) {
+        showFeedback("✓ 正确!", "correct-message");
+        score++;
+        answerDisplayCount++;
+        updateProgress();
+        // 修复：确保正确显示答案
+        displayCorrectAnswer(currentWord);
 
-	setTimeout(() => {
-	if (!checkGameCompletion()) {
-	startGame();
-	}
-	}, 1000);
-	} else {
-	wrongAttempts++;
-	showFeedback("✗ 错误，请重试!", "wrong-message");
-	}
-	}
+        setTimeout(() => {
+            if (!checkGameCompletion()) {
+                startGame();
+            }
+        }, 1000);
+    } else {
+        wrongAttempts++;
+        showFeedback("✗ 错误，请重试!", "wrong-message");
+    }
+}
 
 	function showAnswer() {
 	if (gameState !== GAME_STATE.PLAYING || hintCount <= 0) {
@@ -213,6 +215,7 @@ return words.filter(pair => pair.en.length <= maxLength);
 	   showFeedback("已查看答案", "hint-message" );
 
 	   answerDisplayCount++;
+	   updateProgress();
 	   displayAnswerWithMark(currentWord, true);
 
 	   setTimeout(()=> {
@@ -280,50 +283,72 @@ return words.filter(pair => pair.en.length <= maxLength);
 		}
 
 		function resetGame() {
-		// ===== 1. 重置游戏数据 =====
-		startTime = null;
-		score = 0;
-		totalWords = 0;
-		wrongAttempts = 0;
-		totalHintsUsed = 0;
-		answerDisplayCount = 0;
-		hintCount = 3;
-		questionCount = 0;
-		gameState = GAME_STATE.NOT_STARTED;
+    // ===== 1. 重置游戏数据 =====
+    startTime = null;
+    score = 0;
+    totalWords = 0;
+    wrongAttempts = 0;
+    totalHintsUsed = 0;
+    answerDisplayCount = 0;
+    hintCount = 3;
+    questionCount = 0;
+    gameState = GAME_STATE.NOT_STARTED;
 
-		// ===== 2. 清空数据集合 =====
-		usedWords.clear();
-		selectedLetters = [];
-		currentWord = "";
-		shuffledLetters = [];
+    // ===== 2. 清空数据集合 =====
+    usedWords.clear();
+    selectedLetters = [];
+    currentWord = "";
+    shuffledLetters = [];
 
-		// ===== 3. 重置UI界面 =====
-		// 3.1 控制面板
-		elements.hintCount.textContent = hintCount;
-		elements.startButton.textContent = "开始游戏";
-		elements.endButton.style.display = "none";
+    // ===== 3. 重置UI界面 =====
+    // 3.1 控制面板
+    elements.hintCount.textContent = hintCount;
+    elements.startButton.textContent = "开始游戏";
+    elements.endButton.style.display = "none";
 
-		// 3.2 进度条（带动画效果）
-		elements.progressBar.style.transition = "width 0.5s ease";
-		elements.progressBar.style.width = "0%";
-		elements.progressBar.textContent = "0 / 0 / 100";
-		setTimeout(() => {
-		elements.progressBar.style.transition = "";
-		}, 500);
+// 修复进度显示 - 终极版
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
 
-		// 3.3 游戏区域
-		elements.levelDisplay.textContent = "Lv0.萌新 | 简单(≤5)";
-		elements.correctAnswers.innerHTML = "";
-		elements.userInput.textContent = "";
-		elements.message.textContent = "";
-		elements.chineseWord.textContent = "";
+    // 第一步：完全移除过渡效果
+    progressBar.style.transition = 'none';
+    progressText.style.transition = 'none';
 
-		// 3.4 字母按钮
-		elements.letterChoices.innerHTML = "";
-		document.querySelectorAll(".letter.selected").forEach(letter => {
-		letter.classList.remove("selected");
-		});
-   }
+    // 第二步：重置核心样式
+    progressBar.style.width = '0';
+    progressText.textContent = '0 / 0 / 100';
+    
+    // 第三步：强制重设定位（关键修复）
+    progressText.style.left = '50%';
+    progressText.style.top = '50%';
+    progressText.style.transform = 'translate(-50%, -50%) scale(1)';
+    progressText.style.color = '#000';
+
+    // 第四步：触发浏览器重绘
+    void progressContainer.offsetWidth;
+    void progressBar.offsetWidth;
+    void progressText.offsetWidth;
+
+    // 第五步：恢复过渡效果（延时确保生效）
+    setTimeout(() => {
+        progressBar.style.transition = 'width 0.3s ease';
+        progressText.style.transition = 'transform 0.2s ease';
+    }, 50);
+
+    // 3.3 游戏区域
+    elements.levelDisplay.textContent = "Lv0.萌新 | 简单(≤5)";
+    elements.correctAnswers.innerHTML = "";
+    elements.userInput.textContent = "";
+    elements.message.textContent = "";
+    elements.chineseWord.textContent = "";
+
+    // 3.4 字母按钮
+    elements.letterChoices.innerHTML = "";
+    document.querySelectorAll(".letter.selected").forEach(letter => {
+        letter.classList.remove("selected");
+    });
+}
 
 		function resetRound() {
 		// 清除所有字母的选中状态
@@ -337,36 +362,38 @@ return words.filter(pair => pair.en.length <= maxLength);
 		selectedLetters = [];
 		}
 
-		function updateProgress() {
-		// 更新进度条
-		const progress = Math.min(100, (score / MAX_QUESTIONS) * 100);
-		elements.progressBar.style.width = `${progress}%`;
-		elements.progressBar.textContent = `${correctAnswers} / ${totalWords} / 100`;
+function updateProgress() {
+    // 更新进度条
 
-		// 确定当前等级（从高到低查找）
-		let currentLevel = levels[0]; // 默认萌新
-		for (let i = levels.length - 1; i >= 0; i--) {
-		if (score >= levels[i].score) {
-		currentLevel = levels[i];
-		break;
-		}
-		}
+    const progress = Math.min(100, (score / MAX_QUESTIONS) * 100);
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    
+    progressBar.style.width = `${progress}%`;
+    progressText.textContent = `${score} / ${totalWords} / 100`;
 
-		// 更新显示
-		const difficultyName = elements.difficulty.options[elements.difficulty.selectedIndex].text;
-		elements.levelDisplay.textContent = `${currentLevel.name} | ${difficultyName}`;
+    // 确定当前等级
+    let currentLevel = levels[0];
+    for (let i = levels.length - 1; i >= 0; i--) {
+        if (score >= levels[i].score) {
+            currentLevel = levels[i];
+            break;
+        }
+    }
 
+    // 更新显示
+    const difficultyName = elements.difficulty.options[elements.difficulty.selectedIndex].text;
+    elements.levelDisplay.textContent = `${currentLevel.name} | ${difficultyName}`;
 
-		// 添加等级提升特效
-		const lastLevel = elements.levelDisplay.textContent.split("|")[0].trim();
-		if (currentLevel.name !== lastLevel) {
-		elements.levelDisplay.classList.add("level-up");
-		setTimeout(() => {
-		elements.levelDisplay.classList.remove("level-up");
-		}, 1000);
-		}
-
-		}
+    // 等级提升特效
+    const lastLevel = elements.levelDisplay.textContent.split("|")[0].trim();
+    if (currentLevel.name !== lastLevel) {
+        elements.levelDisplay.classList.add("level-up");
+        setTimeout(() => {
+            elements.levelDisplay.classList.remove("level-up");
+        }, 1000);
+    }
+}
 
 		// 启动游戏
 		window.addEventListener("DOMContentLoaded", initGame);
