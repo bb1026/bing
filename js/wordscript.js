@@ -108,7 +108,7 @@ function startGame() {
     const difficultyName =
       elements.difficulty.options[elements.difficulty.selectedIndex].text;
     alert(`当前难度（${difficultyName}）的所有单词已用完！`);
-    isChangingWord = false; // 重置状态
+    isChangingWord = false;
     elements.startButton.disabled = false; // 重新启用按钮
     return;
   }
@@ -206,7 +206,6 @@ function checkAnswer() {
     score++;
     answerDisplayCount++;
     updateProgress();
-    // 修复：确保正确显示答案
     displayCorrectAnswer(currentWord);
 
     setTimeout(() => {
@@ -308,7 +307,6 @@ function endGame() {
 		--------------------------
 		`);
 
-  // 修复：确保重置所有状态和UI
   resetGame();
 }
 
@@ -331,12 +329,11 @@ function resetGame() {
   shuffledLetters = [];
 
   // ===== 3. 重置UI界面 =====
-  // 3.1 控制面板
   elements.hintCount.textContent = hintCount;
   elements.startButton.textContent = "开始游戏";
   elements.endButton.style.display = "none";
 
-  // 修复进度显示 - 终极版
+  // 重置进度显示
   const progressContainer = document.getElementById("progress-container");
   const progressBar = document.getElementById("progress-bar");
   const progressText = document.getElementById("progress-text");
@@ -366,14 +363,13 @@ function resetGame() {
     progressText.style.transition = "transform 0.2s ease";
   }, 50);
 
-  // 3.3 游戏区域
   elements.levelDisplay.textContent = "Lv0.萌新 | 简单(≤5)";
   elements.correctAnswers.innerHTML = "";
   elements.userInput.textContent = "";
   elements.message.textContent = "";
   elements.chineseWord.textContent = "";
 
-  // 3.4 字母按钮
+  // 字母按钮
   elements.letterChoices.innerHTML = "";
   document.querySelectorAll(".letter.selected").forEach(letter => {
     letter.classList.remove("selected");
@@ -381,8 +377,7 @@ function resetGame() {
 }
 
 function resetRound() {
-  // 清除所有字母的选中状态
-  document.querySelectorAll(".letter.selected").forEach(letter => {
+document.querySelectorAll(".letter.selected").forEach(letter => {
     letter.classList.remove("selected");
   });
 
@@ -393,8 +388,6 @@ function resetRound() {
 }
 
 function updateProgress() {
-  // 更新进度条
-
   const progress = Math.min(100, (score / MAX_QUESTIONS) * 100);
   const progressBar = document.getElementById("progress-bar");
   const progressText = document.getElementById("progress-text");
@@ -411,9 +404,8 @@ function updateProgress() {
     }
   }
 
-  // 更新显示
   const difficultyName =
-    elements.difficulty.options[elements.difficulty.selectedIndex].text;
+elements.difficulty.options[elements.difficulty.selectedIndex].text;
   elements.levelDisplay.textContent = `${currentLevel.name} | ${difficultyName}`;
 
   // 等级提升特效
