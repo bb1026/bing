@@ -123,7 +123,7 @@ function startGame() {
   renderLetters(shuffledLetters);
   updateProgress();
 
-  totalWords++;
+  //totalWords++;
   // 1500毫秒后重新启用按钮
   setTimeout(() => {
     isChangingWord = false;
@@ -225,6 +225,7 @@ setTimeout(() => {
       elements.hintButton.disabled = false;
     }, 1000);
   }
+  totalWords++;
 }
 
 function showAnswer() {
@@ -239,6 +240,7 @@ function showAnswer() {
 
   hintCount--;
   totalHintsUsed++;
+  totalWords++;
   elements.hintCount.textContent = hintCount;
 
   elements.userInput.textContent = currentWord;
