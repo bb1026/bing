@@ -61,7 +61,7 @@ const elements = {
 // 初始化游戏
 async function initGame() {
   try {
-    const response = await fetch("https://bb1026.github.io/bing/js/Word.json");
+    const response = await fetch("js/Word.json");
     const rawData = await response.json();
     wordPairs = rawData
       .map(pair => ({ en: pair[0].trim(), zh: pair[1].trim() }))
