@@ -16,11 +16,11 @@ h1 {
 /* 进度条容器 */
 #progress-container {
   width: 100%;
-  max-width: 600px;
+  max-width: 600px; /* 限制最大宽度 */
   height: 30px;
   background: #eee;
   border-radius: 5px;
-  margin: 20px auto;
+  margin: 20px auto; /* 居中显示 */
   overflow: hidden;
   position: relative;
 }
@@ -28,12 +28,12 @@ h1 {
 /* 进度条本身 */
 #progress-bar {
   height: 100%;
-  width: 0%;
+  width: 0%; /* 初始为0 */
   background-color: #4caf50;
   transition: width 0.3s ease;
 }
 
-/* 进度文字 */
+/* 进度文字 - 修复版 */
 #progress-text {
   position: absolute;
   top: 0;
@@ -144,7 +144,7 @@ h1 {
   cursor: not-allowed;
   transform: none !important;
   box-shadow: none !important;
-  background-color: #4caf50 !important; 
+  background-color: #4caf50 !important; /* 保持原色但变灰 */
 }
 
 #endButton {
@@ -310,4 +310,163 @@ h1 {
     width: 50%;
     max-width: 800px;
   }
+}
+
+/* ===== 新增以下代码到您现有CSS文件的底部 ===== */
+
+/* 弹窗专属样式（所有类名加 levels- 前缀避免冲突） */
+.levels-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.levels-popup-content {
+  background: white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+.levels-popup-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+}
+
+.levels-popup-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 18px;
+}
+
+.levels-popup-close {
+  font-size: 24px;
+  cursor: pointer;
+  color: #777;
+}
+
+.levels-popup-body {
+  padding: 20px;
+}
+
+.levels-popup-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.levels-popup-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+  display: flex;
+  justify-content: space-between;
+}
+
+.levels-popup-name {
+  font-weight: bold;
+}
+
+.levels-popup-score {
+  color: #4CAF50;
+}
+
+/* 添加到您的CSS文件 */
+.stats-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001; /* 比等级弹窗更高 */
+  font-family: Arial, sans-serif;
+}
+
+.stats-popup-content {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.stats-popup-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #777;
+}
+
+.stats-popup-title {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+.stats-popup-details {
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.stats-popup-divider {
+  border-top: 1px dashed #ccc;
+  margin: 15px 0;
+  opacity: 0.6;
+}
+
+.stats-icon {
+  margin-right: 8px;
+  width: 20px;
+  display: inline-block;
+  text-align: center;
+}
+
+/* 动画（可选） */
+@keyframes levelsPopupFadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .stats-popup-content {
+    padding: 15px;
+  }
+  .stats-popup-details {
+    font-size: 14px;
+  }
+}
+
+.levels-popup-content {
+  animation: levelsPopupFadeIn 0.3s;
+}
+
+#progress-container {
+  cursor: pointer; /* 新增 */
+  transition: transform 0.2s; /* 新增 */
+}
+
+#progress-container:hover {
+  transform: translateY(-2px); /* 新增悬停效果 */
+}
+
+#progress-container:active {
+  transform: translateY(0); /* 新增点击反馈 */
 }
