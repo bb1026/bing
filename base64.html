@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>64位加密解密工具</title>
+    <title>编码解码工具（支持中文）</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,7 +29,6 @@
             margin-top: 0;
             color: #333;
         }
-        /* 统一输入输出框样式 */
         textarea, .result {
             width: 100%;
             box-sizing: border-box;
@@ -53,7 +52,6 @@
             word-wrap: break-word;
             background-color: #fff;
         }
-        /* 按钮样式 */
         button {
             padding: 10px 15px;
             border: none;
@@ -95,7 +93,21 @@
             gap: 10px;
             flex-wrap: wrap;
         }
-        /* 电脑端适配 */
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
         @media (min-width: 768px) {
             .tool-box {
                 padding: 20px;
@@ -108,7 +120,6 @@
                 margin: 0 auto;
             }
         }
-        /* 大屏幕适配 */
         @media (min-width: 1200px) {
             .container {
                 max-width: 80%;
@@ -122,10 +133,21 @@
 <body>
     <div class="container">
         <div class="tool-box">
-            <h2>Base64 编码</h2>
+            <h2>编码</h2>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="encodeType" value="base64" checked> Base64
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="encodeType" value="unicode"> Unicode
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="encodeType" value="url"> URL
+                </label>
+            </div>
             <textarea id="encodeInput" placeholder="输入要编码的文本..."></textarea>
             <div class="button-group">
-                <button onclick="pasteToInput('encodeInput')" class="paste-btn">粘贴</button>
+                <button id="pasteEncodeBtn" class="paste-btn">粘贴</button>
                 <button onclick="encodeText()" class="encode-btn">编码</button>
                 <button onclick="copyResult('encodeResult')" class="copy-btn">复制</button>
                 <button onclick="clearArea('encodeInput', 'encodeResult')" class="clear-btn">清除</button>
@@ -134,10 +156,21 @@
         </div>
         
         <div class="tool-box">
-            <h2>Base64 解码</h2>
-            <textarea id="decodeInput" placeholder="输入要解码的Base64字符串..."></textarea>
+            <h2>解码</h2>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="decodeType" value="base64" checked> Base64
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="decodeType" value="unicode"> Unicode
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="decodeType" value="url"> URL
+                </label>
+            </div>
+            <textarea id="decodeInput" placeholder="输入要解码的内容..."></textarea>
             <div class="button-group">
-                <button onclick="pasteToInput('decodeInput')" class="paste-btn">粘贴</button>
+                <button id="pasteDecodeBtn" class="paste-btn">粘贴</button>
                 <button onclick="decodeText()" class="encode-btn">解码</button>
                 <button onclick="copyResult('decodeResult')" class="copy-btn">复制</button>
                 <button onclick="clearArea('decodeInput', 'decodeResult')" class="clear-btn">清除</button>
@@ -147,40 +180,153 @@
     </div>
 
     <script>
-        // 新增粘贴功能
-        async function pasteToInput(elementId) {
+        // 获取编码类型
+        function getEncodeType() {
+            return document.querySelector('input[name="encodeType"]:checked').value;
+        }
+
+        // 获取解码类型
+        function getDecodeType() {
+            return document.querySelector('input[name="decodeType"]:checked').value;
+        }
+
+        // 粘贴功能
+        async function handlePaste(elementId) {
             try {
                 const text = await navigator.clipboard.readText();
                 document.getElementById(elementId).value = text;
             } catch (err) {
-                console.error('粘贴失败: ', err);
-                alert('粘贴失败，请检查浏览器权限设置或手动粘贴');
+                try {
+                    document.getElementById(elementId).select();
+                    const success = document.execCommand('paste');
+                    if (!success) {
+                        const text = prompt("请粘贴内容到这里，然后点击确定");
+                        if (text !== null) {
+                            document.getElementById(elementId).value = text;
+                        }
+                    }
+                } catch (e) {
+                    alert('粘贴失败，请手动输入内容或检查浏览器权限');
+                }
             }
         }
 
+        // 为粘贴按钮添加事件监听
+        document.getElementById('pasteEncodeBtn').addEventListener('click', function() {
+            handlePaste('encodeInput');
+        });
+        document.getElementById('pasteDecodeBtn').addEventListener('click', function() {
+            handlePaste('decodeInput');
+        });
+
+        // ========== 编码函数 ==========
         function encodeText() {
             const input = document.getElementById('encodeInput').value;
+            const type = getEncodeType();
+            let result;
+            
             try {
-                const encoded = btoa(unescape(encodeURIComponent(input)));
-                document.getElementById('encodeResult').textContent = encoded;
+                switch(type) {
+                    case 'base64':
+                        result = encodeBase64(input);
+                        break;
+                    case 'unicode':
+                        result = strToUnicode(input);
+                        break;
+                    case 'url':
+                        result = encodeURIComponent(input);
+                        break;
+                    default:
+                        result = "未知编码类型";
+                }
+                document.getElementById('encodeResult').textContent = result;
             } catch (e) {
                 document.getElementById('encodeResult').textContent = "编码出错: " + e.message;
+                console.error(e);
             }
         }
 
+        // ========== 解码函数 ==========
         function decodeText() {
             const input = document.getElementById('decodeInput').value;
+            const type = getDecodeType();
+            let result;
+            
             try {
-                const decoded = decodeURIComponent(escape(atob(input)));
-                document.getElementById('decodeResult').textContent = decoded;
+                switch(type) {
+                    case 'base64':
+                        result = decodeBase64(input);
+                        break;
+                    case 'unicode':
+                        result = unicodeToStr(input);
+                        break;
+                    case 'url':
+                        result = decodeURIComponent(input);
+                        break;
+                    default:
+                        result = "未知解码类型";
+                }
+                document.getElementById('decodeResult').textContent = result;
             } catch (e) {
                 document.getElementById('decodeResult').textContent = "解码出错: " + e.message;
             }
         }
 
+        // ========== 编码/解码工具函数 ==========
+        
+        // Base64编码（支持中文）
+        function encodeBase64(str) {
+            if (window.TextEncoder) {
+                const encoder = new TextEncoder();
+                const bytes = encoder.encode(str);
+                return btoa(String.fromCharCode(...bytes));
+            } else {
+                // 兼容旧浏览器（但不推荐）
+                return btoa(unescape(encodeURIComponent(str)));
+            }
+        }
+
+        // Base64解码（支持中文）
+        function decodeBase64(base64) {
+            if (window.TextDecoder) {
+                const binary = atob(base64);
+                const bytes = new Uint8Array([...binary].map(c => c.charCodeAt(0)));
+                const decoder = new TextDecoder();
+                return decoder.decode(bytes);
+            } else {
+                // 兼容旧浏览器（但不推荐）
+                return decodeURIComponent(escape(atob(base64)));
+            }
+        }
+
+        // Unicode编码
+        function strToUnicode(str) {
+            return Array.from(str).map(c => 
+                "\\u" + c.charCodeAt(0).toString(16).padStart(4, '0')
+            ).join('');
+        }
+
+        // Unicode解码
+        function unicodeToStr(unicode) {
+            return unicode.replace(/\\u([\dA-Fa-f]{4})/g, function(_, group) {
+                return String.fromCharCode(parseInt(group, 16));
+            });
+        }
+
+        // ========== 通用功能 ==========
+        
+        // 复制结果
         function copyResult(elementId) {
             const resultElement = document.getElementById(elementId);
             const textToCopy = resultElement.textContent;
+            
+            if (!textToCopy) {
+                resultElement.textContent = "没有内容可复制！";
+                setTimeout(() => {
+                    resultElement.textContent = textToCopy;
+                }, 1000);
+                return;
+            }
             
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const originalText = resultElement.textContent;
@@ -189,21 +335,27 @@
                     resultElement.textContent = originalText;
                 }, 1000);
             }).catch(err => {
-                console.error('复制失败: ', err);
                 const range = document.createRange();
                 range.selectNode(resultElement);
                 window.getSelection().removeAllRanges();
                 window.getSelection().addRange(range);
-                document.execCommand('copy');
+                try {
+                    document.execCommand('copy');
+                    resultElement.textContent = "已复制到剪贴板！";
+                    setTimeout(() => {
+                        resultElement.textContent = textToCopy;
+                    }, 1000);
+                } catch (e) {
+                    resultElement.textContent = "复制失败，请手动选择复制";
+                    setTimeout(() => {
+                        resultElement.textContent = textToCopy;
+                    }, 2000);
+                }
                 window.getSelection().removeAllRanges();
-                
-                resultElement.textContent = "已复制到剪贴板！";
-                setTimeout(() => {
-                    resultElement.textContent = originalText;
-                }, 1000);
             });
         }
 
+        // 清除区域
         function clearArea(inputId, resultId) {
             document.getElementById(inputId).value = '';
             document.getElementById(resultId).textContent = '';
