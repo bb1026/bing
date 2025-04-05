@@ -198,7 +198,6 @@ function startGame() {
   if (isShowAndSubmit) {
     elements.startButton.disabled = true; // 禁用按钮
     wrongAttempts++;
-    totalWords++;
   }
   isShowAndSubmit = true;
 
@@ -209,6 +208,7 @@ function startGame() {
     elements.startButton.textContent = "换一个";
   }
 
+  totalWords++;
   questionCount++;
   if (questionCount % 10 === 0) {
     hintCount = 3;
@@ -349,7 +349,6 @@ function checkAnswer() {
       }
     }, 1000);
   }
-  totalWords++;
   updateProgress();
   isShowAndSubmit = false;
 }
@@ -368,7 +367,6 @@ function showAnswer() {
 
   hintCount--;
   totalHintsUsed++;
-  totalWords++;
   elements.hintCount.textContent = hintCount;
 
   elements.userInput.textContent = currentWord;
