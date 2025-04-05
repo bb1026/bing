@@ -68,6 +68,7 @@
         }).then(data => {
             if (data.hasOwnProperty(key)) {
               var url = data[key];
+              document.getElementById("keyInput").value = "";
               // 🎯 使用 openUrl() 来打开特定的 URL
               if (["shortcuts", "birthday", "dcxxl", "wordgame"].some(keyword => url.includes(keyword))) {
                 openUrl(url);
