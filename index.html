@@ -5,7 +5,6 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJGT6TL1SB"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-
       function gtag() {
         dataLayer.push(arguments);
       }
@@ -17,21 +16,32 @@
     <title>Bing的网站</title>
     <link rel="icon" href="imgs/logo.ico" type="image/x-icon">
     <style>
+      body {
+        background-color: #f2f2f2;
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+
       #keyInputContainer {
         display: flex;
         justify-content: center;
-        margin-bottom: 20px;
+        margin-bottom: 2px;
+        padding-top: 10px;
       }
 
       #keyInput {
         border: 2px solid #ccc;
         font-size: 16px;
         padding: 8px;
+        width: 80%;
+        max-width: 400px;
       }
 
-      body {
-        background-color: #f2f2f2;
-        color: #333;
+      #pageFrame {
+        width: 100%;
+        border: none;
+        display: block;
       }
     </style>
   </head>
@@ -39,55 +49,70 @@
     <div id="keyInputContainer">
       <input type="text" autocomplete="off" id="keyInput" onkeydown="checkKey(event)">
     </div>
-    <iframe id="pageFrame" width="100%" height="650px" frameborder="0"></iframe>
+    <iframe id="pageFrame"></iframe>
+
     <script>
       function checkKey(event) {
         if (event.keyCode === 13) {
           submitForm();
         }
       }
-      // 📌 这个函数决定如何打开 URL
-      function openUrl(url) {
-        if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-          // 📱 手机端：在当前窗口打开
-          window.location.href = url;
+
+      function getDeviceType() {
+        const ua = navigator.userAgent;
+        const width = window.innerWidth;
+
+        if (/Mobi|Android|iPhone/i.test(ua)) {
+          return 'mobile';
+        } else if (/iPad|Tablet/i.test(ua) || (width >= 600 && width <= 1024)) {
+          return 'tablet';
         } else {
-          // 💻 电脑端：在新窗口打开
-          window.open(url, '_blank');
+          return 'desktop';
+        }
+      }
+
+      function adjustIframeSize() {
+        const frame = document.getElementById("pageFrame");
+        const device = getDeviceType();
+        const vh = window.innerHeight + "px";
+
+        if (device === 'mobile') {
+          frame.style.height = vh;
+        } else if (device === 'tablet') {
+          frame.style.height = vh;
+        } else {
+          // 桌面端：考虑顶部输入框高度后剩余的空间
+          frame.style.height = vh;
         }
       }
 
       function submitForm() {
-        var key = document.getElementById("keyInput").value.trim();
-        var pageFrame = document.getElementById("pageFrame");
-        fetch('multiple_content.json').then(response => {
-          if (!response.ok) {
-            throw new Error('网络响应不正确');
-          }
-          return response.json();
-        }).then(data => {
+        const key = document.getElementById("keyInput").value.trim();
+        const pageFrame = document.getElementById("pageFrame");
+
+        fetch('https://bb1026.github.io/bing/multiple_content.json')
+          .then(response => {
+            if (!response.ok) throw new Error('网络响应不正确');
+            return response.json();
+          })
+          .then(data => {
             if (data.hasOwnProperty(key)) {
-              var url = data[key];
               document.getElementById("keyInput").value = "";
-              // 🎯 使用 openUrl() 来打开特定的 URL
-              if (["shortcuts", "birthday", "dcxxl", "wordgame"].some(keyword => url.includes(keyword))) {
-                openUrl(url);
-              } else {
-                if (!url.startsWith("http")) {
-                  pageFrame.src = "";
-                  pageFrame.contentWindow.document.write(data[key]);
-                } else {
-                  pageFrame.src = url;
-                }
-              }
+              pageFrame.src = data[key];
+              adjustIframeSize();
             } else {
               pageFrame.src = "";
-              pageFrame.contentWindow.document.write('<div style="text-align:center">输入有误</div>');
-              }
-            }).catch(error => {
+              pageFrame.contentWindow.document.write('<div style="text-align:center">暗号不对</div>');
+            }
+          })
+          .catch(error => {
             console.error('获取数据时发生错误:', error);
           });
-        }
+      }
+
+      // 页面加载和窗口大小变化时都调整 iframe 大小
+      window.addEventListener('load', adjustIframeSize);
+      window.addEventListener('resize', adjustIframeSize);
     </script>
   </body>
 </html>
