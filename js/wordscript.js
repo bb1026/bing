@@ -23,6 +23,7 @@ let hintCount = 3;
 let questionCount = 0;
 let answerDisplayCount = 0;
 let isChangingWord = false;
+let isShowAndSubmit = false;
 
 // 游戏配置
 const levels = [
@@ -61,7 +62,7 @@ const elements = {
 // 初始化游戏
 async function initGame() {
   try {
-    const response = await fetch("js/Word.json");
+    const response = await fetch("https://bb1026.github.io/bing/js/Word.json");
     const rawData = await response.json();
     wordPairs = rawData
       .map(pair => ({ en: pair[0].trim(), zh: pair[1].trim() }))
@@ -72,17 +73,19 @@ async function initGame() {
     console.error("获取单词数据失败:", error);
     alert("加载单词失败，请刷新重试");
   }
-const levelElement = document.getElementById('level');
-  levelElement.addEventListener('click', showLevelsPopup);
-document.getElementById('progress-container').addEventListener('click', showGameStats);
+  const levelElement = document.getElementById("level");
+  levelElement.addEventListener("click", showLevelsPopup);
+  document
+    .getElementById("progress-container")
+    .addEventListener("click", showGameStats);
 }
 
 // 创建等级提示弹窗
 function showLevelsPopup() {
   // 创建弹窗容器
-  const popup = document.createElement('div');
-  popup.className = 'levels-popup';
-  
+  const popup = document.createElement("div");
+  popup.className = "levels-popup";
+
   // 创建弹窗内容 (使用 levels-popup-* 类名)
   popup.innerHTML = `
     <div class="levels-popup-content">
@@ -92,24 +95,28 @@ function showLevelsPopup() {
       </div>
       <div class="levels-popup-body">
         <ul class="levels-popup-list">
-          ${levels.map(level => `
+          ${levels
+            .map(
+              level => `
             <li>
               <span class="levels-popup-name">${level.name}</span>
               <span class="levels-popup-score">${level.score}分</span>
             </li>
-          `).join('')}
+          `
+            )
+            .join("")}
         </ul>
       </div>
     </div>
   `;
 
   // 关闭按钮事件
-  popup.querySelector('.levels-popup-close').addEventListener('click', () => {
+  popup.querySelector(".levels-popup-close").addEventListener("click", () => {
     document.body.removeChild(popup);
   });
 
   // 点击遮罩层关闭
-  popup.addEventListener('click', (e) => {
+  popup.addEventListener("click", e => {
     if (e.target === popup) {
       document.body.removeChild(popup);
     }
@@ -122,21 +129,20 @@ function showLevelsPopup() {
 // 2. 创建显示统计的函数
 function showGameStats() {
   if (gameState === GAME_STATE.NOT_STARTED) return;
-  
+
   const now = new Date();
-  const totalSeconds = gameState === GAME_STATE.PLAYING 
-    ? Math.round((now - startTime) / 1000)
-    : Math.round((endTime - startTime) / 1000);
-  
+  const totalSeconds =
+    gameState === GAME_STATE.PLAYING
+      ? Math.round((now - startTime) / 1000)
+      : Math.round((endTime - startTime) / 1000);
+
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  const accuracy = totalWords > 0 
-    ? Math.round((score / totalWords) * 100)
-    : 0;
+  const accuracy = totalWords > 0 ? Math.round((score / totalWords) * 100) : 0;
   const currentLevel = getCurrentLevel();
 
-  const popup = document.createElement('div');
-  popup.className = 'stats-popup';
+  const popup = document.createElement("div");
+  popup.className = "stats-popup";
   popup.innerHTML = `
     <div class="stats-popup-content">
       <span class="stats-popup-close">&times;</span>
@@ -157,11 +163,11 @@ function showGameStats() {
   `;
 
   // 关闭功能
-  popup.querySelector('.stats-popup-close').addEventListener('click', () => {
+  popup.querySelector(".stats-popup-close").addEventListener("click", () => {
     document.body.removeChild(popup);
   });
 
-  popup.addEventListener('click', (e) => {
+  popup.addEventListener("click", e => {
     if (e.target === popup) {
       document.body.removeChild(popup);
     }
@@ -189,7 +195,12 @@ function setupEventListeners() {
 function startGame() {
   if (isChangingWord) return;
   isChangingWord = true;
-  elements.startButton.disabled = true; // 禁用按钮
+  if (isShowAndSubmit) {
+    elements.startButton.disabled = true; // 禁用按钮
+    wrongAttempts++;
+    totalWords++;
+  }
+  isShowAndSubmit = true;
 
   if (gameState === GAME_STATE.NOT_STARTED) {
     startTime = new Date();
@@ -202,6 +213,7 @@ function startGame() {
   if (questionCount % 10 === 0) {
     hintCount = 3;
     elements.hintCount.textContent = hintCount;
+    elements.hintButton.disabled = false;
   }
 
   resetRound();
@@ -228,12 +240,11 @@ function startGame() {
   renderLetters(shuffledLetters);
   updateProgress();
 
-  //totalWords++;
-  // 1500毫秒后重新启用按钮
+  // 1000毫秒后重新启用按钮
   setTimeout(() => {
     isChangingWord = false;
     elements.startButton.disabled = false;
-  }, 1500);
+  }, 1000);
 }
 
 function getAvailableWords() {
@@ -300,6 +311,7 @@ function addLetter(letter, event) {
 }
 
 function checkAnswer() {
+  if (gameState === GAME_STATE.NOT_STARTED) return;
   elements.submitButton.disabled = true;
   elements.hintButton.disabled = true;
   if (gameState !== GAME_STATE.PLAYING) return;
@@ -310,13 +322,16 @@ function checkAnswer() {
     showFeedback("✓ 正确!", "correct-message");
     score++;
     answerDisplayCount++;
-    updateProgress();
     // 修复：确保正确显示答案
     displayCorrectAnswer(currentWord);
 
     setTimeout(() => {
       elements.submitButton.disabled = false;
-      elements.hintButton.disabled = false;
+      if (hintCount <= 0) {
+        elements.hintButton.disabled = true;
+      } else {
+        elements.hintButton.disabled = false;
+      }
       if (!checkGameCompletion()) {
         startGame();
       }
@@ -325,20 +340,28 @@ function checkAnswer() {
     wrongAttempts++;
     showFeedback("✗ 错误，请重试!", "wrong-message");
 
-setTimeout(() => {
+    setTimeout(() => {
       elements.submitButton.disabled = false;
-      elements.hintButton.disabled = false;
+      if (hintCount <= 0) {
+        elements.hintButton.disabled = true;
+      } else {
+        elements.hintButton.disabled = false;
+      }
     }, 1000);
   }
-totalWords++;
+  totalWords++;
+  updateProgress();
+  isShowAndSubmit = false;
 }
 
 function showAnswer() {
-  elements.submitButton.disabled = true;
+  if (gameState === GAME_STATE.NOT_STARTED) return;
+  isShowAndSubmit = false;
   elements.hintButton.disabled = true;
   if (gameState !== GAME_STATE.PLAYING || hintCount <= 0) {
     if (hintCount <= 0) {
       alert("查看答案次数已用完！");
+      elements.submitButton.disabled = false;
     }
     return;
   }
@@ -362,7 +385,7 @@ function showAnswer() {
     if (!checkGameCompletion()) {
       startGame();
     }
-  }, 1500);
+  }, 1000);
 }
 
 function showFeedback(message, className) {
@@ -425,7 +448,7 @@ function endGame() {
 }
 
 function resetGame() {
-  // ===== 1. 重置游戏数据 =====
+  // ===== 重置游戏数据 =====
   startTime = null;
   score = 0;
   totalWords = 0;
@@ -435,64 +458,48 @@ function resetGame() {
   hintCount = 3;
   questionCount = 0;
   gameState = GAME_STATE.NOT_STARTED;
-
-  // ===== 2. 清空数据集合 =====
   usedWords.clear();
   selectedLetters = [];
   currentWord = "";
   shuffledLetters = [];
+  isChangingWord = false;
+  isShowAndSubmit = false;
+  document.querySelectorAll(".letter.selected").forEach(letter => {
+    letter.classList.remove("selected");
+  });
+  const progressContainer = document.getElementById("progress-container");
+  const progressBar = document.getElementById("progress-bar");
+  const progressText = document.getElementById("progress-text");
+  progressBar.style.transition = "none";
+  progressText.style.transition = "none";
+  progressBar.style.width = "0";
+  progressText.textContent = "0 / 0 / 100";
+  progressText.style.left = "50%";
+  progressText.style.top = "50%";
+  progressText.style.transform = "translate(-50%, -50%) scale(1)";
+  progressText.style.color = "#000";
 
-  // ===== 3. 重置UI界面 =====
-  // 3.1 控制面板
+  void progressContainer.offsetWidth;
+  void progressBar.offsetWidth;
+  void progressText.offsetWidth;
+
+  setTimeout(() => {
+    progressBar.style.transition = "width 0.3s ease";
+    progressText.style.transition = "transform 0.2s ease";
+  }, 50);
+
   elements.hintCount.textContent = hintCount;
   elements.startButton.textContent = "开始游戏";
   elements.endButton.style.display = "none";
   elements.submitButton.disabled = false;
   elements.hintButton.disabled = false;
   elements.startButton.disabled = false;
-
-  // 修复进度显示 - 终极版
-  const progressContainer = document.getElementById("progress-container");
-  const progressBar = document.getElementById("progress-bar");
-  const progressText = document.getElementById("progress-text");
-
-  // 第一步：完全移除过渡效果
-  progressBar.style.transition = "none";
-  progressText.style.transition = "none";
-
-  // 第二步：重置核心样式
-  progressBar.style.width = "0";
-  progressText.textContent = "0 / 0 / 100";
-
-  // 第三步：强制重设定位（关键修复）
-  progressText.style.left = "50%";
-  progressText.style.top = "50%";
-  progressText.style.transform = "translate(-50%, -50%) scale(1)";
-  progressText.style.color = "#000";
-
-  // 第四步：触发浏览器重绘
-  void progressContainer.offsetWidth;
-  void progressBar.offsetWidth;
-  void progressText.offsetWidth;
-
-  // 第五步：恢复过渡效果（延时确保生效）
-  setTimeout(() => {
-    progressBar.style.transition = "width 0.3s ease";
-    progressText.style.transition = "transform 0.2s ease";
-  }, 50);
-
-  // 3.3 游戏区域
   elements.levelDisplay.textContent = "Lv0.萌新 | 简单(≤5字母)";
   elements.correctAnswers.innerHTML = "";
   elements.userInput.textContent = "";
   elements.message.textContent = "";
   elements.chineseWord.textContent = "";
-
-  // 3.4 字母按钮
   elements.letterChoices.innerHTML = "";
-  document.querySelectorAll(".letter.selected").forEach(letter => {
-    letter.classList.remove("selected");
-  });
 }
 
 function resetRound() {
