@@ -79,23 +79,23 @@ document.getElementById('progress-container').addEventListener('click', showGame
 
 // 创建等级提示弹窗
 function showLevelsPopup() {
-// 创建弹窗容器
+  // 创建弹窗容器
   const popup = document.createElement('div');
   popup.className = 'levels-popup';
   
-  // 创建弹窗内容
+  // 创建弹窗内容 (使用 levels-popup-* 类名)
   popup.innerHTML = `
-    <div class="popup-content">
-      <div class="popup-header">
+    <div class="levels-popup-content">
+      <div class="levels-popup-header">
         <h3>游戏等级说明</h3>
-        <span class="close-btn">&times;</span>
+        <span class="levels-popup-close">&times;</span>
       </div>
-      <div class="popup-body">
-        <ul>
+      <div class="levels-popup-body">
+        <ul class="levels-popup-list">
           ${levels.map(level => `
             <li>
-              <span class="level-name">${level.name}</span>
-              <span class="level-score">${level.score}分</span>
+              <span class="levels-popup-name">${level.name}</span>
+              <span class="levels-popup-score">${level.score}分</span>
             </li>
           `).join('')}
         </ul>
@@ -103,12 +103,12 @@ function showLevelsPopup() {
     </div>
   `;
 
-  // 添加关闭功能
-  popup.querySelector('.close-btn').addEventListener('click', () => {
+  // 关闭按钮事件
+  popup.querySelector('.levels-popup-close').addEventListener('click', () => {
     document.body.removeChild(popup);
   });
 
-  // 点击空白处关闭
+  // 点击遮罩层关闭
   popup.addEventListener('click', (e) => {
     if (e.target === popup) {
       document.body.removeChild(popup);
