@@ -19,7 +19,7 @@ const myBusCodes = [
     stopCode: "21491",
     busCodes: ["246"]
   },
-  //   { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] },
+//   { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] },
   { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: ["858"] }
 ];
 
@@ -193,7 +193,7 @@ const buttonText = `🗂️ 数据更新: ${getFormattedUpdateTime()}`;
 const buttonText2 = "🗑️ 清除缓存";
 const buttonText3 = "🔄 刷新";
 const buttonText4 = "🛰️ 附近站点";
-const buttonText5 = "🚉 搜索站点";
+const buttonText5 = "🚏 搜索站点";
 const buttonText6 = "🚌 搜索巴士";
 const buttonText7 = "💟 收藏";
 
@@ -249,7 +249,7 @@ async function addNearestStops(latitude, longitude, busStops) {
       const stopRow = new UITableRow();
       stopRow.isHeader = true;
       stopRow.addText(
-        `${stop.Description} (${stop.BusStopCode}) - ${(
+        `🚏 ${stop.Description} (${stop.BusStopCode}) - ${(
           stop.distance * 1000
         ).toFixed(2)} m`
       );
@@ -270,7 +270,7 @@ async function addStopInfo(stopCode, busStops) {
   if (stopInfo) {
     const stopRow = new UITableRow();
     stopRow.isHeader = true;
-    stopRow.addText(`${stopInfo.Description} (${stopInfo.BusStopCode})`);
+    stopRow.addText(`🚏 ${stopInfo.Description} (${stopInfo.BusStopCode})`);
     table.addRow(stopRow);
     await addBusArrivalRows(table, stopInfo.Description, stopCode, null);
   } else {
@@ -320,7 +320,7 @@ async function addMyBusCodes(myBusCodes, busStops) {
 
     const stopRow = new UITableRow();
     stopRow.isHeader = true;
-    stopRow.addText(`${busstop} (${stopCode})`);
+    stopRow.addText(`🚏 ${busstop} (${stopCode})`);
     stopRow.onSelect = async () => {
       await createTable(stopCode);
       table.present();
@@ -659,7 +659,7 @@ async function createWidget() {
 
   const titleStack = widget.addStack();
   titleStack.layoutHorizontally();
-
+  
   const title = titleStack.addText("🚌 巴士到站信息 ");
   title.font = Font.boldSystemFont(16);
   title.textColor = Color.white();
@@ -706,15 +706,10 @@ async function createWidget() {
           noBusText.font = Font.systemFont(14);
           noBusText.textColor = new Color("#cccccc");
         }
-
-        widget.addSpacer(1);
       }
     }
-
     widget.addSpacer();
   }
-  widget.addSpacer();
-
   return widget;
 }
 
@@ -797,7 +792,7 @@ if (config.runsInWidget) {
   let widget = await createWidget();
 
   await createTable();
-  table.present();
-  //   widget.presentLarge();
+//   table.present();
+  widget.presentLarge();
 }
 Script.complete();
