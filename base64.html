@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>64位加密解密工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            box-sizing: border-box;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .tool-box {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            box-sizing: border-box;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        /* 统一输入输出框样式 */
+        textarea, .result {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-bottom: 10px;
+        }
+        textarea {
+            height: 150px;
+            resize: none;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .result {
+            height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #fff;
+        }
+        /* 按钮样式 */
+        button {
+            padding: 10px 15px;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+            color: white;
+        }
+        .encode-btn {
+            background-color: #4CAF50;
+        }
+        .encode-btn:hover {
+            background-color: #45a049;
+        }
+        .copy-btn {
+            background-color: #2196F3;
+        }
+        .copy-btn:hover {
+            background-color: #0b7dda;
+        }
+        .clear-btn {
+            background-color: #f44336;
+        }
+        .clear-btn:hover {
+            background-color: #d32f2f;
+        }
+        .paste-btn {
+            background-color: #9C27B0;
+        }
+        .paste-btn:hover {
+            background-color: #7B1FA2;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        /* 电脑端适配 */
+        @media (min-width: 768px) {
+            .tool-box {
+                padding: 20px;
+            }
+            textarea, .result {
+                height: 200px;
+            }
+            .container {
+                max-width: 90%;
+                margin: 0 auto;
+            }
+        }
+        /* 大屏幕适配 */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 80%;
+            }
+            textarea, .result {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tool-box">
+            <h2>Base64 编码</h2>
+            <textarea id="encodeInput" placeholder="输入要编码的文本..."></textarea>
+            <div class="button-group">
+                <button onclick="pasteToInput('encodeInput')" class="paste-btn">粘贴</button>
+                <button onclick="encodeText()" class="encode-btn">编码</button>
+                <button onclick="copyResult('encodeResult')" class="copy-btn">复制</button>
+                <button onclick="clearArea('encodeInput', 'encodeResult')" class="clear-btn">清除</button>
+            </div>
+            <div class="result" id="encodeResult"></div>
+        </div>
+        
+        <div class="tool-box">
+            <h2>Base64 解码</h2>
+            <textarea id="decodeInput" placeholder="输入要解码的Base64字符串..."></textarea>
+            <div class="button-group">
+                <button onclick="pasteToInput('decodeInput')" class="paste-btn">粘贴</button>
+                <button onclick="decodeText()" class="encode-btn">解码</button>
+                <button onclick="copyResult('decodeResult')" class="copy-btn">复制</button>
+                <button onclick="clearArea('decodeInput', 'decodeResult')" class="clear-btn">清除</button>
+            </div>
+            <div class="result" id="decodeResult"></div>
+        </div>
+    </div>
+
+    <script>
+        // 新增粘贴功能
+        async function pasteToInput(elementId) {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById(elementId).value = text;
+            } catch (err) {
+                console.error('粘贴失败: ', err);
+                alert('粘贴失败，请检查浏览器权限设置或手动粘贴');
+            }
+        }
+
+        function encodeText() {
+            const input = document.getElementById('encodeInput').value;
+            try {
+                const encoded = btoa(unescape(encodeURIComponent(input)));
+                document.getElementById('encodeResult').textContent = encoded;
+            } catch (e) {
+                document.getElementById('encodeResult').textContent = "编码出错: " + e.message;
+            }
+        }
+
+        function decodeText() {
+            const input = document.getElementById('decodeInput').value;
+            try {
+                const decoded = decodeURIComponent(escape(atob(input)));
+                document.getElementById('decodeResult').textContent = decoded;
+            } catch (e) {
+                document.getElementById('decodeResult').textContent = "解码出错: " + e.message;
+            }
+        }
+
+        function copyResult(elementId) {
+            const resultElement = document.getElementById(elementId);
+            const textToCopy = resultElement.textContent;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalText = resultElement.textContent;
+                resultElement.textContent = "已复制到剪贴板！";
+                setTimeout(() => {
+                    resultElement.textContent = originalText;
+                }, 1000);
+            }).catch(err => {
+                console.error('复制失败: ', err);
+                const range = document.createRange();
+                range.selectNode(resultElement);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                document.execCommand('copy');
+                window.getSelection().removeAllRanges();
+                
+                resultElement.textContent = "已复制到剪贴板！";
+                setTimeout(() => {
+                    resultElement.textContent = originalText;
+                }, 1000);
+            });
+        }
+
+        function clearArea(inputId, resultId) {
+            document.getElementById(inputId).value = '';
+            document.getElementById(resultId).textContent = '';
+        }
+    </script>
+</body>
+</html>
