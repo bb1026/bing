@@ -27,15 +27,15 @@ let isChangingWord = false;
 // 游戏配置
 const levels = [
   { score: 0, name: "Lv0.萌新" },
-  { score: 10, name: "Lv1.菜鸟" },
-  { score: 20, name: "Lv2.初学者" },
-  { score: 30, name: "Lv3.熟练者" },
-  { score: 40, name: "Lv4.专家" },
-  { score: 50, name: "Lv5.大神" },
-  { score: 60, name: "Lv6.宗师" },
-  { score: 70, name: "Lv7.传奇" },
-  { score: 80, name: "Lv8.王者" },
-  { score: 90, name: "Lv9.至尊" },
+  { score: 3, name: "Lv1.菜鸟" },
+  { score: 8, name: "Lv2.初学者" },
+  { score: 14, name: "Lv3.熟练者" },
+  { score: 22, name: "Lv4.专家" },
+  { score: 35, name: "Lv5.大神" },
+  { score: 48, name: "Lv6.宗师" },
+  { score: 60, name: "Lv7.传奇" },
+  { score: 75, name: "Lv8.王者" },
+  { score: 88, name: "Lv9.至尊" },
   { score: 100, name: "Lv10.神话" }
 ];
 const MAX_QUESTIONS = 100;
