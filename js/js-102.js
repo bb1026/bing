@@ -1,4 +1,4 @@
-// Variables used by Scriptable.
+(async () => {// Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-brown; icon-glyph: sync;
 this.name = "Panda Remit";
@@ -236,3 +236,4 @@ if (config.runsInAccessoryWidget) {
   const widget = await createWidget();
   //   widget.presentSmall();
 }
+})();
