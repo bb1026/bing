@@ -1,4 +1,4 @@
-const widget = new ListWidget();
+(async () => {const widget = new ListWidget();
 let currency = "人民币";
 const url = "https://www.hanshanmoney.com/zh/rate-cn/";
 const req = new Request(url);
@@ -20,3 +20,4 @@ stack.addSpacer(5);
 stack.addText(huilv);
 Script.setWidget(widget);
 Script.complete();
+})();
