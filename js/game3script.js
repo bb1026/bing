@@ -431,7 +431,7 @@ function showAnswer() {
     hintCount--;
     totalHintsUsed++;
     elements.hintCount.textContent = hintCount;
-    elements.userInput.textContent = currentWord;
+    elements.userInput.textContent = currentWord.toUpperCase();
     showFeedback("已查看答案", "hint-message");
     answerDisplayCount++;
     updateProgress();
