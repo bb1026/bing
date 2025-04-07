@@ -1,4 +1,4 @@
-// Variables used by Scriptable.
+(async () => {// Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: cyan; icon-glyph: calendar-alt;
 this.name = "日历📆Calendar";
@@ -183,3 +183,4 @@ async function CheckKu() {
 
 widgetcarton.addSpacer();
 widget.presentMedium();
+})();
