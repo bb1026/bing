@@ -1,10 +1,10 @@
 {
   "js-100": {
     "ID": "js-100",
-    "update": "增加从剪切板获取URL",
+    "update": "无法更新的问题",
     "name": "安装小助手",
     "url": "https://bb1026.github.io/bing/js/js-100.js",
-    "version": "v1.1"
+    "version": "v1.2"
   },
   "js-101": {
     "ID": "js-101",
