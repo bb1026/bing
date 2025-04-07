@@ -9,9 +9,9 @@ this.version = "v2.0";
 const Birthdays = [{ Name: "兵", Birthday: "19990909" }];
 
 // 检查更新
-  await CheckKu();
-  const { installation, calendar } = importModule("Ku");
-  await installation(this.widget_ID, this.version);
+await CheckKu();
+const { installation, calendar } = importModule("Ku");
+await installation(this.widget_ID, this.version);
 /* 
 以上为获取更新代码
 以下开始运行代码
@@ -264,17 +264,16 @@ function createTable() {
     daysLeftCell.widthWeight = 6;
 
     // 如果是最近的生日，加粗字体
+    let closeFont = Font.boldSystemFont(18);
     if (person === closestBirthday) {
-      nameCell.titleFont = Font.boldSystemFont(16);
-      dateCell.titleFont = Font.boldSystemFont(16);
-      ageCell.titleFont = Font.boldSystemFont(16);
-      zodiacCell.titleFont = Font.boldSystemFont(16);
-      daysLeftCell.titleFont = Font.boldSystemFont(16);
+      nameCell.titleFont = closeFont;
+      dateCell.titleFont = closeFont;
+      ageCell.titleFont = closeFont;
+      zodiacCell.titleFont = closeFont;
+      daysLeftCell.titleFont = closeFont;
     }
-
     table.addRow(row);
   }
-
   return table;
 }
 
@@ -319,6 +318,6 @@ if (config.runsInWidget) {
   const widget = await createWidget();
   widget.presentLarge();
   const table = createTable();
-//   table.present();
+  //   table.present();
   logBirthdaysToConsole();
 }
