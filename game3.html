@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语单词拼写游戏</title>
+    <link rel="stylesheet" href="wordstylesnew.css">
+</head>
+
+<body>
+    <h1>英语单词拼写游戏</h1>
+    <div class="progress-label">答对题数 / 已答题数 / 总共题数</div>
+    <div id="progress-container">
+        <div id="progress-bar">
+            <span id="progress-text">0 / 0 / 100</span>
+        </div>
+    </div>
+    <div id="level">Lv0.萌新 | 简单(≤5字母)</div>
+    <div class="control-group">
+        <div class="control-row">
+            <label for="wordType">选择类型:</label>
+            <select id="wordType" class="extra-letters-style">
+                <option value="all">全部</option>
+                <!-- 其他选项将从JavaScript动态添加 -->
+            </select>
+            <label for="extraLetters" style="margin-left: 20px;">额外字母:</label>
+            <select id="extraLetters" class="extra-letters-style">
+                <option value="2">2个字母</option>
+                <option value="3">3个字母</option>
+                <option value="4">4个字母</option>
+                <option value="5">5个字母</option>
+            </select>
+        </div>
+        <div class="control-row">
+            <label for="difficulty">选择难度:</label>
+            <select id="difficulty" class="extra-letters-style">
+                <option value="easy" selected>简单(≤5字母)</option>
+                <option value="hard">困难(≤7字母)</option>
+                <option value="nightmare">噩梦(不限制)</option>
+            </select>
+        </div>
+    </div>
+    <div class="button-group">
+        <button class="button" id="startButton">开始游戏</button>
+        <button class="button" id="endButton" style="display:none;">结束游戏</button>
+    </div>
+    <div class="word-box" id="chineseWord"></div>
+    <div class="input-box" id="answerContainer">
+        <div id="userInput"></div>
+        <div id="message"></div>
+    </div>
+    <div class="letter-grid" id="letterChoices"></div>
+    <div class="button-group">
+        <button class="button" id="submitButton">提交答案</button>
+        <button class="button" id="hintButton">查看答案 (剩余<span id="hint-count">3</span>次)</button>
+    </div>
+    <div id="correct-answers"></div>
+    <script src="wordscriptnew.js"></script>
+</body>
+
+</html>
