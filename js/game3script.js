@@ -97,7 +97,7 @@ const elements = {
 // 初始化游戏
 async function initGame() {
     try {
-        const response = await fetch("js/game3.json");
+        const response = await fetch("https://raw.githubusercontent.com/bb1026/bing/refs/heads/main/js/game3.json");
         rawData = await response.json();
 
         // 初始化分类选择下拉菜单
