@@ -1,6 +1,7 @@
-(async () => {// Variables used by Scriptable.
+// Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-brown; icon-glyph: sync;
+(async () => {
 this.name = "Panda Remit";
 this.widget_ID = "js-102";
 this.version = "v2.7";
