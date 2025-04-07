@@ -1,4 +1,4 @@
-// Variables used by Scriptable.
+(async () => {// Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: yellow; icon-glyph: magic;
 this.name = "Birthday";
@@ -207,3 +207,4 @@ if (config.runsInWidget) {
 //   await table.present();
   logBirthdaysToConsole();
 }
+})();
