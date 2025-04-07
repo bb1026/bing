@@ -3,10 +3,42 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v2.1";
+this.version = "v2.2";
 
 //安装脚本库
 async function installation(scriptID, thisVersion) {
+  
+  // 版本检查
+const LOCAL_VER = this.version;
+const SCRIPT_URL = "https://bb1026.github.io/bing/js/Ku.js";
+
+try {
+    // 获取远程版本
+    const remoteCode = await new Request(SCRIPT_URL).loadString();
+    const REMOTE_VER = remoteCode.match(/this\.version\s*=\s*["']([^"']+)["']/)?.[1];
+    
+    // 比较版本
+    if (REMOTE_VER && LOCAL_VER !== REMOTE_VER) {
+        const alert = new Alert();
+        alert.title = "发现新版本数据库";
+        alert.message = `当前: ${LOCAL_VER}\n最新: ${REMOTE_VER}`;
+        alert.addAction("立即更新");
+        alert.addCancelAction("暂不更新");
+        
+        if (await alert.present() === 0) {
+            // 保存更新
+            const fm = FileManager.local();
+            const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
+            await fm.writeString(path, remoteCode);
+            console.log("数据库更新成功");
+        }
+    } else {
+        console.log("数据库已是最新版");
+    }
+} catch (e) {
+    console.error("检查更新失败: " + e);
+}
+  
   const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
 
   const fm = FileManager.iCloud();
