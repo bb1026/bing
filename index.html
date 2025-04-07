@@ -90,7 +90,7 @@
         const key = document.getElementById("keyInput").value.trim();
         const pageFrame = document.getElementById("pageFrame");
 
-        fetch('https://bb1026.github.io/bing/multiple_content.json')
+        fetch('js/multiple_content.json')
           .then(response => {
             if (!response.ok) throw new Error('网络响应不正确');
             return response.json();
