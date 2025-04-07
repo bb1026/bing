@@ -3,10 +3,17 @@
 // icon-color: green; icon-glyph: hands-helping;
 this.name = "安装小助手";
 this.widget_ID = "js-100";
-this.version = "v1.1";
+this.version = "v1.2";
 
 // 检查更新
 await CheckKu();
+const { installation } = importModule("Ku");
+await installation(this.widget_ID, this.version);
+/* 
+以上为获取更新代码
+以下开始运行代码
+*/
+
 const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
 
 let scriptList = await new Request(scriptListURL).loadJSON();
