@@ -3,7 +3,7 @@
 // icon-color: cyan; icon-glyph: theater-masks;
 this.name = "Master List";
 this.widget_ID = "js-105";
-this.version = "v1.1";
+this.version = "v1.2";
 
 // 检查更新
 await CheckKu();
@@ -24,6 +24,32 @@ let sortedScripts = Object.values(scriptList).sort(
 
 let table = new UITable();
 table.showSeparators = true;
+
+let clearKu = new UITableRow();
+clearKu.isHeader = true;
+let clearText = clearKu.addText("清除依赖库");
+clearText.titleColor = Color.red();
+clearText.centerAligned();
+    
+clearKu.onSelect = function() {
+    const fm = FileManager.local();
+    const KuName = "Ku.js";
+    const scriptPath = fm.joinPath(fm.documentsDirectory(), KuName);
+    
+    if (fm.fileExists(scriptPath)) {
+        fm.remove(scriptPath);
+        console.log("Ku.js 已被清除");
+        let alert = new Alert();
+        alert.title = "操作完成";
+        alert.message = "依赖库已清除";
+        alert.addAction("确定");
+        alert.present();
+    } else {
+        console.log("Ku.js 不存在");
+    }
+};
+table.addRow(clearKu);
+
 let headerRow = new UITableRow();
 headerRow.isHeader = true;
 const HID = headerRow.addText("ID");
