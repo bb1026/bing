@@ -1,6 +1,7 @@
-(async () => {// Variables used by Scriptable.
+// Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-purple; icon-glyph: music;
+(async () => {
 this.name = "音乐下载";
 this.widget_ID = "js-106";
 this.version = "v1.5";
