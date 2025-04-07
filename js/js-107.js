@@ -190,7 +190,7 @@ async function showLocationAndBusInfoInApp() {
 
 async function CheckKu() {
   const notification = new Notification();
-  const fm = FileManager.iCloud();
+  const fm = FileManager.local();
   const KuName = "Ku.js";
   const scriptPath = fm.joinPath(fm.documentsDirectory(), KuName);
   const scriptExists = fm.fileExists(scriptPath);
