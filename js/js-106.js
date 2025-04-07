@@ -1,4 +1,4 @@
-// Variables used by Scriptable.
+(async () => {// Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-purple; icon-glyph: music;
 this.name = "音乐下载";
@@ -107,3 +107,4 @@ async function CheckKu() {
 
 // 显示表格
 await table.present();
+})();
