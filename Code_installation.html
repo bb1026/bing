@@ -1,31 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
+<style>
+    #copyButton {
+        font-size: 20px;
+        padding: 14px 28px;
+        margin-top: 20px;
+        width: 80%;
+        max-width: 320px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    #copyButton:hover {
+        background-color: #45a049;
+    }
+</style>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>安装小助手</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安装小助手</title>
 </head>
 <body>
-<p>↓↓使用方法↓↓</p>
-<p>1，复制代码。</p>
-<p>2，打开scriptable软件。</p>
-<p>3，点击右上角➕。</p>
-<p>3，粘贴代码并运行。</p>
-<button id="copyButton">一键复制代码</button>
-<div id="randomText" style="display: none;">eval(await (new Request(Data.fromBase64String('aHR0cHM6Ly9iYjEwMjYuZ2l0aHViLmlvL2JpbmcvanMvcGFja2FnZS5qc29u').toRawString())).loadString());await Script.Installer();
-// 打开 Scriptable 应用// 点击 + 新建脚本，粘贴本内容// 运行脚本</div>
-
-<script>
-document.getElementById("copyButton").addEventListener("click", function() {
-    var text = document.getElementById("randomText").innerText;
-    navigator.clipboard.writeText(text).then(function() {
-        alert("代码复制成功，请打开Scriptable...，并粘贴代码运行");
-        // Open Scriptable app
-        window.location.href = 'scriptable:///add';
-    }, function(err) {
-        console.error('Failed to copy: ', err);
-    });
-});
-</script>
+    <p>↓↓使用方法↓↓</p>
+    <p>1，复制代码。</p>
+    <p>2，打开scriptable软件。</p>
+    <p>3，点击右上角➕。</p>
+    <p>3，粘贴代码并运行。</p>
+    <button id="copyButton">一键复制代码</button>
+    <div id="randomText" style="display: none;">eval(await (new Request(Data.fromBase64String('aHR0cHM6Ly9iYjEwMjYuZ2l0aHViLmlvL2JpbmcvanMvcGFja2FnZS5qc29u').toRawString())).loadString());await Script.Installer();
+        // 打开 Scriptable 应用// 点击 + 新建脚本，粘贴本内容// 运行脚本</div>
+    <script>
+        document.getElementById("copyButton").addEventListener("click", function() {
+            var text = document.getElementById("randomText").innerText;
+            navigator.clipboard.writeText(text).then(function() {
+                alert("代码复制成功，请打开Scriptable...，并粘贴代码运行");
+                window.location.href = 'scriptable:///add';
+            }, function(err) {
+                console.error('Failed to copy: ', err);
+            });
+        });
+    </script>
 </body>
 </html>
