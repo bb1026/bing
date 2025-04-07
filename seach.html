@@ -1,5 +1,5 @@
 <script>
-    fetch("multiple_content.json")
+    fetch("js/multiple_content.json")
         .then(response => response.json())
         .then(data => document.body.innerText = data[new URLSearchParams(window.location.search).get("key")] || "")
         .catch(console.error);
