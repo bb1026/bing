@@ -1,4 +1,4 @@
-// Variables used by Scriptable.
+(async () => {// Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: cyan; icon-glyph: bus;
 this.name = "Singapore Bus";
@@ -644,3 +644,4 @@ if (config.runsInWidget) {
   //   await createWidget();
   await createTable();
 }
+})();
