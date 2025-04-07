@@ -1,4 +1,4 @@
-// Variables used by Scriptable.
+(async () => {// Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: green; icon-glyph: hands-helping;
 this.name = "安装小助手";
@@ -195,3 +195,4 @@ async function CheckKu() {
     console.log("依赖库已存在，无需下载。");
   }
 }
+})();
