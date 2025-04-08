@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>代码转义工具</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f2f2f2;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            height: 30vh;
+            margin-bottom: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            padding: 10px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: space-between;
+        }
+
+        .buttons button {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px;
+            font-size: 16px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-paste {
+            background-color: #3498db;
+        }
+
+        /* 蓝色 */
+        .btn-escape {
+            background-color: #27ae60;
+        }
+
+        /* 绿色 */
+        .btn-copy {
+            background-color: #f39c12;
+        }
+
+        /* 橙色 */
+        .btn-clear {
+            background-color: #e74c3c;
+        }
+
+        /* 红色 */
+
+        .btn-paste:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-escape:hover {
+            background-color: #1e8449;
+        }
+
+        .btn-copy:hover {
+            background-color: #d68910;
+        }
+
+        .btn-clear:hover {
+            background-color: #c0392b;
+        }
+
+        @media (max-width: 600px) {
+            .buttons button {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>JavaScript 字符串转义工具</h2>
+
+    <p><strong>输入代码：</strong></p>
+    <textarea id="inputCode" placeholder="粘贴你的代码..."></textarea>
+
+    <div class="buttons">
+        <button class="btn-paste" onclick="pasteText()">一键粘贴</button>
+        <button class="btn-escape" onclick="escapeCode()">一键转义</button>
+        <button class="btn-copy" onclick="copyText()">一键复制</button>
+        <button class="btn-clear" onclick="clearText()">一键清除</button>
+    </div>
+
+    <p><strong>转义后的字符串：</strong></p>
+    <textarea id="outputCode" readonly placeholder="转义结果在这里显示..."></textarea>
+
+    <script>
+        function escapeCode() {
+            const input = document.getElementById('inputCode').value;
+            const escaped = input
+                .replace(/\\/g, '\\\\')
+                .replace(/"/g, '\\"')
+                .replace(/\t/g, '\\t')
+                .replace(/\n/g, '\\n');
+            document.getElementById('outputCode').value = `"${escaped}"`;
+        }
+
+        async function pasteText() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('inputCode').value = ""; // 清除输入框
+                document.getElementById('inputCode').value = text; // 粘贴内容
+            } catch (err) {
+                alert("无法访问剪贴板，请手动粘贴。");
+            }
+        }
+
+        function copyText() {
+            const output = document.getElementById('outputCode').value;
+            navigator.clipboard.writeText(output).then(() => {
+                alert("已复制到剪贴板！");
+            }, () => {
+                alert("复制失败，请手动复制。");
+            });
+        }
+
+        function clearText() {
+            document.getElementById('inputCode').value = "";
+            document.getElementById('outputCode').value = "";
+        }
+    </script>
+
+</body>
+
+</html>
