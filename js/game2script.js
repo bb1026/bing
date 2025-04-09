@@ -63,7 +63,7 @@ const elements = {
 document.addEventListener('DOMContentLoaded', function() {
     // 创建音频元素
     const audio = new Audio();
-    audio.src = 'https://bb1026.github.io/bing/music/ 天空の城ラピュタ-久石譲.mp3'; // 替换为您想要的音乐URL
+    audio.src = 'music/天空の城.mp3';
     audio.loop = true;
     
     // 获取音乐控制元素
