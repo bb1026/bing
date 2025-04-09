@@ -1,4 +1,4 @@
-/* styles.css */
+/* game3styles.css */
 /* 音乐控制样式 */
 #music-control {
     position: fixed;
@@ -147,22 +147,35 @@ h1 {
     margin-right: 5px;
 }
 
-/* 下拉框样式 */
+/* 下拉框 */
 #extraLetters,
-#difficulty,
-#wordType {
+#wordType,
+#difficulty {
     padding: 8px 12px;
     font-size: 16px;
     border-radius: 5px;
     background-color: white;
     border: 1px solid #ddd;
-    width: 100px;
+    width: 150px;
     cursor: pointer;
+    box-sizing: border-box;
 }
 
-#extraLetters:hover,
-#difficulty:hover,
-#wordType:hover {
+/* 修改为统一使用类选择器 */
+.extra-letters-style {
+    padding: 8px 12px;
+    font-size: 16px;
+    border-radius: 5px;
+    background-color: white;
+    border: 1px solid #ddd;
+    width: 120px;
+    /* 统一宽度 */
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+/* 悬停效果 */
+.extra-letters-style:hover {
     border-color: #4caf50;
 }
 
@@ -338,9 +351,7 @@ h1 {
         margin-right: 0;
     }
 
-    #extraLetters,
-    #difficulty,
-    #wordType {
+    #extraLetters {
         width: 150px;
     }
 
@@ -441,6 +452,7 @@ h1 {
     color: #4CAF50;
 }
 
+/* 添加到您的CSS文件 */
 .stats-popup {
     position: fixed;
     top: 0;
