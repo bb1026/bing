@@ -149,7 +149,8 @@ h1 {
 
 /* 下拉框样式 */
 #extraLetters,
-#difficulty {
+#difficulty,
+#wordType {
     padding: 8px 12px;
     font-size: 16px;
     border-radius: 5px;
@@ -160,7 +161,8 @@ h1 {
 }
 
 #extraLetters:hover,
-#difficulty:hover {
+#difficulty:hover,
+#wordType:hover {
     border-color: #4caf50;
 }
 
@@ -337,7 +339,8 @@ h1 {
     }
 
     #extraLetters,
-    #difficulty {
+    #difficulty,
+    #wordType {
         width: 150px;
     }
 
@@ -438,7 +441,6 @@ h1 {
     color: #4CAF50;
 }
 
-/* 添加到您的CSS文件 */
 .stats-popup {
     position: fixed;
     top: 0;
