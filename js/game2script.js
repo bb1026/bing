@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // 初始化游戏
 async function initGame() {
   try {
-    const response = await fetch("https://raw.githubusercontent.com/bb1026/bing/refs/heads/main/js/game1.json");
+    const response = await fetch("js/game1.json");
     const rawData = await response.json();
     wordPairs = rawData
       .map(pair => ({ en: pair[0].trim(), zh: pair[1].trim() }))
