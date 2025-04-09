@@ -59,6 +59,57 @@ const elements = {
   hintCount: document.getElementById("hint-count")
 };
 
+// 在文件开头添加音乐控制功能
+document.addEventListener('DOMContentLoaded', function() {
+    // 创建音频元素
+    const audio = new Audio();
+    audio.src = 'https://bb1026.github.io/bing/music/ 天空の城ラピュタ-久石譲.mp3'; // 替换为您想要的音乐URL
+    audio.loop = true;
+    
+    // 获取音乐控制元素
+    const musicControl = document.getElementById('music-control');
+    const musicIcon = document.getElementById('music-icon');
+    
+    // 静音图标路径
+    const soundOnIcon = '<path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>';
+    const soundOffIcon = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+    
+    // 尝试自动播放（添加用户交互检测）
+    function attemptAutoplay() {
+        audio.play().then(() => {
+            musicControl.classList.remove('muted');
+            musicIcon.innerHTML = soundOnIcon;
+        }).catch(e => {
+            // 自动播放被阻止，等待用户交互
+            document.body.addEventListener('click', enableAudioOnInteraction, { once: true });
+        });
+    }
+    
+    function enableAudioOnInteraction() {
+        audio.play().then(() => {
+            musicControl.classList.remove('muted');
+            musicIcon.innerHTML = soundOnIcon;
+        });
+    }
+    
+    attemptAutoplay();
+    
+    // 点击控制音乐
+    musicControl.addEventListener('click', function(e) {
+        e.stopPropagation(); // 防止触发body的交互检测
+        
+        if (audio.paused) {
+            audio.play();
+            musicControl.classList.remove('muted');
+            musicIcon.innerHTML = soundOnIcon;
+        } else {
+            audio.pause();
+            musicControl.classList.add('muted');
+            musicIcon.innerHTML = soundOffIcon;
+        }
+    });
+  });
+
 // 初始化游戏
 async function initGame() {
   try {
