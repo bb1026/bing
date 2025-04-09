@@ -98,7 +98,7 @@ const elements = {
 document.addEventListener('DOMContentLoaded', function() {
     // 创建音频元素
     const audio = new Audio();
-    audio.src = 'https://bb1026.github.io/bing/music/ 千与千寻 主题曲《いつも何度で...-里德可以Houche.mp3'; // 替换为您想要的音乐URL
+    audio.src = 'music/千与千寻.mp3';
     audio.loop = true;
     
     // 获取音乐控制元素
