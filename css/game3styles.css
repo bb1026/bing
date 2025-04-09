@@ -1,4 +1,51 @@
 /* game3styles.css */
+/* 音乐控制样式 */
+#music-control {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    cursor: pointer;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.8);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+#music-control:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: scale(1.1);
+}
+
+#music-icon {
+    width: 24px;
+    height: 24px;
+    fill: #4a6baf;
+    transition: all 0.3s ease;
+}
+
+/* 静音状态样式 */
+#music-control.muted #music-icon {
+    fill: #999;
+    opacity: 0.7;
+}
+
+/* 添加音量波动动画 */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+#music-control:not(.muted) #music-icon {
+    animation: pulse 1.5s infinite;
+}
+
 body {
     font-family: Arial, sans-serif;
     text-align: center;
