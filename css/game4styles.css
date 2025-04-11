@@ -600,6 +600,7 @@ select:hover {
     cursor: pointer;
     color: var(--error-red);
     font-weight: bold;
+    font-size: 24px;
 }
 
 .levels-popup-body,
