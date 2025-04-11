@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语单词拼写游戏</title>
+    <link rel="stylesheet" href="css/game4styles.css">
+</head>
+
+<body>
+    <!-- 音乐控制按钮 -->
+    <div id="music-control">
+        <svg id="music-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+        </svg>
+    </div>
+
+    <h1>英语单词拼写游戏</h1>
+
+    <!-- 进度显示 -->
+    <div class="progress-label">答对题数 / 已答题数 / 总共题数</div>
+    <div id="progress-container">
+        <div id="progress-bar">
+            <span id="progress-text">0 / 0 / 100</span>
+        </div>
+    </div>
+
+    <div id="level">Lv0.萌新 | 简单(≤5字母)</div>
+
+    <!-- 游戏控制选项 -->
+    <div class="control-group">
+        <div class="control-row">
+            <label for="wordType">单词分类:</label>
+            <select id="wordType" class="extra-letters-style">
+                <option value="all">全部</option>
+                <!-- 其他选项将从JavaScript动态添加 -->
+            </select>
+        </div>
+        <div class="control-row">
+            <label for="difficulty">选择难度:</label>
+            <select id="difficulty">
+                <option value="easy">简单(≤5字母)</option>
+                <option value="medium">中等(≤7字母)</option>
+                <option value="hard">困难(不限)</option>
+            </select>
+        </div>
+        <div class="control-row">
+            <label for="extraLetters">额外字母:</label>
+            <select id="extraLetters">
+                <option value="2">2个</option>
+                <option value="4">4个</option>
+                <option value="6">6个</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- 游戏控制按钮 -->
+    <div class="button-group">
+        <button class="button" id="startButton">开始游戏</button>
+        <button class="button" id="endButton" style="display:none;">结束游戏</button>
+    </div>
+
+    <!-- 游戏内容区域 -->
+    <div class="game-content">
+    </div>
+    <div class="word-box">
+        <div class="word-box-content">
+            <div id="chineseWord" class="chinese-hint"></div>
+            <div class="lookup-word" id="showAnswerButton">查</div>
+        </div>
+    </div>
+
+    <!-- 答案输入区域 -->
+    <div class="input-box" id="answerContainer">
+        <div id="userInput" class="hidden-word"></div>
+        <div id="message" class="message-box"></div>
+    </div>
+
+    <!-- 字母选择区 -->
+    <div class="letter-grid-container">
+        <div class="letter-grid" id="letterChoices"></div>
+    </div>
+    </div>
+
+    <!-- 正确答案记录 -->
+    <div id="correct-answers" class="answers-history"></div>
+
+    <script src="js/game4script.js"></script>
+</body>
+
+</html>
