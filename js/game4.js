@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
 async function initGame() {
   try {
     const response = await fetch(
-      "https://raw.githubusercontent.com/bb1026/bing/refs/heads/main/js/game3.json"
+      "js/game3.json"
     );
     rawData = await response.json();
 
