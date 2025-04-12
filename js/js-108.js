@@ -4,65 +4,179 @@
 (async () => {
 this.name = "Birthday";
 this.widget_ID = "js-108";
-this.version = "v2.1";
+this.version = "v2.2";
 
-// 生日数据
 const Birthdays = [
-  { Name: "星", Birthday: "20001010" },
+  { Name: "星", Birthday: "20000412" },
   { Name: "兵", Birthday: "19990909" }
 ];
 
-// 获取更新
 await CheckKu();
 const { installation, calendar } = importModule("Ku");
 await installation(this.widget_ID, this.version);
 
-// 日期数据
 const today = new Date();
 const dates = calendar.solar2lunar();
 
-// 工具函数
-const formatBirthday = b => `${b.slice(0, 4)}-${b.slice(4, 6)}-${b.slice(6)}`;
-const getZodiac = b => calendar.solar2lunar(
-  parseInt(b.slice(0, 4)),
-  parseInt(b.slice(4, 6)),
-  parseInt(b.slice(6))
-).Animal;
-const isTodayBirthday = b => {
-  const d = new Date(b);
-  return d.getDate() === today.getDate() && d.getMonth() === today.getMonth();
-};
-const isMorning = () => today.getHours() >= 8 && today.getHours() < 12;
-const getTodayKey = name => `birthday-notify-${name}-${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+function formatBirthday(Birthday) {
+  if (typeof Birthday !== 'string' || Birthday.length < 8) {
+    throw new Error('日期格式应为YYYYMMDD的8位字符串');
+  }
+  const year = Birthday.slice(0, 4);
+  const month = Birthday.slice(4, 6);
+  const day = Birthday.slice(6, 8);
+
+  return `${year}-${month}-${day}`;
+}
+
+function getZodiac(solarDate) {
+  try {
+    const zodiac = calendar.solar2lunar(
+      parseInt(solarDate.slice(0, 4)),
+      parseInt(solarDate.slice(4, 6)),
+      parseInt(solarDate.slice(6))
+    ).Animal;
+    return zodiac;
+  } catch (error) {
+    return "生肖获取失败"
+  }
+}
+
+function getLunarDate(solarDate) {
+  try {
+    const lunarData = calendar.solar2lunar(
+      parseInt(solarDate.slice(0, 4)),
+      parseInt(solarDate.slice(4, 6)),
+      parseInt(solarDate.slice(6))
+    );
+
+    const { 
+      IMonthCn: month = "未知月份", 
+      IDayCn: day = "未知日期" 
+    } = lunarData || {};
+
+    return `${month}${day}`;
+  } catch (error) {
+    return "农历转换失败";
+  }
+}
+
+function isTodayBirthday(birthday) {
+  try {
+    if (!birthday || typeof birthday !== 'string') {
+      console.error('生日参数无效');
+      return false;
+    }
+
+    const today = new Date();
+    const birthDate = new Date(birthday);
+    
+    if (isNaN(birthDate.getTime())) {
+      console.error('生日日期格式无效');
+      return false;
+    }
+    
+    return (
+      birthDate.getDate() === today.getDate() && 
+      birthDate.getMonth() === today.getMonth()
+    );
+  } catch (error) {
+    console.error('判断生日出错:', error);
+    return false;
+  }
+}
+
+const isMorning = () => today.getHours() >= 8 && today.getHours() < 24;
+
+function getTodayKey(name) {
+  const today = new Date();
+  return `birthday-notify-${name}-${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+}
+
 const sendNotificationOnce = name => {
   const key = getTodayKey(name);
   if (!Keychain.contains(key)) {
-    let n = new Notification();
-    n.title = `${name} 的生日 🎉`;
-    n.body = `今天是 ${name} 的生日！祝生日快乐！🎂`;
-    n.schedule();
-    Keychain.set(key, "notified");
+    const person = Birthdays.find(b => b.Name === name);
+    if (person) {
+      const bDate = formatBirthday(person.Birthday);
+      const age = calculateAge(bDate);
+      
+      let n = new Notification();
+      n.title = `${name} 的${age}岁生日🎉！祝生日快乐！🎂`;
+      n.body = `今天是 ${today.toLocaleDateString()} ${dates.ncWeek} 农历${dates.IMonthCn}${dates.IDayCn}`;
+      n.schedule();
+      Keychain.set(key, "notified");
+    }
   }
 };
-const calculateAge = b => {
-  const bd = new Date(b);
-  let age = today.getFullYear() - bd.getFullYear();
-  if (today.getMonth() < bd.getMonth() || (today.getMonth() === bd.getMonth() && today.getDate() < bd.getDate())) age--;
-  return age;
-};
-const daysUntilNextBirthday = b => {
-  const d = new Date(b);
-  let next = new Date(today.getFullYear(), d.getMonth(), d.getDate());
-  if (next < today) next.setFullYear(today.getFullYear() + 1);
-  return Math.ceil((next - today) / (1000 * 60 * 60 * 24));
-};
 
-// 最近的生日
+function calculateAge(birthdate) {
+  try {
+    if (!birthdate) throw new Error('出生日期不能为空');
+    
+    const today = new Date();
+    const birthDate = new Date(birthdate);
+    
+    if (isNaN(birthDate.getTime())) {
+      throw new Error('无效的日期格式');
+    }
+    
+    if (birthDate > today) {
+      throw new Error('出生日期不能晚于当前日期');
+    }
+    
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
+  } catch (error) {
+    console.error('年龄计算失败:', error.message);
+    return null; 
+  }
+}
+
+function daysUntilNextBirthday(birthdate) {
+  try {
+    if (!birthdate) throw new Error('出生日期不能为空');
+    
+    const today = new Date();
+    const birthDate = new Date(birthdate);
+    
+    if (isNaN(birthDate.getTime())) {
+      throw new Error('无效的日期格式');
+    }
+    
+    const currentYear = today.getFullYear();
+    let nextBirthday = new Date(
+      currentYear,
+      birthDate.getMonth(),
+      birthDate.getDate()
+    );
+    
+    if (nextBirthday < today) {
+      nextBirthday.setFullYear(currentYear + 1);
+    }
+    
+    const timeDiff = nextBirthday - today;
+    const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    
+    return daysRemaining;
+  } catch (error) {
+    console.error('计算剩余天数失败:', error.message);
+    return null;
+  }
+}
+
 const closestBirthday = Birthdays.reduce((a, b) => 
   daysUntilNextBirthday(formatBirthday(a.Birthday)) < daysUntilNextBirthday(formatBirthday(b.Birthday)) ? a : b
 );
 
-// 控制台输出
+console.log(`今天是 ${today.toLocaleDateString()} ${dates.ncWeek} 农历${dates.IMonthCn}${dates.IDayCn}`);
+
 function logBirthdaysToConsole() {
   console.log("====================");
   for (const { Name, Birthday } of Birthdays) {
@@ -70,6 +184,7 @@ function logBirthdaysToConsole() {
     const isToday = isTodayBirthday(bDate);
     console.log(`姓名: ${Name}`);
     console.log(`生日: ${bDate}`);
+    console.log(`农历: ${getLunarDate(Birthday)}`)
     console.log(`年龄: ${calculateAge(bDate)}岁`);
     console.log(`生肖: ${getZodiac(Birthday)}`);
     console.log(`距离下次生日: ${isToday ? "今天 🎂" : `${daysUntilNextBirthday(bDate)} 天后`}`);
@@ -77,13 +192,11 @@ function logBirthdaysToConsole() {
   }
 }
 
-// 创建小组件
 function createWidget() {
   const widget = new ListWidget();
   widget.backgroundColor = new Color("#f5f5f5");
   widget.setPadding(10, 10, 10, 10);
 
-  // 标题
   let title = widget.addText(
     `今天:${dates.cYear}年${dates.cMonth}月${dates.cDay}日,${dates.ncWeek}\n农历:${dates.Animal}年${dates.IMonthCn}${dates.IDayCn}`
   );
@@ -94,6 +207,7 @@ function createWidget() {
   for (const person of Birthdays) {
     const { Name, Birthday } = person;
     const bDate = formatBirthday(Birthday);
+    const lDate = getLunarDate(Birthday);
     const isClosest = person === closestBirthday;
     const isToday = isTodayBirthday(bDate);
 
@@ -109,7 +223,7 @@ function createWidget() {
 
     addStyledText(Name, isClosest, "#333");
     row.addSpacer(12);
-    addStyledText(bDate, isClosest, "#333");
+    addStyledText(`${bDate}\n${lDate}`, isClosest, "#333");
     addStyledText(` (${getZodiac(Birthday)})`, isClosest, "#333");
     row.addSpacer();
     addStyledText(`${calculateAge(bDate)} 岁`, isClosest, "#333");
@@ -128,9 +242,35 @@ function createWidget() {
 function createTable() {
   let table = new UITable();
   table.showSeparators = true;
+  
+  let title = new UITableRow();
+  title.height = 70;
+  title.addText(`今天:${dates.cYear}年${dates.cMonth}月${dates.cDay}日,${dates.ncWeek}\n农历:${dates.Animal}年${dates.IMonthCn}${dates.IDayCn}`)
+  table.addRow(title);
+
+  const clearRow = new UITableRow();
+  clearRow.height = 60;
+  const clearButton = clearRow.addButton("清除所有通知记录");
+  clearButton.titleColor = Color.red();
+  clearButton.onTap = async () => {
+    for (const { Name } of Birthdays) {
+      const key = getTodayKey(Name);
+      if (Keychain.contains(key)) {
+        Keychain.remove(key);
+      }
+    }
+    
+    const alert = new Alert();
+    alert.title = "操作成功";
+    alert.message = "所有通知记录已清除";
+    alert.addAction("确定");
+    await alert.present();
+  };
+  table.addRow(clearRow);
 
   for (const { Name, Birthday } of Birthdays) {
     const formattedBirthday = formatBirthday(Birthday);
+    const lunarDate = getLunarDate(Birthday);
     const age = calculateAge(formattedBirthday);
     const zodiac = getZodiac(Birthday);
     const daysLeft = daysUntilNextBirthday(formattedBirthday);
@@ -146,8 +286,9 @@ function createTable() {
     nameCell.titleFont = font;
     nameCell.widthWeight = 5;
 
-    const dateCell = row.addText(formattedBirthday);
+    const dateCell = row.addText(formattedBirthday, lunarDate);
     dateCell.titleFont = font;
+    dateCell.subtitleFont = font;
     dateCell.widthWeight = 9;
 
     const ageCell = row.addText(`${age}`);
@@ -168,7 +309,6 @@ function createTable() {
   return table;
 }
 
-// 下载依赖
 async function CheckKu() {
   const notification = new Notification();
   const fm = FileManager.local();
@@ -196,7 +336,6 @@ async function CheckKu() {
   }
 }
 
-// 运行环境判断
 if (config.runsInWidget) {
   const widget = createWidget();
   Script.setWidget(widget);
