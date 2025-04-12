@@ -81,7 +81,7 @@ stack.addText("汇率：" + huilv);
 if (config.runsInApp) {
   let wb = new WebView();
   await wb.loadURL(url);
-  await wb.present()
+  await wb.present(true)
 }
 
 Script.setWidget(widget);
