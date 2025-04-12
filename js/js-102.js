@@ -200,6 +200,12 @@ async function createAccessoryCircular() {
   return Acc;
 }
 
+async function showwebview() {
+  const webview = new WebView();
+  await webview.loadURL("https://bb1026.github.io/bing/panda.html");
+  return webview.present(true);
+}
+
 async function CheckKu() {
   const notification = new Notification();
   const fm = FileManager.local();
@@ -236,5 +242,6 @@ if (config.runsInAccessoryWidget) {
 } else {
   const widget = await createWidget();
   //   widget.presentSmall();
+  await showwebview();
 }
 })();
