@@ -383,13 +383,18 @@ cleanbutton.onTap = async () => {
 };
 
 nearbyButton.onTap = async () => {
-  let notification = new Notification();
-  notification.title = Script.name();
-  notification.body = "正在定位...\n请稍后...";
-  notification.schedule();
-
-  const loc = await Location.current();
-  await createTable(null, null, loc);
+  try {
+    const loc = await Location.current();
+    console.log(loc);
+    await createTable(null, null, loc);
+  } catch (error) {
+    console.error(`定位失败: ${error}`);
+    let failAlert = new Alert();
+    failAlert.title = Script.name();
+    failAlert.message = `定位失败: ${error}: \n请稍候再试！`;
+    failAlert.addCancelAction("取消");
+    const response = await failAlert.presentAlert();
+  }
 };
 
 searchStopButton.onTap = async () => {
