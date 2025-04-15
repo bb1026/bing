@@ -118,18 +118,19 @@ async function createCalendarWidget() {
   widget.backgroundColor = COLORS.widgetBg;
   const widgetWidth = 350;
   const today = new Date();
+  //   const today = new Date(2025,04,01);
   const year = today.getFullYear();
   const month = today.getMonth();
   const dayOfWeek = today.getDay();
   const isWeekend = WidgetUtils.isWeekend(dayOfWeek);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const widgetFamily = config.widgetFamily || "large";/*small, medium, large*/
+  const widgetFamily = config.widgetFamily || "large"; /*small, medium, large*/
 
   const weekStart = new Date(year, month, 1);
   weekStart.setHours(0, 0, 0, 0);
   const weekEnd = new Date(year, month + 1, 0);
   weekEnd.setHours(23, 59, 59, 999);
-  
+
   let allEvents = [];
   try {
     const calendars = await Calendar.forEvents();
@@ -188,7 +189,7 @@ async function createCalendarWidget() {
     const end = new Date(today);
     end.setHours(23, 59, 59, 999);
     const upcoming = await getUpcomingEvents(start, end);
-    
+
     if (upcoming.length > 0) {
       const eventRow = widget.addStack();
       eventRow.layoutHorizontally();
@@ -400,18 +401,32 @@ async function createCalendarWidget() {
         );
 
         if (dayEvents.length > 0) {
-          const shownColors = new Set();
+          const shownColors = [];
           for (const event of dayEvents) {
             const colorHex = event.calendar.color.hex;
-            if (!shownColors.has(colorHex)) {
-              const dot = dotCell.addText("●");
-              dot.textColor = new Color("#" + colorHex);
-              dot.font = Font.systemFont(6);
-              dotCell.addSpacer(2);
-              shownColors.add(colorHex);
+            if (!shownColors.includes(colorHex)) {
+              shownColors.push(colorHex);
+              if (shownColors.length >= 3) break;
             }
-            if (shownColors.size >= 3) break;
           }
+
+          // 添加前置 spacer 使圆点整体居中
+          const totalWidth =
+            shownColors.length * 6 + (shownColors.length - 1) * 2;
+          const remainingSpace = 40 - totalWidth;
+          if (remainingSpace > 0) {
+            dotCell.addSpacer(remainingSpace / 2);
+          }
+
+          // 添加圆点和间距
+          shownColors.forEach((colorHex, index) => {
+            const dot = dotCell.addText("●");
+            dot.textColor = new Color("#" + colorHex);
+            dot.font = Font.systemFont(6);
+            if (index < shownColors.length - 1) {
+              dotCell.addSpacer(2);
+            }
+          });
         }
 
         // 农历信息
