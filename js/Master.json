@@ -71,9 +71,9 @@
     },
     "js-110": {
     "ID": "js-110",
-    "update": "发布代码",
+    "update": "支持大中小三种组件",
     "name": "农历",
     "url": "https://bb1026.github.io/bing/js/js-110.js",
-    "version": "v1.0"
+    "version": "v2.0"
     }
 }
