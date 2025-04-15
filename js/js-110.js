@@ -4,14 +4,12 @@
 (async () => {
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v1.0";
+this.version = "v2.0";
 
 await CheckKu();
 const { installation, calendar } = importModule("Ku");
-// 检查更新
 await installation(this.widget_ID, this.version);
 
-// 全局常量
 const WEEK_DAYS = ["日", "一", "二", "三", "四", "五", "六"];
 const WEEK_DAYS_FULL = [
   "星期日",
@@ -23,9 +21,19 @@ const WEEK_DAYS_FULL = [
   "星期六"
 ];
 
-// 工具函数集合
+const COLORS = {
+  weekend: Color.red(),
+  weekday: Color.black(),
+  todayBorder: Color.blue(),
+  lunarText: new Color("#666666"),
+  monthBgText: new Color("#D3D3D3"),
+  eventText: Color.black(),
+  widgetBg: new Color("#FFFFFF")
+};
+
+const lunarCache = {};
+
 const WidgetUtils = {
-  // 创建背景图片
   createBackgroundImage(size = 200) {
     return Object.assign(new DrawContext(), {
       opaque: false,
@@ -34,19 +42,35 @@ const WidgetUtils = {
     });
   },
 
-  // 判断是否周末
   isWeekend(day) {
     return day === 0 || day === 6;
   },
 
-  // 获取农历显示文本
-  getLunarDisplayDate(date) {
-    const lunar = calendar.solar2lunar(
-      date.getFullYear(),
-      date.getMonth() + 1,
-      date.getDate()
-    );
-    return lunar.IDayCn === "初一" ? lunar.IMonthCn : lunar.IDayCn;
+  getLunarData(date) {
+    const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    if (!lunarCache[key]) {
+      lunarCache[key] = calendar.solar2lunar(
+        date.getFullYear(),
+        date.getMonth() + 1,
+        date.getDate()
+      );
+    }
+    return lunarCache[key];
+  },
+
+  getLunarDisplayDate(date, widgetFamily = "small") {
+    const lunar = this.getLunarData(date);
+    return widgetFamily === "small"
+      ? lunar.IMonthCn + lunar.IDayCn
+      : lunar.IDayCn;
+  },
+
+  getTerm(date) {
+    return this.getLunarData(date).Term;
+  },
+
+  getIsTerm(date) {
+    return this.getLunarData(date).isTerm;
   },
 
   // 创建水平居中行
@@ -59,102 +83,145 @@ const WidgetUtils = {
 
   // 应用当天样式
   applyTodayStyle(element, textElement) {
-    textElement.font = Font.boldSystemFont(30);
     element.borderWidth = 2;
-    element.borderColor = Color.blue();
+    element.borderColor = COLORS.todayBorder;
     element.cornerRadius = 10;
   },
 
   // 创建日期文本元素
   createDateText(parent, text, isWeekend = false, isToday = false) {
     const textElement = parent.addText(text);
-    textElement.font = Font.boldSystemFont(isToday ? 30 : 25);
-    textElement.textColor = isWeekend ? Color.red() : Color.black();
+    textElement.font = Font.boldSystemFont(20);
+    textElement.textColor = isWeekend ? COLORS.weekend : COLORS.weekday;
     textElement.centerAlignText();
     return textElement;
   }
 };
 
+async function getUpcomingEvents(startDate, endDate, maxEventsToShow = 2) {
+  try {
+    const calendars = await Calendar.forEvents();
+    const events = await CalendarEvent.between(startDate, endDate, calendars);
+    return events.slice(0, maxEventsToShow).map(event => ({
+      title: event.title,
+      color: event.calendar.color?.hex || "000000",
+      startDate: event.startDate
+    }));
+  } catch (error) {
+    console.error("获取日历事件失败:", error);
+    return [];
+  }
+}
+
 async function createCalendarWidget() {
   const widget = new ListWidget();
-  widget.backgroundColor = new Color("#FFFFFF");
+  widget.backgroundColor = COLORS.widgetBg;
   const widgetWidth = 350;
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth();
+  const dayOfWeek = today.getDay();
+  const isWeekend = WidgetUtils.isWeekend(dayOfWeek);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const widgetFamily = config.widgetFamily || "large";
+  const widgetFamily = config.widgetFamily || "large";/*small, medium, large*/
+
+  const weekStart = new Date(year, month, 1);
+  weekStart.setHours(0, 0, 0, 0);
+  const weekEnd = new Date(year, month + 1, 0);
+  weekEnd.setHours(23, 59, 59, 999);
+  
+  let allEvents = [];
+  try {
+    const calendars = await Calendar.forEvents();
+    allEvents = await CalendarEvent.between(weekStart, weekEnd, calendars);
+  } catch (error) {
+    console.error("获取月事件失败:", error);
+  }
 
   if (widgetFamily === "small") {
-    // 小尺寸 - 当天日期+星期+农历
-    const dayOfWeek = today.getDay();
-    const isWeekend = WidgetUtils.isWeekend(dayOfWeek);
-
-    // 背景图片
     const bgImg = WidgetUtils.createBackgroundImage();
     bgImg.setFont(Font.boldSystemFont(180));
-    bgImg.setTextColor(new Color("#D3D3D3"));
+    bgImg.setTextColor(COLORS.monthBgText);
     const monthNumber = month + 1;
     const x = monthNumber.toString().length === 1 ? 40 : 0;
     bgImg.drawTextInRect(monthNumber.toString(), new Rect(x, -20, 200, 200));
     widget.backgroundImage = await bgImg.getImage();
 
-    // 主内容
-    const mainStack = widget.addStack();
-    mainStack.layoutVertically();
-    mainStack.centerAlignContent();
-    mainStack.addSpacer();
-
-    const contentStack = mainStack.addStack();
+    const contentStack = widget.addStack();
     contentStack.layoutVertically();
-    contentStack.centerAlignContent();
-
-    // 日期行
-    const dateRow = WidgetUtils.createCenteredRow(contentStack);
-    dateRow.addSpacer();
-    const dateText = dateRow.addText(today.getDate().toString());
-    dateText.font = Font.mediumSystemFont(80); // 直接设置为30
-    dateText.textColor = isWeekend ? Color.red() : Color.black();
-    dateText.centerAlignText();
-    dateRow.addSpacer();
-
-    // 农历行
-    const lunarRow = WidgetUtils.createCenteredRow(contentStack);
-    lunarRow.addSpacer();
-    const lunarText = lunarRow.addText(WidgetUtils.getLunarDisplayDate(today));
-    lunarText.font = Font.mediumSystemFont(30);
-    lunarText.textColor = isWeekend ? Color.red() : Color.black();
-    lunarText.centerAlignText();
-    lunarRow.addSpacer();
 
     // 星期行
     const weekRow = WidgetUtils.createCenteredRow(contentStack);
     weekRow.addSpacer();
     const weekText = weekRow.addText(WEEK_DAYS_FULL[dayOfWeek]);
-    weekText.font = Font.mediumSystemFont(30); // 设置为30号字体
-    weekText.textColor = isWeekend ? Color.red() : Color.black();
-    weekText.centerAlignText();
+    weekText.font = Font.boldSystemFont(30);
+    weekText.textColor = isWeekend ? COLORS.weekend : COLORS.weekday;
     weekRow.addSpacer();
 
-    mainStack.addSpacer();
-    widget.addSpacer(15);
+    // 日期行
+    const dateRow = WidgetUtils.createCenteredRow(contentStack);
+    dateRow.addSpacer();
+    const dateText = dateRow.addText(today.getDate().toString());
+    dateText.font = Font.boldSystemFont(60);
+    dateText.textColor = isWeekend ? COLORS.weekend : COLORS.weekday;
+    dateRow.addSpacer();
+
+    // 农历 + 节气行
+    const lunarRow = WidgetUtils.createCenteredRow(contentStack);
+    lunarRow.addSpacer();
+
+    let lunarTextContent = WidgetUtils.getLunarDisplayDate(today);
+    if (WidgetUtils.getIsTerm(today)) {
+      lunarTextContent += ` • ${WidgetUtils.getTerm(today)}`;
+    }
+
+    const lunarText = lunarRow.addText(lunarTextContent);
+    lunarText.font = Font.boldSystemFont(16);
+    lunarText.textColor = isWeekend ? COLORS.weekend : COLORS.weekday;
+    lunarRow.addSpacer();
+
+    widget.addSpacer();
+
+    // 添加事件
+    const start = new Date(today);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(today);
+    end.setHours(23, 59, 59, 999);
+    const upcoming = await getUpcomingEvents(start, end);
+    
+    if (upcoming.length > 0) {
+      const eventRow = widget.addStack();
+      eventRow.layoutHorizontally();
+      eventRow.addSpacer();
+
+      const eventStack = eventRow.addStack();
+      eventStack.layoutVertically();
+      eventStack.spacing = 2;
+
+      for (const event of upcoming) {
+        const eventText = eventStack.addText("● " + event.title);
+        eventText.font = Font.systemFont(14);
+        eventText.textColor = new Color("#" + event.color);
+        eventText.lineLimit = 1;
+      }
+
+      eventRow.addSpacer();
+    }
   } else if (widgetFamily === "medium") {
-    // 中尺寸 - 本周日历
+    // 中尺寸
     const currentDay = today.getDate();
     const currentDayOfWeek = today.getDay();
     const firstDayOfWeek = new Date(today);
     firstDayOfWeek.setDate(currentDay - currentDayOfWeek);
 
-    // 背景图片
     const bgImg = WidgetUtils.createBackgroundImage();
     bgImg.setFont(Font.boldSystemFont(80));
-    bgImg.setTextColor(new Color("#D3D3D3"));
+    bgImg.setTextColor(COLORS.monthBgText);
     const monthNumber = month + 1;
     const x = monthNumber.toString().length === 1 ? 40 : 20;
     bgImg.drawTextInRect(`${monthNumber}月`, new Rect(x, 50, 200, 200));
     widget.backgroundImage = await bgImg.getImage();
 
-    // 星期行
     const weekRow = WidgetUtils.createCenteredRow(widget);
     WEEK_DAYS.forEach((day, i) => {
       const dayCell = weekRow.addStack();
@@ -164,10 +231,8 @@ async function createCalendarWidget() {
       if (i < 6) weekRow.addSpacer(5);
     });
 
-    widget.addSpacer(5);
-
-    // 日期行和农历行
     const dateRow = WidgetUtils.createCenteredRow(widget);
+    const dotRow = WidgetUtils.createCenteredRow(widget);
     const lunarRow = WidgetUtils.createCenteredRow(widget);
 
     for (let i = 0; i < 7; i++) {
@@ -190,33 +255,89 @@ async function createCalendarWidget() {
       );
       if (isToday) WidgetUtils.applyTodayStyle(dayCell, dayText);
 
-      // 农历单元格
+      // 事件圆点
+      const dotCell = dotRow.addStack();
+      dotCell.size = new Size(40, 6);
+      dotCell.centerAlignContent();
+
+      const dayStart = new Date(dayDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayDate);
+      dayEnd.setHours(23, 59, 59, 999);
+      const dayEvents = allEvents.filter(
+        e => e.startDate >= dayStart && e.startDate <= dayEnd
+      );
+
+      if (dayEvents.length > 0) {
+        const shownColors = new Set();
+        for (const event of dayEvents) {
+          const colorHex = event.calendar.color.hex;
+          if (!shownColors.has(colorHex)) {
+            const dot = dotCell.addText("●");
+            dot.textColor = new Color("#" + colorHex);
+            dot.font = Font.systemFont(6);
+            dotCell.addSpacer(2);
+            shownColors.add(colorHex);
+          }
+          if (shownColors.size >= 3) break;
+        }
+      }
+
+      // 农历信息
       const lunarCell = lunarRow.addStack();
-      lunarCell.size = new Size(40, 20);
-      lunarCell.centerAlignContent();
+      lunarCell.size = new Size(40, 40);
       const lunarText = lunarCell.addText(
-        WidgetUtils.getLunarDisplayDate(dayDate)
+        `${WidgetUtils.getLunarDisplayDate(dayDate, widgetFamily)}${
+          WidgetUtils.getIsTerm(dayDate)
+            ? `\n${WidgetUtils.getTerm(dayDate)}`
+            : ""
+        }`
       );
       lunarText.font = Font.mediumSystemFont(14);
-      lunarText.textColor = new Color("#666666");
+      lunarText.textColor = COLORS.lunarText;
 
       if (i < 6) {
         dateRow.addSpacer(5);
+        dotRow.addSpacer(5);
         lunarRow.addSpacer(5);
       }
     }
+
+    widget.addSpacer(8);
+
+    // 事件详情（最多2条）
+    const upcomingEvents = allEvents
+      .filter(e => e.endDate >= today)
+      .sort((a, b) => a.startDate - b.startDate)
+      .slice(0, 2);
+
+    for (const event of upcomingEvents) {
+      const eventStack = widget.addStack();
+      eventStack.layoutHorizontally();
+      const bullet = eventStack.addText("● ");
+      bullet.textColor = new Color("#" + event.calendar.color.hex);
+      bullet.font = Font.systemFont(12);
+      const eventDate = event.startDate;
+      const datePrefix = `${
+        eventDate.getMonth() + 1
+      }月${eventDate.getDate()}日 `;
+      const title = eventStack.addText(datePrefix + event.title);
+      title.font = Font.systemFont(12);
+      title.textColor = COLORS.eventText;
+    }
+
+    widget.addSpacer();
   } else {
     // 大尺寸 - 完整月历
     const monthNumber = month + 1;
     const bgImg = WidgetUtils.createBackgroundImage(400);
     bgImg.setFont(Font.boldSystemFont(200));
-    bgImg.setTextColor(new Color("#D3D3D3"));
+    bgImg.setTextColor(COLORS.monthBgText);
     const x = monthNumber.toString().length === 1 ? 40 : 10;
     bgImg.drawTextInRect(`${monthNumber}月`, new Rect(x, 55, 800, 400));
     widget.backgroundImage = await bgImg.getImage();
 
-    // 星期行
-    widget.addSpacer(70);
+    widget.addSpacer(4);
     const weekRow = WidgetUtils.createCenteredRow(widget);
     WEEK_DAYS.forEach((day, i) => {
       const dayCell = weekRow.addStack();
@@ -226,12 +347,14 @@ async function createCalendarWidget() {
       if (i < 6) weekRow.addSpacer((widgetWidth - 350) / 6);
     });
 
-    widget.addSpacer(5);
-
-    // 日期行
     let currentDate = 1;
     const firstDayOfWeek = new Date(year, month, 1).getDay();
-    for (let i = 0; i < 6; i++) {
+
+    // 计算本月需要多少行
+    const totalCells = firstDayOfWeek + daysInMonth;
+    const totalRows = Math.ceil(totalCells / 7);
+
+    for (let i = 0; i < totalRows; i++) {
       const dateRow = WidgetUtils.createCenteredRow(widget);
       dateRow.addSpacer((widgetWidth - 350) / 2);
 
@@ -251,9 +374,9 @@ async function createCalendarWidget() {
         const isWeekend = WidgetUtils.isWeekend(date.getDay());
         const isToday = currentDate === today.getDate();
 
-        // 公历日期
+        // 日期数字
         const dayStack = dateCell.addStack();
-        dayStack.size = new Size(50, 30);
+        dayStack.size = new Size(50, 20);
         dayStack.centerAlignContent();
         const dayText = WidgetUtils.createDateText(
           dayStack,
@@ -261,26 +384,81 @@ async function createCalendarWidget() {
           isWeekend,
           isToday
         );
-        if (isToday) WidgetUtils.applyTodayStyle(dateCell, dayText);
+        if (isToday) WidgetUtils.applyTodayStyle(dayStack, dayText);
 
-        // 农历日期
-        const lunarStack = dateCell.addStack();
-        lunarStack.size = new Size(50, 20);
-        lunarStack.centerAlignContent();
-        const lunarText = lunarStack.addText(
-          WidgetUtils.getLunarDisplayDate(date)
+        // 事件圆点
+        const dotCell = dateCell.addStack();
+        dotCell.size = new Size(40, 6);
+        dotCell.centerAlignContent();
+
+        const dayStart = new Date(date);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(date);
+        dayEnd.setHours(23, 59, 59, 999);
+        const dayEvents = allEvents.filter(
+          e => e.startDate >= dayStart && e.startDate <= dayEnd
         );
-        lunarText.font = Font.mediumSystemFont(12);
-        lunarText.textColor = new Color("#666666");
+
+        if (dayEvents.length > 0) {
+          const shownColors = new Set();
+          for (const event of dayEvents) {
+            const colorHex = event.calendar.color.hex;
+            if (!shownColors.has(colorHex)) {
+              const dot = dotCell.addText("●");
+              dot.textColor = new Color("#" + colorHex);
+              dot.font = Font.systemFont(6);
+              dotCell.addSpacer(2);
+              shownColors.add(colorHex);
+            }
+            if (shownColors.size >= 3) break;
+          }
+        }
+
+        // 农历信息
+        const lunarStack = dateCell.addStack();
+        lunarStack.size = new Size(50, 30);
+        const lunarText = lunarStack.addText(
+          `${WidgetUtils.getLunarDisplayDate(date, widgetFamily)}${
+            WidgetUtils.getIsTerm(date) ? `\n${WidgetUtils.getTerm(date)}` : ""
+          }`
+        );
+        lunarText.font = Font.mediumSystemFont(11);
+        lunarText.textColor = COLORS.lunarText;
 
         currentDate++;
       }
-      dateRow.addSpacer((widgetWidth - 350) / 2);
-      widget.addSpacer(5);
     }
+
+    // 事件列表
+    const upcomingEvents = allEvents
+      .filter(e => e.startDate >= weekStart && e.endDate <= weekEnd)
+      .sort((a, b) => a.startDate - b.startDate)
+      .slice(0, 5);
+
+    for (const event of upcomingEvents) {
+      const eventStack = widget.addStack();
+      eventStack.layoutHorizontally();
+      const bullet = eventStack.addText("    ● ");
+      bullet.textColor = new Color("#" + event.calendar.color.hex);
+      bullet.font = Font.systemFont(12);
+      const eventDate = event.startDate;
+      const datePrefix = `${
+        eventDate.getMonth() + 1
+      }月${eventDate.getDate()}日 `;
+      const title = eventStack.addText(datePrefix + event.title);
+      title.font = Font.systemFont(12);
+      title.textColor = COLORS.eventText;
+    }
+    widget.addSpacer();
   }
 
-  return config.runsInWidget ? Script.setWidget(widget) : widget.presentLarge();
+  return config.runsInWidget
+    ? Script.setWidget(widget)
+    : widgetFamily === "small"
+    ? widget.presentSmall()
+    : widgetFamily === "medium"
+    ? widget.presentMedium()
+    : widget.presentLarge();
 }
 
 await createCalendarWidget();
