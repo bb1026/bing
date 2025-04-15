@@ -466,6 +466,9 @@ async function createCalendarWidget() {
     }
     widget.addSpacer();
   }
+  
+  // 设置点击跳转到日历
+  widget.url = "calshow://";
 
   return config.runsInWidget
     ? Script.setWidget(widget)
