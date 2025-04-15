@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
-// icon-color: teal; icon-glyph: magic;
+// icon-color: teal; icon-glyph: calendar-alt;
 (async () => {
 this.name = "农历";
 this.widget_ID = "js-110";
