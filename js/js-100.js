@@ -20,7 +20,6 @@ const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
 let scriptList = await new Request(scriptListURL).loadJSON();
 if (scriptList[this.widget_ID]) {
   let scriptversion = scriptList[this.widget_ID].version;
-  console.log(scriptversion);
   if (this.version !== scriptversion) {
     Pasteboard.copy(scriptList[this.widget_ID].url);
     Safari.open("scriptable:///run?scriptName=安装小助手");
@@ -41,6 +40,7 @@ if (clipboardLink) {
     let endIndex = clipboardLink.indexOf(".js", startIndex);
     if (endIndex === -1) endIndex = undefined; // 可能 URL 没有 .js
     scriptID = clipboardLink.substring(startIndex, endIndex);
+    Pasteboard.copy("");
   } else {
     console.log("剪贴板中的链接不包含脚本 ID。");
   }
@@ -50,8 +50,8 @@ if (!scriptID) {
   // 用户输入
   const inputAlert = new Alert();
   inputAlert.title = "输入脚本ID";
-  inputAlert.message = "请输入要查找的脚本 ID（格式: js-xxx）：";
-  inputAlert.addTextField("js-", "");
+  inputAlert.message = "请输入要查找的脚本 ID（格式: 100）：";
+  inputAlert.addTextField("输入脚本ID", "");
   inputAlert.addAction("确定");
   inputAlert.addCancelAction("取消");
 
