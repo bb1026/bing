@@ -4,76 +4,120 @@
     "update": "无法更新的问题",
     "name": "安装小助手",
     "url": "https://bb1026.github.io/bing/js/js-100.js",
-    "version": "v1.2"
+    "version": "v1.2",
+    "argsID": "100",
+    "small": false,
+    "medium": false,
+    "large": false
   },
   "js-101": {
     "ID": "js-101",
     "update": "上传代码",
     "name": "汉生汇率",
     "url": "https://bb1026.github.io/bing/js/js-101.js",
-    "version": "v1.1"
+    "version": "v1.1",
+    "argsID": "101",
+    "small": false,
+    "medium": true,
+    "large": false
   },
     "js-102": {
     "ID": "js-102",
     "update": "增加手续费提醒",
     "name": "Panda Remit",
     "url": "https://bb1026.github.io/bing/js/js-102.js",
-    "version": "v2.7"
+    "version": "v2.7",
+    "argsID": "102",
+    "small": true,
+    "medium": false,
+    "large": false
   },
     "js-103": {
     "ID": "js-103",
     "update": "查询巴士显示序号",
     "name": "Singapore Bus",
     "url": "https://bb1026.github.io/bing/js/js-103.js",
-    "version": "v4.9"
+    "version": "v4.9",
+    "argsID": "103",
+    "small": false,
+    "medium": false,
+    "large": false
     },
     "js-104": {
     "ID": "js-104",
     "update": "缩减代码",
     "name": "日历📆Calendar",
     "url": "https://bb1026.github.io/bing/js/js-104.js",
-    "version": "v2.0"
+    "version": "v2.0",
+    "argsID": "104",
+    "small": false,
+    "medium": true,
+    "large": false
     },
     "js-105": {
     "ID": "js-105",
     "update": "更新",
     "name": "Master List",
     "url": "https://bb1026.github.io/bing/js/js-105.js",
-    "version": "v1.2"
+    "version": "v1.2",
+    "argsID": "105",
+    "small": false,
+    "medium": false,
+    "large": false
     },
     "js-106": {
     "ID": "js-106",
     "update": "修复无法使用",
     "name": "音乐下载",
     "url": "https://bb1026.github.io/bing/js/js-106.js",
-    "version": "v1.5"
+    "version": "v1.5",
+    "argsID": "106",
+    "small": false,
+    "medium": false,
+    "large": false
     },
     "js-107": {
     "ID": "js-107",
     "update": "修改部分代码",
     "name": "附近的Bus SG",
     "url": "https://bb1026.github.io/bing/js/js-107.js",
-    "version": "v1.5"
+    "version": "v1.5",
+    "argsID": "107",
+    "small": false,
+    "medium": false,
+    "large": false
     },
     "js-108": {
     "ID": "js-108",
     "update": "更新代码",
     "name": "Birthday",
     "url": "https://bb1026.github.io/bing/js/js-108.js",
-    "version": "v2.2"
+    "version": "v2.2",
+    "argsID": "108",
+    "small": false,
+    "medium": false,
+    "large": true
     },
     "js-109": {
     "ID": "js-109",
     "update": "更新顶部菜单，\n刷新功能，\n优化代码",
     "name": "BusGo",
     "url": "https://bb1026.github.io/bing/js/js-109.js",
-    "version": "v2.0"
+    "version": "v2.0",
+    "argsID": "109",
+    "small": false,
+    "medium": false,
+    "large": true
     },
     "js-110": {
     "ID": "js-110",
     "update": "支持大中小三种组件",
     "name": "农历",
     "url": "https://bb1026.github.io/bing/js/js-110.js",
-    "version": "v2.0"
+    "version": "v2.0",
+    "argsID": "110",
+    "small": true,
+    "medium": true,
+    "large": true
     }
 }
