@@ -7,10 +7,9 @@ this.widget_ID = "js-107";
 this.version = "v1.5";
 
 // 检查更新
+let installation;
 await CheckKu();
-const { installation } = importModule('Ku');
 await installation(this.widget_ID, this.version);
-
 /* 
 以上为获取更新代码
 以下开始运行代码
@@ -190,30 +189,30 @@ async function showLocationAndBusInfoInApp() {
 }
 
 async function CheckKu() {
-  const notification = new Notification();
   const fm = FileManager.local();
-  const KuName = "Ku.js";
-  const scriptPath = fm.joinPath(fm.documentsDirectory(), KuName);
-  const scriptExists = fm.fileExists(scriptPath);
+  const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
+  const url = "https://bb1026.github.io/bing/js/Ku.js";
+  let needDownload = false;
 
-  if (!scriptExists) {
-    try {
-      const downloadReq = new Request("https://bb1026.github.io/bing/js/Ku.js");
-      const scriptContent = await downloadReq.loadString();
-      await fm.writeString(scriptPath, scriptContent);
-
-      notification.title = "依赖库安装完成!";
-      await notification.schedule();
-      console.log("依赖库安装完成!");
-    } catch (error) {
-      console.error("下载或写入文件时出错:", error);
-      notification.title = "依赖库安装失败!";
-      notification.body = error.toString();
-      await notification.schedule();
+  try {
+    if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
+      console.log("数据库异常，准备重新下载");
+      needDownload = true;
     }
-  } else {
-    console.log("依赖库已存在，无需下载。");
+  } catch {
+    console.log("数据库异常，准备重新下载");
+    needDownload = true;
   }
+
+  if (needDownload) {
+    fm.writeString(path, await new Request(url).loadString());
+    if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+    console.log("数据库下载完成");
+  }
+
+  const Ku = importModule("Ku");
+  if (typeof Ku.installation !== "function") throw new Error("数据库模块无效");
+  installation = Ku.installation;
 }
 
 // 在应用内显示位置数据和公交信息
