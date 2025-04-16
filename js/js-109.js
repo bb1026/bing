@@ -796,10 +796,9 @@ if (config.runsInWidget) {
   const { installation } = importModule("Ku");
   await installation(this.widget_ID, this.version);
   let widget = await createWidget();
-
+//  widget.presentLarge();
   await createTable();
-//   table.present();
-  widget.presentLarge();
+  table.present();
 }
 Script.complete();
 })();
