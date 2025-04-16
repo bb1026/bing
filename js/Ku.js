@@ -72,8 +72,7 @@ async function installation(scriptID, thisVersion) {
       console.log("[*] 开始下载脚本...");
       const rawScript = await new Request(SCRIPT_DOWNLOAD_URL).loadString();
       const scriptContent = unwrapScript(rawScript);
-      // 移除自执行函数包装（仅当检测到这种模式时）
-      // 移除自执行函数包装（仅当检测到这种模式时）
+
       function unwrapScript(content) {
         const lines = content.trim().split("\n");
 
@@ -105,8 +104,8 @@ async function installation(scriptID, thisVersion) {
       console.log("[-] 脚本安装完成（iCloud）");
 
       const successAlert = new Notification();
-      successAlert.title = "✅ 更新成功，点击重新启动脚本";
-      successAlert.body = `${scriptName} 已更新至 ${remoteVersion}\n更新内容: ${updateInfo}`;
+      successAlert.title = `✅ 安装成功，点击运行${scriptName}`;
+      successAlert.body = `${scriptName}\n版本 ${remoteVersion}`;
       successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
         scriptName
       )}`;
@@ -118,7 +117,7 @@ async function installation(scriptID, thisVersion) {
       }
       return;
     } else {
-      console.log("✅ 脚本已是最新版本（iCloud）");
+      console.log("✅ 已是最新版本（iCloud）");
     }
   } catch (error) {
     if (error.message.includes("Could not connect")) {
