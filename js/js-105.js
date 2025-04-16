@@ -1,7 +1,8 @@
+(async () => {
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: cyan; icon-glyph: theater-masks;
-(async () => {
+//(async () => {
   this.name = "Master List";
   this.widget_ID = "js-105";
   this.version = "v1.3";
