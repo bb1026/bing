@@ -84,14 +84,23 @@
     table.addRow(row);
   }
 
-  if (args.widgetParameter) {
+if (args.widgetParameter) {
     const id = args.widgetParameter;
     const scriptURL = `https://bb1026.github.io/bing/js/js-${id}.js`;
     const script = await new Request(scriptURL).loadString();
     eval(script);
-  } else {
-    await table.present(true);
-  }
+} else {
+    const widget = new ListWidget();
+    widget.backgroundColor = new Color("#1C1C1E");
+    const title = widget.addText("长按小组件\n输入Parameter");
+    title.textColor = Color.white();
+    // 保留原有的表格显示逻辑
+    if (typeof table !== 'undefined') {
+        await table.present(true);
+    }
+//     Script.setWidget(widget);
+    widget.presentSmall()
+}
 
   async function CheckKu() {
     const notification = new Notification();
