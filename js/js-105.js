@@ -98,8 +98,8 @@ if (args.widgetParameter) {
     if (typeof table !== 'undefined') {
         await table.present(true);
     }
-//     Script.setWidget(widget);
-    widget.presentSmall()
+    Script.setWidget(widget);
+//   widget.presentSmall()
 }
 
   async function CheckKu() {
