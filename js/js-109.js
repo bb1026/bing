@@ -798,7 +798,7 @@ if (config.runsInWidget) {
   let widget = await createWidget();
 //  widget.presentLarge();
   await createTable();
-  table.present();
+  table.present(true);
 }
 Script.complete();
 })();
