@@ -633,7 +633,7 @@ async function CheckKu() {
   }
 
 ({ installation } = importModule("Ku"));
-  if (typeof Ku.installation !== "function") throw new Error("数据库模块无效");
+  if (typeof installation !== "function") throw new Error("数据库模块无效");
 }
 
 // 运行函数
