@@ -3,142 +3,86 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v2.2";
+this.version = "v2.3";
 
-//安装脚本库
 async function installation(scriptID, thisVersion) {
-  
-  // 版本检查
-const LOCAL_VER = this.version;
-const SCRIPT_URL = "https://bb1026.github.io/bing/js/Ku.js";
-
-try {
-    // 获取远程版本
-    const remoteCode = await new Request(SCRIPT_URL).loadString();
-    const REMOTE_VER = remoteCode.match(/this\.version\s*=\s*["']([^"']+)["']/)?.[1];
+    const LOCAL_VER = this.version;
+    const KU_SCRIPT_URL = "https://bb1026.github.io/bing/js/Ku.js";
+    const MASTER_JSON_URL = "https://bb1026.github.io/bing/js/Master.json";
     
-    // 比较版本
-    if (REMOTE_VER && LOCAL_VER !== REMOTE_VER) {
-        const alert = new Alert();
-        alert.title = "发现新版本数据库";
-        alert.message = `当前: ${LOCAL_VER}\n最新: ${REMOTE_VER}`;
-        alert.addAction("立即更新");
-        alert.addCancelAction("暂不更新");
+    // 1. Ku.js 存 Local
+    const localFm = FileManager.local();
+    // 2. 其他脚本存 iCloud
+    const iCloudFm = FileManager.iCloud();
+
+    try {
+        // 1. 检查 Ku.js 更新（存 Local）
+        const remoteKuCode = await new Request(KU_SCRIPT_URL).loadString();
+        const REMOTE_VER = remoteKuCode.match(/version\s*=\s*["']([^"']+)["']/)?.[1];
         
-        if (await alert.present() === 0) {
-            // 保存更新
-            const fm = FileManager.local();
-            const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-            await fm.writeString(path, remoteCode);
-            console.log("数据库更新成功");
+        if (REMOTE_VER && LOCAL_VER !== REMOTE_VER) {
+            const updateAlert = new Notification();
+            updateAlert.title = "发现新版本数据库";
+            updateAlert.body = `当前: ${LOCAL_VER}\n最新: ${REMOTE_VER}`;
+            await updateAlert.schedule();
+            
+            const kuScriptPath = localFm.joinPath(localFm.documentsDirectory(), "Ku.js");
+            await localFm.writeString(kuScriptPath, remoteKuCode);
+            console.log("✅ 数据库更新成功");
+        } else {
+            console.log("✅ 已是最新版");
         }
-    } else {
-        console.log("数据库已是最新版");
-    }
-} catch (e) {
-    console.error("检查更新失败: " + e);
-}
-  
-  const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
 
-  const fm = FileManager.iCloud();
+        // 2. 检查脚本更新（存 iCloud）
+        const scriptList = await new Request(MASTER_JSON_URL).loadJSON();
+        console.log("✔️ 连接成功，检查更新");
 
-  try {
-    // 发起网络请求获取脚本列表
-    let scriptList = await new Request(scriptListURL).loadJSON();
-
-    console.log("✔️连接成功\n检查更新");
-
-    let remoteScriptInfo = scriptList[scriptID];
-
-    if (!remoteScriptInfo) {
-      // 未找到脚本信息
-      console.log(`未找到ID为'${scriptID}'的脚本信息。`);
-      return;
-    }
-
-    let updateinfo = remoteScriptInfo.update;
-    let remoteVersion = remoteScriptInfo.version;
-    console.log(`远程脚本版本: ${remoteVersion}`);
-    console.log(`本地脚本版本: ${thisVersion}`);
-
-    // 仅当版本不匹配时才进行更新
-    if (thisVersion !== remoteVersion) {
-      const scriptURL = `https://bb1026.github.io/bing/js/${scriptID}.js`;
-
-      const { name: scriptName, update: scriptUpdate } = remoteScriptInfo;
-
-      // 构建本地脚本路径
-      const scriptPath = fm.joinPath(
-        fm.documentsDirectory(),
-        `${scriptName}.js`
-      );
-
-      // 检查脚本是否已经存在
-      if (fm.fileExists(scriptPath)) {
-        const alreadyInstalledAlert = new Alert();
-        alreadyInstalledAlert.title = "更新提示";
-        alreadyInstalledAlert.message = `已有新版本: ${thisVersion} → ${remoteVersion}\n更新内容: ${updateinfo}\n<${scriptName}>已经存在，是否覆盖安装！`;
-        alreadyInstalledAlert.addAction("取消安装");
-        alreadyInstalledAlert.addAction("覆盖安装");
-        const response = await alreadyInstalledAlert.present();
-
-        if (response === 0) {
-          // 用户选择取消安装
-          const cancelAlert = new Alert();
-          cancelAlert.title = "取消安装";
-          cancelAlert.message = `<${scriptName}>已经存在相同名称的脚本，用户取消安装。`;
-          cancelAlert.addAction("确定");
-          await cancelAlert.present();
-          console.log(`<${scriptName}>已经存在相同名称的脚本，用户取消安装。`);
-          return;
+        const remoteScriptInfo = scriptList[scriptID];
+        if (!remoteScriptInfo) {
+            console.log(`❌ 未找到ID为 '${scriptID}' 的脚本信息`);
+            return;
         }
-      }
 
-      // 用户选择覆盖安装或脚本不存在，继续安装脚本
-      // 下载脚本
-      const downloadReq = new Request(scriptURL);
-      console.log("[*] 开始下载脚本...");
-      const scriptContent = await downloadReq.loadString();
-      console.log("[+] 脚本下载完成...");
+        const { name: scriptName, update: updateInfo, version: remoteVersion } = remoteScriptInfo;
+        console.log(`📌 远程版本: ${remoteVersion}\n📌 本地版本: ${thisVersion}`);
 
-      // 保存脚本到 Scriptable 的脚本目录中
-      console.log("[#] 开始安装脚本...");
-      fm.writeString(scriptPath, scriptContent);
-      console.log("[-] 脚本安装完成...");
+        if (thisVersion !== remoteVersion) {
+            const SCRIPT_DOWNLOAD_URL = `https://bb1026.github.io/bing/js/${scriptID}.js`;
+            const LOCAL_SCRIPT_PATH = iCloudFm.joinPath(iCloudFm.documentsDirectory(), `${scriptName}.js`);
 
-      console.log(
-        `<${scriptName}>脚本已成功安装！\n更新日期：${scriptUpdate}\n版本号：${remoteVersion}`
-      );
-      // 显示成功消息
-      const successAlert = new Alert();
-      successAlert.title = "成功";
-      successAlert.message = `<${scriptName}>脚本已成功安装！\n更新内容：${scriptUpdate}\n版本号：${remoteVersion}`;
-      successAlert.addAction("确定");
-      const runScript = await successAlert.present();
-      if (runScript === 0) {
-        // 强制关闭表格
-        Safari.open("scriptable:///run?scriptName=");
-      }
-      // 创建通知
-      let notification = new Notification();
-      notification.title = `<${scriptName}> 脚本已更新`;
-      notification.body = "点击此处重新运行脚本";
+            if (iCloudFm.fileExists(LOCAL_SCRIPT_PATH)) {
+                const alert = new Notification();
+                alert.title = "更新提示";
+                alert.body = `新版本: ${thisVersion} → ${remoteVersion}\n将覆盖安装 ${scriptName}`;
+                await alert.schedule();
+            }
 
-      // 添加点击通知后执行的操作
-      notification.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
-        scriptName
-      )}`;
-      console.log("继续运行新脚本...");
+            console.log("[*] 开始下载脚本...");
+            const scriptContent = await new Request(SCRIPT_DOWNLOAD_URL).loadString();
+            console.log("[+] 脚本下载完成");
 
-      // 显示通知
-      await notification.schedule();
-    } else {
-      console.log("脚本已是最新版本，无需更新。");
+            console.log("[#] 开始安装脚本...");
+            iCloudFm.writeString(LOCAL_SCRIPT_PATH, scriptContent);
+            console.log("[-] 脚本安装完成（iCloud）");
+
+            const successAlert = new Notification();
+            successAlert.title = "✅ 更新成功，点击重新启动脚本";
+            successAlert.body = `${scriptName} 已更新至 ${remoteVersion}\n更新内容: ${updateInfo}`;
+
+            successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`;
+            await successAlert.schedule();
+        } else {
+            console.log("✅ 脚本已是最新版本（iCloud）");
+        }
+    } catch (error) {
+        if (error.message.includes("Could not connect")) {
+            console.log("❌ 网络连接失败，请检查网络");
+        } else if (error.message.includes("writeString")) {
+            console.log("❌ 文件写入失败，请检查权限");
+        } else {
+            console.log("❌ 未知错误: " + error);
+        }
     }
-  } catch (error) {
-    console.log("❌连接失败\n取消本次更新");
-  }
 }
 
 module.exports = { installation };
