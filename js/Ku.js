@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v2.3";
+this.version = "v2.4";
 
 async function installation(scriptID, thisVersion) {
     const LOCAL_VER = this.version;
@@ -68,14 +68,19 @@ async function installation(scriptID, thisVersion) {
             const successAlert = new Notification();
             successAlert.title = "✅ 更新成功，点击重新启动脚本";
             successAlert.body = `${scriptName} 已更新至 ${remoteVersion}\n更新内容: ${updateInfo}`;
-
             successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`;
             await successAlert.schedule();
+
+            // 新增：立即停止当前脚本的执行
+            throw new Error("SCRIPT_UPDATE_COMPLETE");
         } else {
             console.log("✅ 脚本已是最新版本（iCloud）");
         }
     } catch (error) {
-        if (error.message.includes("Could not connect")) {
+        if (error.message === "SCRIPT_UPDATE_COMPLETE") {
+            // 这是预期的停止，不做任何处理
+            return;
+        } else if (error.message.includes("Could not connect")) {
             console.log("❌ 网络连接失败，请检查网络");
         } else if (error.message.includes("writeString")) {
             console.log("❌ 文件写入失败，请检查权限");
