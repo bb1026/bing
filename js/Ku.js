@@ -3,99 +3,140 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v2.4";
+this.version = "v3.0";
 
 async function installation(scriptID, thisVersion) {
-    const LOCAL_VER = this.version;
-    const KU_SCRIPT_URL = "https://bb1026.github.io/bing/js/Ku.js";
-    const MASTER_JSON_URL = "https://bb1026.github.io/bing/js/Master.json";
-    
-    // 1. Ku.js 存 Local
-    const localFm = FileManager.local();
-    // 2. 其他脚本存 iCloud
-    const iCloudFm = FileManager.iCloud();
+  const LOCAL_VER = this.version;
+  const KU_SCRIPT_URL = "https://bb1026.github.io/bing/js/Ku.js";
+  const MASTER_JSON_URL = "https://bb1026.github.io/bing/js/Master.json";
 
-    try {
-        // 1. 检查 Ku.js 更新（存 Local）
-        const remoteKuCode = await new Request(KU_SCRIPT_URL).loadString();
-        const REMOTE_VER = remoteKuCode.match(/version\s*=\s*["']([^"']+)["']/)?.[1];
-        
-        if (REMOTE_VER && LOCAL_VER !== REMOTE_VER) {
-            const updateAlert = new Notification();
-            updateAlert.title = "发现新版本数据库";
-            updateAlert.body = `✅ 数据库已更新到: ${REMOTE_VER}`;
-            await updateAlert.schedule();
-            
-            const kuScriptPath = localFm.joinPath(localFm.documentsDirectory(), "Ku.js");
-            await localFm.writeString(kuScriptPath, remoteKuCode);
-            console.log("✅ 数据库更新成功");
-        } else {
-            console.log("✅ 已是最新版");
-        }
+  // 1. Ku.js 存 Local
+  const localFm = FileManager.local();
+  // 2. 其他脚本存 iCloud
+  const iCloudFm = FileManager.iCloud();
 
-        // 2. 检查脚本更新（存 iCloud）
-        const scriptList = await new Request(MASTER_JSON_URL).loadJSON();
-        console.log("✔️ 连接成功，检查更新");
+  try {
+    // 1. 检查 Ku.js 更新（存 Local）
+    const remoteKuCode = await new Request(KU_SCRIPT_URL).loadString();
+    const REMOTE_VER = remoteKuCode.match(
+      /version\s*=\s*["']([^"']+)["']/
+    )?.[1];
 
-        const remoteScriptInfo = scriptList[scriptID];
-        if (!remoteScriptInfo) {
-            console.log(`❌ 未找到ID为 '${scriptID}' 的脚本信息`);
-            return;
-        }
+    if (REMOTE_VER && LOCAL_VER !== REMOTE_VER) {
+      const updateAlert = new Notification();
+      updateAlert.title = "发现新版本数据库";
+      updateAlert.body = `✅ 数据库已更新到: ${REMOTE_VER}`;
+      await updateAlert.schedule();
 
-        const { name: scriptName, update: updateInfo, version: remoteVersion } = remoteScriptInfo;
-        console.log(`📌 远程版本: ${remoteVersion}\n📌 本地版本: ${thisVersion}`);
-
-        if (thisVersion !== remoteVersion) {
-            const SCRIPT_DOWNLOAD_URL = `https://bb1026.github.io/bing/js/${scriptID}.js`;
-            const LOCAL_SCRIPT_PATH = iCloudFm.joinPath(iCloudFm.documentsDirectory(), `${scriptName}.js`);
-
-            if (iCloudFm.fileExists(LOCAL_SCRIPT_PATH)) {
-                const alert = new Notification();
-                alert.title = "更新提示";
-                alert.body = `新版本: ${thisVersion} → ${remoteVersion}\n将覆盖安装 ${scriptName}`;
-                await alert.schedule();
-            }
-
-            console.log("[*] 开始下载脚本...");
-            const scriptContent = await new Request(SCRIPT_DOWNLOAD_URL).loadString();
-            console.log("[+] 脚本下载完成");
-
-            console.log("[#] 开始安装脚本...");
-            iCloudFm.writeString(LOCAL_SCRIPT_PATH, scriptContent);
-            console.log("[-] 脚本安装完成（iCloud）");
-
-            const successAlert = new Notification();
-            successAlert.title = "✅ 更新成功，点击重新启动脚本";
-            successAlert.body = `${scriptName} 已更新至 ${remoteVersion}\n更新内容: ${updateInfo}`;
-            successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`;
-            await successAlert.schedule();
-
-            // 新增：立即停止当前脚本的执行
-            if (typeof Script !== 'undefined') {
-                Script.complete();
-            }
-            return;
-        } else {
-            console.log("✅ 脚本已是最新版本（iCloud）");
-        }
-    } catch (error) {
-        if (error.message.includes("Could not connect")) {
-            console.log("❌ 网络连接失败，请检查网络");
-        } else if (error.message.includes("writeString")) {
-            console.log("❌ 文件写入失败，请检查权限");
-        } else {
-            console.log("❌ 未知错误: " + error);
-        }
+      const kuScriptPath = localFm.joinPath(
+        localFm.documentsDirectory(),
+        "Ku.js"
+      );
+      await localFm.writeString(kuScriptPath, remoteKuCode);
+      console.log("✅ 数据库更新成功");
+    } else {
+      console.log("✅ 已是最新版");
     }
+
+    // 2. 检查脚本更新（存 iCloud）
+    const scriptList = await new Request(MASTER_JSON_URL).loadJSON();
+    console.log("✔️ 连接成功，检查更新");
+
+    const remoteScriptInfo = scriptList[scriptID];
+    if (!remoteScriptInfo) {
+      console.log(`❌ 未找到ID为 '${scriptID}' 的脚本信息`);
+      return;
+    }
+
+    const {
+      name: scriptName,
+      update: updateInfo,
+      version: remoteVersion
+    } = remoteScriptInfo;
+    console.log(`📌 远程版本: ${remoteVersion}\n📌 本地版本: ${thisVersion}`);
+
+    if (thisVersion !== remoteVersion) {
+      const SCRIPT_DOWNLOAD_URL = `https://bb1026.github.io/bing/js/${scriptID}.js`;
+      const LOCAL_SCRIPT_PATH = iCloudFm.joinPath(
+        iCloudFm.documentsDirectory(),
+        `${scriptName}.js`
+      );
+
+      if (iCloudFm.fileExists(LOCAL_SCRIPT_PATH)) {
+        const alert = new Notification();
+        alert.title = "更新提示";
+        alert.body = `新版本: ${thisVersion} → ${remoteVersion}\n将覆盖安装 ${scriptName}`;
+        await alert.schedule();
+      }
+
+      console.log("[*] 开始下载脚本...");
+      const rawScript = await new Request(SCRIPT_DOWNLOAD_URL).loadString();
+      const scriptContent = unwrapScript(rawScript);
+      // 移除自执行函数包装（仅当检测到这种模式时）
+      // 移除自执行函数包装（仅当检测到这种模式时）
+      function unwrapScript(content) {
+        const lines = content.trim().split("\n");
+
+        // 查找 async 包裹开始与结束行
+        const startIdx = lines.findIndex(line =>
+          line.match(/^\s*\(async\s*\(\)\s*=>\s*{\s*$/)
+        );
+        const endIdx = lines.findIndex(line => line.trim() === "})();");
+
+        // 若两者都找到，才进行解包
+        if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+          const before = lines.slice(0, startIdx); // 包裹前内容
+          const body = lines.slice(startIdx + 1, endIdx); // 包裹体内容
+          const after = lines.slice(endIdx + 1); // 包裹后内容
+
+          // 去除 body 中每行的缩进（2~4空格）
+          const unwrappedBody = body.map(line => line.replace(/^ {2,4}/, ""));
+
+          return [...before, ...unwrappedBody, ...after].join("\n").trim();
+        }
+
+        // 否则返回原内容
+        return content.trim();
+      }
+      console.log(scriptContent);
+
+      console.log("[+] 脚本下载完成");
+
+      console.log("[#] 开始安装脚本...");
+      iCloudFm.writeString(LOCAL_SCRIPT_PATH, scriptContent);
+      console.log("[-] 脚本安装完成（iCloud）");
+
+      const successAlert = new Notification();
+      successAlert.title = "✅ 更新成功，点击重新启动脚本";
+      successAlert.body = `${scriptName} 已更新至 ${remoteVersion}\n更新内容: ${updateInfo}`;
+      successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
+        scriptName
+      )}`;
+      await successAlert.schedule();
+
+      // 新增：立即停止当前脚本的执行
+      if (typeof Script !== "undefined") {
+        Script.complete();
+      }
+      return;
+    } else {
+      console.log("✅ 脚本已是最新版本（iCloud）");
+    }
+  } catch (error) {
+    if (error.message.includes("Could not connect")) {
+      console.log("❌ 网络连接失败，请检查网络");
+    } else if (error.message.includes("writeString")) {
+      console.log("❌ 文件写入失败，请检查权限");
+    } else {
+      console.log("❌ 未知错误: " + error);
+    }
+  }
 }
 
 module.exports = { installation };
 
 // 示例调用
 // await installation('yourScriptID', 'yourCurrentVersion');
-
-
 
 // 日历库
 /**
