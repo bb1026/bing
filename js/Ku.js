@@ -23,7 +23,7 @@ async function installation(scriptID, thisVersion) {
         if (REMOTE_VER && LOCAL_VER !== REMOTE_VER) {
             const updateAlert = new Notification();
             updateAlert.title = "发现新版本数据库";
-            updateAlert.body = `✅ 数据库更新成功\n当前: ${LOCAL_VER}\n最新: ${REMOTE_VER}`;
+            updateAlert.body = `当前: ${LOCAL_VER}\n最新: ${REMOTE_VER}`;
             await updateAlert.schedule();
             
             const kuScriptPath = localFm.joinPath(localFm.documentsDirectory(), "Ku.js");
@@ -72,15 +72,15 @@ async function installation(scriptID, thisVersion) {
             await successAlert.schedule();
 
             // 新增：立即停止当前脚本的执行
-            throw new Error("SCRIPT_UPDATE_COMPLETE");
+            if (typeof Script !== 'undefined') {
+                Script.complete();
+            }
+            return;
         } else {
             console.log("✅ 脚本已是最新版本（iCloud）");
         }
     } catch (error) {
-        if (error.message === "SCRIPT_UPDATE_COMPLETE") {
-            // 这是预期的停止，不做任何处理
-            return;
-        } else if (error.message.includes("Could not connect")) {
+        if (error.message.includes("Could not connect")) {
             console.log("❌ 网络连接失败，请检查网络");
         } else if (error.message.includes("writeString")) {
             console.log("❌ 文件写入失败，请检查权限");
