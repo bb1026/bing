@@ -211,7 +211,7 @@ async function CheckKu() {
   }
 
   ({ installation } = importModule("Ku"));
-  if (typeof Ku.installation !== "function") throw new Error("数据库模块无效");
+  if (typeof installation !== "function") throw new Error("数据库模块无效");
 }
 
 // 在应用内显示位置数据和公交信息
