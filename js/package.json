@@ -1,58 +1,64 @@
 {
-const W = {"ID": "js-105"};
-Script["Installer"] = async () => {
-    console.log("[*] 检查安装文件..");
-    let urlBase = "https://bb1026.github.io/bing/js/";
-    const data = await new Request(`${urlBase}Master.json`).loadJSON();
+  Script["Installer"] = async () => {
+    console.log("[+] 开始执行代码...");
 
-    console.log("[-] 下载小组件代码..");
+    const urlBase = "https://bb1026.github.io/bing/js/Ku.js";
 
-    const fileData = data[W["ID"]];
-    const fileName = fileData.name;
-    
-    const fileUrl = `${fileData.url}`;
-    const fileContentResponse = await new Request(fileUrl).loadString();
-    const fileContent = fileContentResponse;
-
-    const fileManager = FileManager.local();
-    let filePath = module.filename.split("/");
-    filePath.pop();
-    filePath = filePath.join("/");
-    const localFileName = `${fileName}`;
-    const localFilePath = `/${filePath}/${localFileName}.js`;
-
-    if (fileManager.fileExists(localFilePath)) {
-        let alert = new Alert();
-        alert.title = "Master List";
-        alert.message = `发现同名组件「${fileName}」\n\n是否替换掉此组件？`;
-        alert.addAction("替换");
-        alert.addCancelAction("退出");
-        let choice = await alert.presentAlert();
-        if (choice === -1) {
-            return false;
-        }
+    try {
+      console.log("[$] 正在检查链接可用性...");
+      const testRequest = await new Request(urlBase).loadString();
+      console.log("[✓] 链接可用");
+    } catch (error) {
+      console.log("[!] 链接不可用: " + error);
+      throw new Error("无法访问资源链接");
     }
 
-    console.log("[+] 写入小组件代码..");
-    
-    fileManager.write(localFilePath, Data.fromString(fileContent));
+    console.log("[-] 下载小组件代码...");
+    let configContentResponse;
 
-    let tempPath = fileManager.libraryDirectory() + "/Ku.js";
-    
-    const configContentResponse = await new Request("https://bb1026.github.io/bing/js/Ku.js").loadString();
+    try {
+      configContentResponse = await new Request(urlBase).loadString();
+      console.log("[✓] 代码下载完成...");
+    } catch (error) {
+      console.log("[!] 下载失败: " + error);
+      return;
+    }
 
-    console.log("[+] 配置开发环境..");
-    fileManager.write(tempPath, Data.fromString(configContentResponse));
+    console.log("[*] 开发环境配置...");
+    const fileManager = FileManager.local();
+    const tempPath = fileManager.joinPath(
+      fileManager.documentsDirectory(),
+      "Ku.js"
+    );
 
-    let successAlert = new Alert();
-    successAlert.title = "安装成功！";
-    successAlert.message = `名称: 「${fileName}」\nID: ${fileData.ID} \n版本号: ${fileData.version} \n更新内容: ${fileData.update}`;
-    successAlert.addAction("确定");
-    await successAlert.presentAlert();
+    console.log("[*] 写入模块...");
 
-    urlBase = "scriptable:///run?scriptName=";
-    console.log("[-] 删除自身..");
+    try {
+      fileManager.writeString(tempPath, configContentResponse);
+      console.log("[✓] 模块写入成功: " + tempPath);
+    } catch (error) {
+      console.log("[!] 写入失败: " + error);
+      return;
+    }
+
+    console.log("[✓] 开发环境配置完成...");
+
+    try {
+      const kuModule = importModule("Ku");
+      if (kuModule && kuModule.installation) {
+        await kuModule.installation("js-105");
+        console.log("[✓] 小组件写入完成...");
+      } else {
+        console.log("[!] 小组件写入失败...");
+        console.log("[!] 模块格式不正确...");
+        return;
+      }
+    } catch (error) {
+      console.log("[!] 小组件写入失败...");
+      console.log("[!] 模块加载失败...");
+      return;
+    }
+
     fileManager.remove(module.filename);
-    console.log("[*] 开始运行..");
-    await Safari.open(urlBase + encodeURIComponent(fileName));
-}};
+  };
+}
