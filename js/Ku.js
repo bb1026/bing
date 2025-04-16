@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v2.4";
+this.version = "v2.3";
 
 async function installation(scriptID, thisVersion) {
     const LOCAL_VER = this.version;
@@ -23,7 +23,7 @@ async function installation(scriptID, thisVersion) {
         if (REMOTE_VER && LOCAL_VER !== REMOTE_VER) {
             const updateAlert = new Notification();
             updateAlert.title = "发现新版本数据库";
-            updateAlert.body = `当前: ${LOCAL_VER}\n最新: ${REMOTE_VER}`;
+            updateAlert.body = `✅ 数据库更新成功\n当前: ${LOCAL_VER}\n最新: ${REMOTE_VER}`;
             await updateAlert.schedule();
             
             const kuScriptPath = localFm.joinPath(localFm.documentsDirectory(), "Ku.js");
