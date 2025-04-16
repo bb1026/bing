@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.0";
+this.version = "v3.1";
 
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
@@ -25,7 +25,7 @@ async function installation(scriptID, thisVersion) {
     if (REMOTE_VER && LOCAL_VER !== REMOTE_VER) {
       const updateAlert = new Notification();
       updateAlert.title = "发现新版本数据库";
-      updateAlert.body = `✅ 数据库已更新到: ${REMOTE_VER}`;
+      updateAlert.body = `✅ 数据库已更新: ${REMOTE_VER}`;
       await updateAlert.schedule();
 
       const kuScriptPath = localFm.joinPath(
@@ -53,7 +53,11 @@ async function installation(scriptID, thisVersion) {
       update: updateInfo,
       version: remoteVersion
     } = remoteScriptInfo;
-    console.log(`📌 远程版本: ${remoteVersion}\n📌 本地版本: ${thisVersion}`);
+console.log(
+  thisVersion
+    ? `📌 远程版本: ${remoteVersion}\n📌 本地版本: ${thisVersion}`
+    : `📌 远程版本: ${remoteVersion}`
+);
 
     if (thisVersion !== remoteVersion) {
       const SCRIPT_DOWNLOAD_URL = `https://bb1026.github.io/bing/js/${scriptID}.js`;
@@ -61,13 +65,6 @@ async function installation(scriptID, thisVersion) {
         iCloudFm.documentsDirectory(),
         `${scriptName}.js`
       );
-
-      if (iCloudFm.fileExists(LOCAL_SCRIPT_PATH)) {
-        const alert = new Notification();
-        alert.title = "更新提示";
-        alert.body = `新版本: ${thisVersion} → ${remoteVersion}\n将覆盖安装 ${scriptName}`;
-        await alert.schedule();
-      }
 
       console.log("[*] 开始下载脚本...");
       const rawScript = await new Request(SCRIPT_DOWNLOAD_URL).loadString();
