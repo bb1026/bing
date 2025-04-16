@@ -94,11 +94,9 @@ async function installation(scriptID, thisVersion) {
 
           return [...before, ...unwrappedBody, ...after].join("\n").trim();
         }
-
         // 否则返回原内容
         return content.trim();
       }
-      console.log(scriptContent);
 
       console.log("[+] 脚本下载完成");
 
