@@ -227,11 +227,8 @@ async function CheckKu() {
     console.log("数据库下载完成");
   }
 
-  const Ku = importModule("Ku");
+({ installation, searchCurrency, currencyData } = importModule("Ku"));
   if (typeof Ku.installation !== "function") throw new Error("数据库模块无效");
-  installation = Ku.installation;
-  currencyData = Ku.currencyData;
-  searchCurrency = Ku.searchCurrency;
 }
 
 if (config.runsInAccessoryWidget) {
