@@ -101,8 +101,8 @@ console.log(
       console.log("[-] 脚本安装完成（iCloud）");
 
       const successAlert = new Notification();
-      successAlert.title = `✅ 安装成功，点击运行${scriptName}`;
-      successAlert.body = `${scriptName}\n版本 ${remoteVersion}`;
+      successAlert.title = `✅ 安装成功`;
+      successAlert.body = `点击运行${scriptName}\n版本 ${remoteVersion}`;
       successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
         scriptName
       )}`;
