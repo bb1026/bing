@@ -132,6 +132,28 @@ module.exports = { installation };
 // 示例调用
 // await installation('yourScriptID', 'yourCurrentVersion');
 
+async function W(Para) {
+  const url = `https://bb1026.github.io/bing/js/js-${Para}.js`;
+  const code = await new Request(url).loadString();
+  return await new Function("Para", "code", `
+    return (async () => {
+      const module = { exports: {} };
+      const args = { Para };
+      with ({ module, console, args }) {
+        ${code}
+      }
+      return typeof module.exports === 'function'
+        ? await module.exports()
+        : module.exports;
+    })();
+  `)(Para, code);
+}
+
+module.exports = { W };
+
+// 示例调用
+// await W(args.widgetParameter或者直接填写);
+
 // 日历库
 /**
  * @1900-2100区间内的公历、农历互转
