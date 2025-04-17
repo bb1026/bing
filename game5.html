@@ -299,7 +299,10 @@
         steps++;
         stepsDisplay.textContent = steps;
         draw();
-        if (checkWin()) gameOver();
+        setTimeout(() => {
+          if (checkWin()) gameOver();
+        }
+        }, 100);
         return;
       }
     }
