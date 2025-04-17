@@ -16,14 +16,14 @@ await installation(this.widget_ID, this.version);
 
 // 站点代码及对应巴士代码
 const myBusCodes = [
-  { busstop: "Yishun Int", stopCode: "59009", busCodes: [800, 804, /*852*/] },
+  { busstop: "Yishun Int", stopCode: "59009", busCodes: [800, 804 /*852*/] },
   { busstop: "Blk 236", stopCode: "59241", busCodes: [804] },
   { busstop: "Blk 257", stopCode: "59249", busCodes: [800] },
-    { busstop: "Boon Lay Int", stopCode: "22009", busCodes: [246, 249] },
+  { busstop: "Boon Lay Int", stopCode: "22009", busCodes: [246, 249] },
   { busstop: "Bef Jln Tukang", stopCode: "21499", busCodes: [246] },
   { busstop: "Bef Intl Rd", stopCode: "21491", busCodes: [246] },
-  { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: [249] },
-//  { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: [858] }
+  { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: [249] }
+  //  { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: [858] }
 ];
 
 async function getStopArrivalInfo(stopId) {
@@ -192,7 +192,9 @@ async function createTable() {
   // 将已有的stopCode分组，手动选择站点
   const stopCodeGroups = [];
   for (let i = 0; i < myBusCodes.length; i += 3) {
-    stopCodeGroups.push(myBusCodes.slice(i, i + 3).map(item => [item.busstop, item.stopCode]));
+    stopCodeGroups.push(
+      myBusCodes.slice(i, i + 3).map(item => [item.busstop, item.stopCode])
+    );
   }
 
   // 创建行并添加到表格中
@@ -588,11 +590,13 @@ function handleArrivalInfo(stationInfo) {
   // 添加标题行
   let headerRow = new UITableRow();
   headerRow.isHeader = true;
-  let headerCell = headerRow.addText(`${stationName}( ${stationCode} ) ${new Date().toLocaleTimeString("en-US", {
-        hour12: false,
-        hour: "numeric",
-        minute: "numeric"
-      })}`);
+  let headerCell = headerRow.addText(
+    `${stationName}( ${stationCode} ) ${new Date().toLocaleTimeString("en-US", {
+      hour12: false,
+      hour: "numeric",
+      minute: "numeric"
+    })}`
+  );
   stationTable.addRow(headerRow);
 
   // 添加巴士到达信息行
@@ -618,11 +622,20 @@ async function CheckKu() {
   try {
     if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
       console.log("数据库异常，准备重新下载");
+      notify("数据库异常", "本地数据库无效，准备重新下载");
       needDownload = true;
     }
   } catch {
     console.log("数据库异常，准备重新下载");
+    notify("数据库异常", "读取数据库出错，准备重新下载");
     needDownload = true;
+  }
+
+  async function notify(title, body) {
+    const n = new Notification();
+    n.title = title;
+    n.body = body;
+    await n.schedule();
   }
 
   if (needDownload) {
@@ -631,7 +644,7 @@ async function CheckKu() {
     console.log("数据库下载完成");
   }
 
-({ installation } = importModule("Ku"));
+  ({ installation } = importModule("Ku"));
   if (typeof installation !== "function") throw new Error("数据库模块无效");
 }
 
