@@ -205,6 +205,7 @@ async function showwebview() {
   const webview = new WebView();
   await webview.loadURL("https://bb1026.github.io/bing/panda.html");
   return webview.present(true);
+  };
 async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
