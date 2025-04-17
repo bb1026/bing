@@ -26,13 +26,22 @@ if (!config.runsInApp) {
 const url = "https://www.hanshanmoney.com/zh/rate-cn/";
 const req = new Request(url);
 const reqdata = await req.loadString();
-const data = reqdata.replace(/<[^>]+>/g,'');
+const data = reqdata.replace(/<[^>]+>/g, "");
 
 // 解析日期、时间和汇率数据
-const riqi = data.match(/有效日期:.*/i)?.toString().replace(/ /g,'') || "日期信息不可用";
-const shijian = data.match(/更新时间:.*/i)?.toString().replace(/ /g,'') || "时间信息不可用";
-const huilvMatch = data.match(new RegExp(currency + '.*\n.*', 'i'));
-const huilv = huilvMatch?.toString().replace(/\n     /g, '') || "汇率信息不可用";
+const riqi =
+  data
+    .match(/有效日期:.*/i)
+    ?.toString()
+    .replace(/ /g, "") || "日期信息不可用";
+const shijian =
+  data
+    .match(/更新时间:.*/i)
+    ?.toString()
+    .replace(/ /g, "") || "时间信息不可用";
+const huilvMatch = data.match(new RegExp(currency + ".*\n.*", "i"));
+const huilv =
+  huilvMatch?.toString().replace(/\n     /g, "") || "汇率信息不可用";
 
 // 添加标题
 const titleText = widget.addText("汉生汇率");
@@ -52,7 +61,7 @@ stack.addText(huilv);
 if (config.runsInApp) {
   let wb = new WebView();
   await wb.loadURL(url);
-  await wb.present(true)
+  await wb.present(true);
 }
 
 // widget.presentMedium();
@@ -68,11 +77,20 @@ async function CheckKu() {
   try {
     if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
       console.log("数据库异常，准备重新下载");
+      notify("数据库异常", "本地数据库无效，准备重新下载");
       needDownload = true;
     }
   } catch {
     console.log("数据库异常，准备重新下载");
+    notify("数据库异常", "读取数据库出错，准备重新下载");
     needDownload = true;
+  }
+
+  async function notify(title, body) {
+    const n = new Notification();
+    n.title = title;
+    n.body = body;
+    await n.schedule();
   }
 
   if (needDownload) {
