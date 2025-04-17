@@ -107,32 +107,6 @@ module.exports = { installation };
 // 示例调用
 // await installation('yourScriptID', 'yourCurrentVersion');
 
-async function loadRemote(Pmeter) {
-  const code = await new Request(
-    `https://bb1026.github.io/bing/js/js-${Pmeter}.js`
-  ).loadString();
-  return await new Function(
-    "args",
-    "code",
-    `
-    return (async () => {
-      const module = { exports: {} };
-      with ({ module, console, args }) {
-        ${code}
-      }
-      return typeof module.exports === 'function'
-        ? await module.exports()
-        : module.exports;
-    })();
-  `
-  )(Pmeter ?? {}, code);
-}
-
-module.exports = { loadRemote };
-
-// 示例调用
-// await loadRemote(args.widgetParameter或者直接填写);
-
 // 日历库
 /**
  * @1900-2100区间内的公历、农历互转
