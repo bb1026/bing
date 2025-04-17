@@ -1,7 +1,6 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: teal; icon-glyph: calendar-alt;
-(async () => {
 this.name = "农历";
 this.widget_ID = "js-110";
 this.version = "v2.0";
@@ -507,4 +506,3 @@ async function CheckKu() {
     ({ installation, calendar } = importModule("Ku"));
   if (typeof installation !== "function") throw new Error("数据库模块无效");
 }
-})();
