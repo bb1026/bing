@@ -64,16 +64,14 @@ table.addRow(headerRow);
 for (let item of musicData) {
   let dataRow = new UITableRow();
   dataRow.addCell(UITableCell.text(item.song_title));
-  dataRow.addCell(UITableCell.text(item.singer));
-  
-  dataRow.onSelect = async () => {
+  dataRow.addCell(UITableCell.text(item.singer)); 
+  dataRow.onSelect = async() => {
     if (item.href) {
       const MP3URL = `https://www.fangpi.net/music/${item.href}`;
       console.log(`曲名:${item.song_title}, 歌手:${item.singer}, 链接:${MP3URL}`);
-        Safari.open(`quark://${MP3URL}`);
+      Safari.open(`quark://${MP3URL}`);
     }
-  };
-  
+  }; 
   table.addRow(dataRow);
 }
 
@@ -86,22 +84,30 @@ async function CheckKu() {
   try {
     if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
       console.log("数据库异常，准备重新下载");
+      notify("数据库异常", "本地数据库无效，准备重新下载");
       needDownload = true;
     }
   } catch {
     console.log("数据库异常，准备重新下载");
+    notify("数据库异常", "读取数据库出错，准备重新下载");
     needDownload = true;
   }
 
-  if (needDownload) {
-    fm.writeString(path, await new Request(url).loadString());
-    if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
-    console.log("数据库下载完成");
+  async function notify(title, body) {
+    const n = new Notification();
+    n.title = title;
+    n.body = body;
+    await n.schedule();
+
+    if (needDownload) {
+      fm.writeString(path, await new Request(url).loadString());
+      if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+      console.log("数据库下载完成");
+    }
+
+    ({ installation } = importModule("Ku"));
+    if (typeof installation !== "function") throw new Error("数据库模块无效");
   }
 
-({ installation } = importModule("Ku"));
-  if (typeof installation !== "function") throw new Error("数据库模块无效");
-}
-
-// 显示表格
-await table.present();
+  // 显示表格
+  await table.present();
