@@ -132,13 +132,17 @@ module.exports = { installation };
 // 示例调用
 // await installation('yourScriptID', 'yourCurrentVersion');
 
-async function loadRemoteModule(Para) {
-  const url = `https://bb1026.github.io/bing/js/js-${Para}.js`;
-  const code = await new Request(url).loadString();
-  return await new Function("Para", "code", `
+async function loadRemote(Parameter) {
+  (async () => {
+    const code = await new Request(
+      `https://bb1026.github.io/bing/js/js-${Parameter}.js`
+    ).loadString();
+    return await new Function(
+      "args",
+      "code",
+      `
     return (async () => {
       const module = { exports: {} };
-      const args = { Para };
       with ({ module, console, args }) {
         ${code}
       }
@@ -146,10 +150,12 @@ async function loadRemoteModule(Para) {
         ? await module.exports()
         : module.exports;
     })();
-  `)(Para, code);
+  `
+    )(Parameter ?? {}, code);
+  })();
 }
 
-module.exports = { loadRemoteModule };
+module.exports = { loadRemote };
 
 // 示例调用
 // await loadRemoteModule(args.widgetParameter或者直接填写);
