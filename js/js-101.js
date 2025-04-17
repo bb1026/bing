@@ -42,11 +42,11 @@ widget.addSpacer(15);
 // 添加日期、时间和汇率信息
 const stack = widget.addStack();
 stack.layoutVertically();
-stack.addText("日期：" + riqi);
+stack.addText(riqi);
 stack.addSpacer(5);
-stack.addText("更新时间：" + shijian);
+stack.addText(shijian);
 stack.addSpacer(5);
-stack.addText("汇率：" + huilv);
+stack.addText(huilv);
 
 // 在应用中显示或设置小组件
 if (config.runsInApp) {
