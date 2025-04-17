@@ -1,7 +1,6 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: red; icon-glyph: bus;
-(async () => {
 this.name = "附近的Bus SG";
 this.widget_ID = "js-107";
 this.version = "v1.5";
@@ -216,4 +215,3 @@ async function CheckKu() {
 
 // 在应用内显示位置数据和公交信息
 showLocationAndBusInfoInApp();
-})();
