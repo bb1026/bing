@@ -133,14 +133,13 @@ module.exports = { installation };
 // await installation('yourScriptID', 'yourCurrentVersion');
 
 async function loadRemote(Pmeter) {
-  (async () => {
-    const code = await new Request(
-      `https://bb1026.github.io/bing/js/js-${Pmeter}.js`
-    ).loadString();
-    return await new Function(
-      "args",
-      "code",
-      `
+  const code = await new Request(
+    `https://bb1026.github.io/bing/js/js-${Pmeter}.js`
+  ).loadString();
+  return await new Function(
+    "args",
+    "code",
+    `
     return (async () => {
       const module = { exports: {} };
       with ({ module, console, args }) {
@@ -151,8 +150,7 @@ async function loadRemote(Pmeter) {
         : module.exports;
     })();
   `
-    )(Pmeter ?? {}, code);
-  })();
+  )(Pmeter ?? {}, code);
 }
 
 module.exports = { loadRemote };
