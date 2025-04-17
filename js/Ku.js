@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.1";
+this.version = "v3.2";
 
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
