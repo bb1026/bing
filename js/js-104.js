@@ -177,6 +177,7 @@ async function CheckKu() {
     n.title = title;
     n.body = body;
     await n.schedule();
+    }
 
     if (needDownload) {
       fm.writeString(path, await new Request(url).loadString());
