@@ -1,7 +1,6 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: yellow; icon-glyph: magic;
-(async () => {
   this.name = "Birthday";
   this.widget_ID = "js-108";
   this.version = "v2.2";
@@ -371,4 +370,3 @@ async function CheckKu() {
     await table.present();
     logBirthdaysToConsole();
   }
-})();
