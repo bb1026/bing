@@ -23,20 +23,17 @@ const myBusCodes = [
     stopCode: "21491",
     busCodes: ["246"]
   },
-//   { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] },
+  //   { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] },
   { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: ["858"] }
 ];
 
 const fm = FileManager.local();
 
 const apiUrls = {
-  busRoutes:
-    "https://datamall2.mytransport.sg/ltaodataservice/BusRoutes?$skip=",
-  busServices:
-    "https://datamall2.mytransport.sg/ltaodataservice/BusServices?$skip=",
+  busRoutes: "https://datamall2.mytransport.sg/ltaodataservice/BusRoutes?$skip=",
+  busServices: "https://datamall2.mytransport.sg/ltaodataservice/BusServices?$skip=",
   busStops: "https://datamall2.mytransport.sg/ltaodataservice/BusStops?$skip=",
-  BusArrival:
-    "https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival?BusStopCode="
+  BusArrival: "https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival?BusStopCode="
 };
 
 const maxSkip = { busRoutes: 26000, busServices: 1000, busStops: 5500 };
@@ -151,8 +148,8 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) ** 2;
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -257,7 +254,7 @@ async function addNearestStops(latitude, longitude, busStops) {
           stop.distance * 1000
         ).toFixed(2)} m`
       );
-      stopRow.onSelect = async () => {
+      stopRow.onSelect = async() => {
         await createTable(stop.BusStopCode);
         table.present();
       };
@@ -305,7 +302,7 @@ async function addBusRoutes(busCode, busRoutes, busStops) {
       row.addText(route.BusStopCode).widthWeight = 30;
       row.addText(stopName).widthWeight = 70;
 
-      row.onSelect = async () => {
+      row.onSelect = async() => {
         await createTable(route.BusStopCode);
         table.present();
       };
@@ -325,7 +322,7 @@ async function addMyBusCodes(myBusCodes, busStops) {
     const stopRow = new UITableRow();
     stopRow.isHeader = true;
     stopRow.addText(`🚏 ${busstop} (${stopCode})`);
-    stopRow.onSelect = async () => {
+    stopRow.onSelect = async() => {
       await createTable(stopCode);
       table.present();
     };
@@ -372,20 +369,20 @@ async function createTable(
   }
 }
 
-refreshButton.onTap = async () => {
+refreshButton.onTap = async() => {
   await createTable(currentStopCode, currentBusCode, currentUseLocation);
 };
 
-updatebutton.onTap = async () => {
+updatebutton.onTap = async() => {
   await fetchAllData(true); // 获取最新数据
   await createTable(stopCode, busCode, useLocation);
 };
 
-cleanbutton.onTap = async () => {
+cleanbutton.onTap = async() => {
   await clearCache();
 };
 
-nearbyButton.onTap = async () => {
+nearbyButton.onTap = async() => {
   try {
     const loc = await Location.current();
     console.log(loc);
@@ -400,17 +397,17 @@ nearbyButton.onTap = async () => {
   }
 };
 
-searchStopButton.onTap = async () => {
+searchStopButton.onTap = async() => {
   const code = await promptUserForInput("stop");
   if (code) await createTable(code);
 };
 
-searchBusButton.onTap = async () => {
+searchBusButton.onTap = async() => {
   const code = await promptUserForInput("bus");
   if (code) await createTable(null, code);
 };
 
-favoriteBusButton.onTap = async () => {
+favoriteBusButton.onTap = async() => {
   await createTable();
 };
 
@@ -443,13 +440,13 @@ async function addBusArrivalRows(
     busNumberCell.font = Font.boldSystemFont(16);
 
     [service.NextBus, service.NextBus2, service.NextBus3]
-      .map(formatArrivalTime)
+    .map(formatArrivalTime)
       .forEach((text, index) => {
         const timeCell = row.addText(text);
         timeCell.widthWeight = 25;
         timeCell.font = Font.systemFont(14);
       });
-    row.onSelect = async () => {
+    row.onSelect = async() => {
       await showBusFirstLastTimes(busstop, stopCode, service.ServiceNo);
     };
 
@@ -560,7 +557,7 @@ async function showBusFirstLastTimes(busstop, stopCode, busCode) {
     const row = new UITableRow();
 
     let stopCodeCell = row.addText(route.busStopCode);
-    row.onSelect = async () => {
+    row.onSelect = async() => {
       await createTable(route.busStopCode);
     };
 
@@ -584,7 +581,7 @@ async function getArrivalInfoForStop(stopCode, busCodes) {
 
   const stopArrivalInfo = await getStopArrivalInfo(stopCode);
 
-  if (stopArrivalInfo?.Services?.length) {
+  if (stopArrivalInfo ? .Services ? .length) {
     for (const service of stopArrivalInfo.Services) {
       if (busCodes && busCodes.includes(service.ServiceNo)) {
         busArrivalInfo.push({
@@ -637,7 +634,7 @@ function getFormattedUpdateTime() {
 }
 
 function formatArrivalTime(bus) {
-  if (!bus?.EstimatedArrival) return "未发车";
+  if (!bus ? .EstimatedArrival) return "未发车";
 
   const arrival = new Date(bus.EstimatedArrival);
   const diff = Math.round((arrival - new Date()) / 60000);
@@ -668,7 +665,7 @@ async function createWidget() {
 
   const titleStack = widget.addStack();
   titleStack.layoutHorizontally();
-  
+
   const title = titleStack.addText("🚌 巴士到站信息 ");
   title.font = Font.boldSystemFont(16);
   title.textColor = Color.white();
@@ -687,7 +684,7 @@ async function createWidget() {
 
     widget.addSpacer(1);
 
-    if (stopArrivalInfo?.Services) {
+    if (stopArrivalInfo ? .Services) {
       for (const busCode of busCodes) {
         const service = stopArrivalInfo.Services.find(
           s => s.ServiceNo.trim() === busCode
@@ -703,7 +700,7 @@ async function createWidget() {
 
         if (service) {
           [service.NextBus, service.NextBus2, service.NextBus3]
-            .map(formatArrivalTime)
+          .map(formatArrivalTime)
             .forEach((text, i) => {
               if (i > 0) row.addSpacer(30);
               const timeText = row.addText(text);
@@ -772,11 +769,20 @@ async function CheckKu() {
   try {
     if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
       console.log("数据库异常，准备重新下载");
+      notify("数据库异常", "本地数据库无效，准备重新下载");
       needDownload = true;
     }
   } catch {
     console.log("数据库异常，准备重新下载");
+    notify("数据库异常", "读取数据库出错，准备重新下载");
     needDownload = true;
+  }
+
+  async function notify(title, body) {
+    const n = new Notification();
+    n.title = title;
+    n.body = body;
+    await n.schedule();
   }
 
   if (needDownload) {
@@ -795,7 +801,7 @@ if (config.runsInWidget) {
   Script.setWidget(widget);
 } else {
   let widget = await createWidget();
-//  widget.presentLarge();
+  //  widget.presentLarge();
   await createTable();
   table.present(true);
 }
