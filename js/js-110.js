@@ -6,7 +6,7 @@ this.widget_ID = "js-110";
 this.version = "v2.0";
 
 let installation;
-let calendarf
+let calendarf;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 
@@ -466,7 +466,7 @@ async function createCalendarWidget() {
     }
     widget.addSpacer();
   }
-  
+
   // 设置点击跳转到日历
   widget.url = "calshow://";
 
@@ -490,11 +490,20 @@ async function CheckKu() {
   try {
     if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
       console.log("数据库异常，准备重新下载");
+      notify("数据库异常", "本地数据库无效，准备重新下载");
       needDownload = true;
     }
   } catch {
     console.log("数据库异常，准备重新下载");
+    notify("数据库异常", "读取数据库出错，准备重新下载");
     needDownload = true;
+  }
+
+  async function notify(title, body) {
+    const n = new Notification();
+    n.title = title;
+    n.body = body;
+    await n.schedule();
   }
 
   if (needDownload) {
@@ -503,6 +512,6 @@ async function CheckKu() {
     console.log("数据库下载完成");
   }
 
-    ({ installation, calendar } = importModule("Ku"));
+  ({ installation, calendar } = importModule("Ku"));
   if (typeof installation !== "function") throw new Error("数据库模块无效");
 }
