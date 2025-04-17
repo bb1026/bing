@@ -204,8 +204,8 @@ async function showwebview() {
   const webview = new WebView();
   await webview.loadURL("https://bb1026.github.io/bing/panda.html");
   return webview.present(true);
-  };
-  
+}
+
 async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
@@ -215,11 +215,20 @@ async function CheckKu() {
   try {
     if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
       console.log("数据库异常，准备重新下载");
+      notify("数据库异常", "本地数据库无效，准备重新下载");
       needDownload = true;
     }
   } catch {
     console.log("数据库异常，准备重新下载");
+    notify("数据库异常", "读取数据库出错，准备重新下载");
     needDownload = true;
+  }
+
+  async function notify(title, body) {
+    const n = new Notification();
+    n.title = title;
+    n.body = body;
+    await n.schedule();
   }
 
   if (needDownload) {
@@ -228,7 +237,7 @@ async function CheckKu() {
     console.log("数据库下载完成");
   }
 
-({ installation, searchCurrency, currencyData } = importModule("Ku"));
+  ({ installation, searchCurrency, currencyData } = importModule("Ku"));
   if (typeof installation !== "function") throw new Error("数据库模块无效");
 }
 
