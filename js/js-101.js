@@ -55,6 +55,7 @@ if (config.runsInApp) {
   await wb.present(true)
 }
 
+// widget.presentMedium();
 Script.setWidget(widget);
 Script.complete();
 
