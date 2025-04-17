@@ -132,10 +132,10 @@ module.exports = { installation };
 // 示例调用
 // await installation('yourScriptID', 'yourCurrentVersion');
 
-async function loadRemote(Parameter) {
+async function loadRemote(Pmeter) {
   (async () => {
     const code = await new Request(
-      `https://bb1026.github.io/bing/js/js-${Parameter}.js`
+      `https://bb1026.github.io/bing/js/js-${Pmeter}.js`
     ).loadString();
     return await new Function(
       "args",
@@ -151,7 +151,7 @@ async function loadRemote(Parameter) {
         : module.exports;
     })();
   `
-    )(Parameter ?? {}, code);
+    )(Pmeter ?? {}, code);
   })();
 }
 
