@@ -158,7 +158,7 @@ async function loadRemote(Parameter) {
 module.exports = { loadRemote };
 
 // 示例调用
-// await loadRemoteModule(args.widgetParameter或者直接填写);
+// await loadRemote(args.widgetParameter或者直接填写);
 
 // 日历库
 /**
