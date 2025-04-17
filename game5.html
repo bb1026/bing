@@ -11,72 +11,46 @@
       background: #fafafa;
       margin: 0;
       padding: 0;
-      overflow-x: hidden;
     }
 
     h1 {
       margin-top: 20px;
-      font-size: 4vw;
+      font-size: 5vw;
     }
 
     #controls {
-      margin: 20px;
+      margin: 20px 0;
       display: flex;
-      justify-content: center;
-      align-items: center;
       flex-direction: column;
-    }
-
-    #puzzle {
-      display: grid;
-      gap: 5px;
-      margin: 0 auto;
-      width: max-content;
-      max-width: 90vw;
-    }
-
-    .tile {
-      color: white;
-      font-size: 4vw;
-      font-weight: bold;
-      border-radius: 6px;
-      display: flex;
       align-items: center;
-      justify-content: center;
-      width: 80px;
-      height: 80px;
-      transition: background 0.3s;
-      cursor: pointer;
     }
 
-    .empty {
-      background: #eeeeee !important;
-      cursor: default;
-    }
-
-    #colorSelector {
+    #sizeButtons {
       display: flex;
       justify-content: center;
-      margin-top: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
     }
 
-    .color-option {
-      width: 40px;
-      height: 40px;
+    .size-btn {
       margin: 5px;
-      border-radius: 50%;
+      padding: 10px 20px;
+      font-size: 4vw;
+      border: none;
+      border-radius: 8px;
+      background-color: #e0e0e0;
       cursor: pointer;
+      transition: background-color 0.3s;
     }
 
-    .selected-color {
-      border: 3px solid black;
+    .size-btn.selected {
+      background-color: #4db6ac;
+      color: white;
     }
 
-    #stats {
-      margin: 10px;
-      font-size: 3vw;
-      height: 24px;
-      padding: 10px;
+    .size-btn:disabled {
+      opacity: 0.6;
+      cursor: default;
     }
 
     #startBtn {
@@ -94,44 +68,76 @@
       background-color: #3a9e8c;
     }
 
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 6vw;
-      }
+    #colorSelector {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
 
-      .tile {
-        font-size: 6vw;
-        width: 20vw;
-        height: 20vw;
-      }
+    .color-option {
+      width: 40px;
+      height: 40px;
+      margin: 5px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #ccc;
+    }
 
-      #stats {
-        font-size: 4vw;
-      }
+    .color-option.selected-color {
+      border: 3px solid black;
+    }
 
-      #startBtn {
-        font-size: 5vw;
-        padding: 10px 20px;
-      }
+    #stats {
+      font-size: 4vw;
+      margin: 10px 0;
+      height: 30px;
+    }
+
+    #puzzle {
+      display: grid;
+      gap: 5px;
+      margin: 0 auto 30px;
+      width: 90vw;
+      max-width: 450px;
+      aspect-ratio: 1 / 1;
+    }
+
+    .tile {
+      color: white;
+      font-size: 5vw;
+      font-weight: bold;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 1 / 1;
+      background-color: #ccc;
+      transition: background 0.3s;
+      cursor: pointer;
+    }
+
+    .empty {
+      background: #eeeeee !important;
+      cursor: default;
     }
   </style>
 </head>
 <body>
 
 <h1>华容道</h1>
+
 <div id="controls">
-  <label for="sizeSelect">选择尺寸：</label>
-  <select id="sizeSelect">
-    <option value="3">3×3</option>
-    <option value="4">4×4</option>
-    <option value="5">5×5</option>
-    <option value="6">6×6</option>
-  </select>
+  <div id="sizeButtons">
+    <button class="size-btn selected" onclick="selectSize(3)">3×3</button>
+    <button class="size-btn" onclick="selectSize(4)">4×4</button>
+    <button class="size-btn" onclick="selectSize(5)">5×5</button>
+    <button class="size-btn" onclick="selectSize(6)">6×6</button>
+  </div>
   <button id="startBtn" onclick="toggleGame()">开始游戏</button>
 </div>
 
 <div id="colorSelector">
-  <div class="color-option" style="background-color: #4db6ac;" onclick="selectColor('#4db6ac')"></div>
+  <div class="color-option selected-color" style="background-color: #4db6ac;" onclick="selectColor('#4db6ac')"></div>
   <div class="color-option" style="background-color: #ff6347;" onclick="selectColor('#ff6347')"></div>
   <div class="color-option" style="background-color: #f39c12;" onclick="selectColor('#f39c12')"></div>
   <div class="color-option" style="background-color: #3498db;" onclick="selectColor('#3498db')"></div>
@@ -147,11 +153,9 @@
 
 <script>
   const puzzle = document.getElementById("puzzle");
-  const sizeSelect = document.getElementById("sizeSelect");
   const timeDisplay = document.getElementById("time");
   const stepsDisplay = document.getElementById("steps");
   const statusDisplay = document.getElementById("status");
-  const stats = document.getElementById("stats");
   const startBtn = document.getElementById("startBtn");
 
   let grid = [];
@@ -161,7 +165,7 @@
   let intervalId = null;
   let playing = false;
   let started = false;
-  let selectedColor = '#4db6ac'; // 默认颜色
+  let selectedColor = '#4db6ac';
 
   function toggleGame() {
     if (started) {
@@ -171,8 +175,31 @@
     }
   }
 
+  function selectSize(n) {
+    if (started) return;
+    size = n;
+    document.querySelectorAll('.size-btn').forEach(btn => {
+      btn.classList.remove('selected');
+    });
+    event.target.classList.add('selected');
+    drawEmptyGrid(size);
+  }
+
+  function selectColor(color) {
+    selectedColor = color;
+    document.querySelectorAll('.color-option').forEach(opt => {
+      opt.classList.remove('selected-color');
+    });
+    event.target.classList.add('selected-color');
+    const tiles = document.querySelectorAll('.tile');
+    tiles.forEach(tile => {
+      if (!tile.classList.contains('empty')) {
+        tile.style.backgroundColor = selectedColor;
+      }
+    });
+  }
+
   function startGame() {
-    size = parseInt(sizeSelect.value);
     const total = size * size;
     let numbers = [...Array(total - 1).keys()].map(n => n + 1).concat(0);
     do {
@@ -192,7 +219,8 @@
     timeDisplay.textContent = timer;
     stepsDisplay.textContent = steps;
     startBtn.textContent = "结束游戏";
-    sizeSelect.disabled = true;
+
+    document.querySelectorAll('.size-btn').forEach(btn => btn.disabled = true);
 
     clearInterval(intervalId);
     intervalId = setInterval(() => {
@@ -208,21 +236,8 @@
     playing = false;
     started = false;
     startBtn.textContent = "开始游戏";
-    sizeSelect.disabled = false;
-    drawEmptyGrid(parseInt(sizeSelect.value));
-  }
-
-  function drawEmptyGrid(s = 3) {
-    size = s;
-    puzzle.style.gridTemplateColumns = `repeat(${size}, 80px)`;
-    puzzle.innerHTML = '';
-    for (let i = 0; i < size * size; i++) {
-      const tile = document.createElement('div');
-      tile.className = 'tile';
-      tile.style.backgroundColor = '#eeeeee'; // 空白方块颜色
-      tile.style.width = tile.style.height = '80px';
-      puzzle.appendChild(tile);
-    }
+    document.querySelectorAll('.size-btn').forEach(btn => btn.disabled = false);
+    drawEmptyGrid(size);
   }
 
   function isSolvable(arr) {
@@ -240,20 +255,30 @@
     }
   }
 
+  function drawEmptyGrid(s = 3) {
+    size = s;
+    puzzle.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    puzzle.innerHTML = '';
+    for (let i = 0; i < size * size; i++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile empty';
+      puzzle.appendChild(tile);
+    }
+  }
+
   function draw() {
-    puzzle.style.gridTemplateColumns = `repeat(${size}, 80px)`;
+    puzzle.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     puzzle.innerHTML = '';
     for (let r = 0; r < size; r++) {
       for (let c = 0; c < size; c++) {
         const val = grid[r][c];
         const tile = document.createElement('div');
         tile.className = 'tile';
-        tile.style.width = tile.style.height = '80px';
         if (val === 0) {
           tile.classList.add('empty');
           tile.style.backgroundColor = '#eeeeee';
         } else {
-          tile.style.backgroundColor = selectedColor; // 使用选择的颜色
+          tile.style.backgroundColor = selectedColor;
           tile.textContent = val;
           tile.addEventListener('click', () => tryMove(r, c));
         }
@@ -264,12 +289,10 @@
 
   function tryMove(r, c) {
     if (!playing) return;
-
     const moves = [
       [r - 1, c], [r + 1, c],
       [r, c - 1], [r, c + 1]
     ];
-
     for (let [nr, nc] of moves) {
       if (nr >= 0 && nr < size && nc >= 0 && nc < size && grid[nr][nc] === 0) {
         [grid[r][c], grid[nr][nc]] = [grid[nr][nc], grid[r][c]];
@@ -297,19 +320,7 @@
     alert(`恭喜过关！用时 ${timer} 秒，步数 ${steps} 步！`);
   }
 
-  function selectColor(color) {
-    selectedColor = color;
-
-    // 改变所有方块颜色
-    const tiles = document.querySelectorAll('.tile');
-    tiles.forEach(tile => {
-      if (!tile.classList.contains('empty')) {
-        tile.style.backgroundColor = selectedColor;
-      }
-    });
-  }
-
-  // 页面加载时显示默认空白 3×3 背景
+  // 初始化显示
   drawEmptyGrid(3);
 </script>
 
