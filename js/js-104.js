@@ -43,7 +43,7 @@ const widgetcarton = widget.addStack();
 const widgetcarton1 = widgetcarton.addStack();
 widgetcarton1.layoutVertically();
 widgetcarton1.size = new Size(160, 160);
-if (dates.nWeek == 7 || dates.nWeek == 6){
+if (dates.nWeek == 7 || dates.nWeek == 6) {
   var txtcolor = Color.red()
 } else {
   var txtcolor = Color.black()
@@ -120,8 +120,8 @@ for (i = 0; i < 3; i++) {
     ctitle = events[i].title;
     sstartDate = events[i].startDate;
     textcolor = new Color(events[i].calendar.color.hex);
-//     daysLeft = (sstartDate - today) / (24 * 3600 * 1000);
-        daysLeft = Math.floor((sstartDate - today) / (24 * 3600 * 1000)) + 1;
+    //     daysLeft = (sstartDate - today) / (24 * 3600 * 1000);
+    daysLeft = Math.floor((sstartDate - today) / (24 * 3600 * 1000)) + 1;
     console.log(daysLeft);
     var timeText;
     if (daysLeft < 1) {
@@ -163,22 +163,30 @@ async function CheckKu() {
   try {
     if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
       console.log("数据库异常，准备重新下载");
+      notify("数据库异常", "本地数据库无效，准备重新下载");
       needDownload = true;
     }
   } catch {
     console.log("数据库异常，准备重新下载");
+    notify("数据库异常", "读取数据库出错，准备重新下载");
     needDownload = true;
   }
 
-  if (needDownload) {
-    fm.writeString(path, await new Request(url).loadString());
-    if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
-    console.log("数据库下载完成");
+  async function notify(title, body) {
+    const n = new Notification();
+    n.title = title;
+    n.body = body;
+    await n.schedule();
+
+    if (needDownload) {
+      fm.writeString(path, await new Request(url).loadString());
+      if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+      console.log("数据库下载完成");
+    }
+
+    ({ installation, calendar } = importModule("Ku"));
+    if (typeof installation !== "function") throw new Error("数据库模块无效");
   }
 
-({ installation, calendar } = importModule("Ku"));
-  if (typeof installation !== "function") throw new Error("数据库模块无效");
-}
-
-widgetcarton.addSpacer();
-widget.presentMedium();
+  widgetcarton.addSpacer();
+  widget.presentMedium();
