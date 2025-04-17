@@ -67,32 +67,7 @@ console.log(
       );
 
       console.log("[*] 开始下载脚本...");
-      const rawScript = await new Request(SCRIPT_DOWNLOAD_URL).loadString();
-      const scriptContent = unwrapScript(rawScript);
-
-      function unwrapScript(content) {
-        const lines = content.trim().split("\n");
-
-        // 查找 async 包裹开始与结束行
-        const startIdx = lines.findIndex(line =>
-          line.match(/^\s*\(async\s*\(\)\s*=>\s*{\s*$/)
-        );
-        const endIdx = lines.findIndex(line => line.trim() === "})();");
-
-        // 若两者都找到，才进行解包
-        if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-          const before = lines.slice(0, startIdx); // 包裹前内容
-          const body = lines.slice(startIdx + 1, endIdx); // 包裹体内容
-          const after = lines.slice(endIdx + 1); // 包裹后内容
-
-          // 去除 body 中每行的缩进（2~4空格）
-          const unwrappedBody = body.map(line => line.replace(/^ {2,4}/, ""));
-
-          return [...before, ...unwrappedBody, ...after].join("\n").trim();
-        }
-        // 否则返回原内容
-        return content.trim();
-      }
+      const scriptContent = await new Request(SCRIPT_DOWNLOAD_URL).loadString();
 
       console.log("[+] 脚本下载完成");
 
