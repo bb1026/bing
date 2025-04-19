@@ -184,7 +184,7 @@ async function showLocationAndBusInfoInApp() {
       table.addRow(busRow);
     }
   }
-  QuickLook.present(table);
+  table.present(true);
 }
 
 async function CheckKu() {
