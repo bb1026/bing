@@ -581,7 +581,7 @@ async function getArrivalInfoForStop(stopCode, busCodes) {
 
   const stopArrivalInfo = await getStopArrivalInfo(stopCode);
 
-  if (stopArrivalInfo ? .Services ? .length) {
+  if (stopArrivalInfo?.Services?.length) {
     for (const service of stopArrivalInfo.Services) {
       if (busCodes && busCodes.includes(service.ServiceNo)) {
         busArrivalInfo.push({
@@ -634,7 +634,7 @@ function getFormattedUpdateTime() {
 }
 
 function formatArrivalTime(bus) {
-  if (!bus ? .EstimatedArrival) return "未发车";
+  if (!bus?.EstimatedArrival) return "未发车";
 
   const arrival = new Date(bus.EstimatedArrival);
   const diff = Math.round((arrival - new Date()) / 60000);
@@ -684,7 +684,7 @@ async function createWidget() {
 
     widget.addSpacer(1);
 
-    if (stopArrivalInfo ? .Services) {
+    if (stopArrivalInfo?.Services) {
       for (const busCode of busCodes) {
         const service = stopArrivalInfo.Services.find(
           s => s.ServiceNo.trim() === busCode
