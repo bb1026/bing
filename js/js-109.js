@@ -95,7 +95,7 @@ const updateTimeCachePath = fm.joinPath(
 async function fetchAllData(forceUpdate = false) {
   try {
     const startNotification = new Notification();
-    startNotification.title = "数据更新";
+    startNotification.title = Script.name();
     startNotification.body = "正在更新数据，请稍候...";
     await startNotification.schedule();
 
@@ -113,12 +113,12 @@ async function fetchAllData(forceUpdate = false) {
 
     if (failedTasks.length === 0) {
       const endNotification = new Notification();
-      endNotification.title = "数据更新完成";
+      endNotification.title = Script.name();
       endNotification.body = "所有数据已成功更新！";
       await endNotification.schedule();
     } else {
       const errorNotification = new Notification();
-      errorNotification.title = "数据更新部分失败";
+      errorNotification.title = Script.name();
       errorNotification.body = `以下任务更新失败: ${failedTasks.join(", ")}`;
       await errorNotification.schedule();
     }
@@ -126,7 +126,7 @@ async function fetchAllData(forceUpdate = false) {
     console.log("数据更新任务完成");
   } catch (error) {
     const errorNotification = new Notification();
-    errorNotification.title = "数据更新失败";
+    errorNotification.title = Script.name();
     errorNotification.body = `更新数据时出错: ${error.message}`;
     await errorNotification.schedule();
 
