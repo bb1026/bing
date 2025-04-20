@@ -3,7 +3,7 @@
 // icon-color: cyan; icon-glyph: theater-masks;
 this.name = "Master List";
 this.widget_ID = "js-105";
-this.version = "v1.3";
+this.version = "v1.4";
 
 let installation;
 await CheckKu();
@@ -26,7 +26,7 @@ let clearText = clearKu.addText("清除数据库");
 clearText.titleColor = Color.red();
 clearText.centerAligned();
 
-clearKu.onSelect = function() {
+clearKu.onSelect = function () {
   const fm = FileManager.local();
   const KuName = "Ku.js";
   const scriptPath = fm.joinPath(fm.documentsDirectory(), KuName);
@@ -77,21 +77,24 @@ for (let script of sortedScripts) {
   TUPDATE.widthWeight = 40;
   TUPDATE.centerAligned();
 
-  row.onSelect = async() => {
+  row.onSelect = async () => {
     await installation(script.ID);
   };
   table.addRow(row);
 }
 
+const widget = new ListWidget();
+
 if (args.widgetParameter) {
-  (async() => {
-    const code = await new Request(
-      `https://bb1026.github.io/bing/js/js-${args?.widgetParameter}.js`
-    ).loadString();
-    return await new Function(
-      "args",
-      "code",
-      `
+  const paramValue = args.widgetParameter.split(";")[0];
+  try {
+    const url = scriptList[`js-${paramValue}`].url;
+    (async () => {
+      const code = await new Request(url).loadString();
+      return await new Function(
+        "args",
+        "code",
+        `
     return (async () => {
       const module = { exports: {} };
       with ({ module, console, args }) {
@@ -102,18 +105,18 @@ if (args.widgetParameter) {
         : module.exports;
     })();
   `
-    )(args ?? {}, code);
-  })();
+      )(args ?? {}, code);
+    })();
+  } catch (error) {
+    widget.addText("请检查Parameter").textColor = Color.red();
+    Script.setWidget(widget);
+  }
 } else {
-  const widget = new ListWidget();
-  widget.backgroundColor = new Color("#1C1C1E");
-  const title = widget.addText("长按小组件\n输入Parameter");
-  title.textColor = Color.white();
+  widget.addText("长按小组件\n输入Parameter").textColor;
+  Script.setWidget(widget);
   if (typeof table !== "undefined") {
     await table.present(true);
   }
-  Script.setWidget(widget);
-  //   widget.presentSmall()
 }
 
 async function CheckKu() {
@@ -139,14 +142,14 @@ async function CheckKu() {
     n.title = title;
     n.body = body;
     await n.schedule();
-    }
-
-    if (needDownload) {
-      fm.writeString(path, await new Request(url).loadString());
-      if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
-      console.log("数据库下载完成");
-    }
-
-    ({ installation } = importModule("Ku"));
-    if (typeof installation !== "function") throw new Error("数据库模块无效");
   }
+
+  if (needDownload) {
+    fm.writeString(path, await new Request(url).loadString());
+    if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+    console.log("数据库下载完成");
+  }
+
+  ({ installation } = importModule("Ku"));
+  if (typeof installation !== "function") throw new Error("数据库模块无效");
+}
