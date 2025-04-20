@@ -16,7 +16,7 @@ await installation(this.widget_ID, this.version);
 以下开始运行代码
 */
 
-const Moneycode = args.widgetParameter?.split(';')[1] ?? (/^\d+$/.test(args.widgetParameter) ? "CNY" : args.widgetParameter) ?? "CNY";
+const Moneycode = args.widgetParameter ? args.widgetParameter.includes(';') ? args.widgetParameter.split(';')[1]?.trim() || "CNY" : args.widgetParameter : "CNY";
 const rateurl = "https://prod.pandaremit.com/pricing/rate/SGD/" + Moneycode;
 const picurl = "https://bb1026.github.io/bing/imgs/Panda_Remit.JPG";
 const feeurl = "https://prod.pandaremit.com/web/ratefee/fee";
