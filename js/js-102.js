@@ -3,7 +3,7 @@
 // icon-color: deep-brown; icon-glyph: sync;
 this.name = "Panda Remit";
 this.widget_ID = "js-102";
-this.version = "v2.7";
+this.version = "v2.8";
 
 // 检查更新
 let installation;
@@ -16,7 +16,7 @@ await installation(this.widget_ID, this.version);
 以下开始运行代码
 */
 
-const Moneycode = args.widgetParameter || "CNY";
+const Moneycode = args.widgetParameter?.split(';')[1] ?? (/^\d+$/.test(args.widgetParameter) ? "CNY" : args.widgetParameter) ?? "CNY";
 const rateurl = "https://prod.pandaremit.com/pricing/rate/SGD/" + Moneycode;
 const picurl = "https://bb1026.github.io/bing/imgs/Panda_Remit.JPG";
 const feeurl = "https://prod.pandaremit.com/web/ratefee/fee";
@@ -43,7 +43,7 @@ async function fetchFeeData(targetCurrency, code) {
 }
 
 async function Code_Change(code) {
-  return currencyData[code].zh_currency_abbr;
+  return currencyData?.[code]?.zh_currency_abbr || code;
 }
 
 // 工具函数：加载图片（异步调用）
