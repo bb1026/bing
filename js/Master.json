@@ -23,10 +23,10 @@
   },
     "js-102": {
     "ID": "js-102",
-    "update": "增加手续费提醒",
+    "update": "修复代码",
     "name": "Panda Remit",
     "url": "https://bb1026.github.io/bing/js/js-102.js",
-    "version": "v2.7",
+    "version": "v2.8",
     "argsID": "102",
     "small": true,
     "medium": false,
