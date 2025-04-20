@@ -102,7 +102,7 @@ if (args.widgetParameter) {
         : module.exports;
     })();
   `
-    )(args ? ? {}, code);
+    )(args ?? {}, code);
   })();
 } else {
   const widget = new ListWidget();
