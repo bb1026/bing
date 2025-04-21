@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,6 +11,7 @@
             grid-template-columns: 1fr;
             gap: 10px;
             margin-top: 1rem;
+            font-family: Arial, sans-serif;
         }
 
         .cell {
@@ -17,7 +19,7 @@
             border: 1px solid var(--border-color);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         @media (min-width: 500px) {
@@ -327,8 +329,8 @@
             document.getElementById('timestamp-to-datetime-result').innerHTML = `
     <div class="grid-output">
       <div class="cell"><strong>格式:</strong><br>${type}</div>
-      <div class="cell"><strong>本地时间:</strong><br>${date.toLocaleString()}</div>
-      <div class="cell"><strong>UTC时间:</strong><br>${date.toUTCString()}</div>
+      <div class="cell"><strong>本地时间:</strong><br>${date.toString()}</div>
+      <div class="cell"><strong>UTC时间:</strong><br>${date.toUTCString()}+0000</div>
       <div class="cell"><strong>距离现在:</strong><br>${distanceDesc}</div>
     </div>
   `;
@@ -340,4 +342,5 @@
         }
     </script>
 </body>
+
 </html>
