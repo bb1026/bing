@@ -100,10 +100,10 @@
     },
     "js-109": {
     "ID": "js-109",
-    "update": "更新顶部菜单，\n刷新功能，\n优化代码",
+    "update": "增加定时刷新功能",
     "name": "BusGo",
     "url": "https://bb1026.github.io/bing/js/js-109.js",
-    "version": "v2.0",
+    "version": "v2.1",
     "argsID": "109",
     "small": false,
     "medium": false,
