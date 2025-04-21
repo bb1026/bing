@@ -14,8 +14,7 @@ let scriptList = await new Request(scriptListURL).loadJSON();
 // console.log(JSON.stringify(scriptList, null, 1))
 
 let sortedScripts = Object.values(scriptList).sort(
-  (a, b) => parseInt(a.ID.slice(3)) - parseInt(b.ID.slice(3))
-);
+  (a, b) => parseInt(a.ID.slice(3)) - parseInt(b.ID.slice(3)));
 
 let table = new UITable();
 table.showSeparators = true;
@@ -88,7 +87,14 @@ const widget = new ListWidget();
 if (args.widgetParameter) {
   const paramValue = args.widgetParameter.split(";")[0];
   try {
-    const url = scriptList[`js-${paramValue}`].url;
+    const paramData = scriptList[`js-${paramValue}`];
+let widgetSize = config.widgetFamily; 
+
+if (!paramData[widgetSize]) {
+  widget.addText(`当前小组件尺寸为 ${widgetSize}，不支持这个尺寸。`);
+  Script.setWidget(widget);
+}
+    const url = paramData.url;
     (async () => {
       const code = await new Request(url).loadString();
       return await new Function(
@@ -115,7 +121,7 @@ if (args.widgetParameter) {
   widget.addText("长按小组件\n输入Parameter").textColor;
   Script.setWidget(widget);
   if (typeof table !== "undefined") {
-    await table.present(true);
+//     await table.present(true);
   }
 }
 
