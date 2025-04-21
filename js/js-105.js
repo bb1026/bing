@@ -91,7 +91,7 @@ if (args.widgetParameter) {
 let widgetSize = config.widgetFamily; 
 
 if (!paramData[widgetSize]) {
-  widget.addText(`当前小组件尺寸为 ${widgetSize}，不支持这个尺寸。`);
+  widget.addText(`不支持 ${widgetSize} 尺寸，请更换其它尺寸。`);
   Script.setWidget(widget);
 }
     const url = paramData.url;
@@ -121,7 +121,7 @@ if (!paramData[widgetSize]) {
   widget.addText("长按小组件\n输入Parameter").textColor;
   Script.setWidget(widget);
   if (typeof table !== "undefined") {
-//     await table.present(true);
+     await table.present(true);
   }
 }
 
