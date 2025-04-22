@@ -5,6 +5,8 @@ this.name = "Ku";
 this.widget_ID = "js-999";
 this.version = "v3.3";
 
+module.exports = { generateScriptsHTML, createHTMLContent, installation, currencyData, searchCurrency, calendar }
+
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
   const KU_SCRIPT_URL = "https://bb1026.github.io/bing/js/Ku.js";
@@ -102,16 +104,13 @@ console.log(
   }
 }
 
-module.exports = { installation };
-
 // 示例调用
 // await installation('yourScriptID', 'yourCurrentVersion');
 
 
 // 示例调用
 // const { generateScriptsHTML, createHTMLContent } = importModule('Ku');
-module.exports = {
-  generateScriptsHTML(scriptList) {
+async function generateScriptsHTML(scriptList) {
     let scriptsHTML = "";
     for (const key in scriptList) {
       const script = scriptList[key];
@@ -138,9 +137,9 @@ module.exports = {
       `;
     }
     return scriptsHTML;
-  },
+};
 
-  createHTMLContent(scriptsHTML) {
+async function createHTMLContent(scriptsHTML) {
     return `<!DOCTYPE html>
 <html>
 <head>
@@ -327,7 +326,6 @@ module.exports = {
   </script>
 </body>
 </html>`;
-  }
 };
 
 // 日历库
@@ -2788,10 +2786,6 @@ function searchCurrency(input) {
     }
     return searchResults;
 }
-
-// 导出模块
-module.exports = { currencyData, searchCurrency, calendar, installation };
-
 /* 示例查询，使用方法
 const { currencyData, searchCurrency } = importModule('Money Code Exchange')
 导入方法
