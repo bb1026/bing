@@ -5,7 +5,7 @@ this.name = "Ku";
 this.widget_ID = "js-999";
 this.version = "v3.3";
 
-module.exports = { generateScriptsHTML, createHTMLContent, installation, currencyData, searchCurrency, calendar }
+module.exports = { installation }
 
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
@@ -107,7 +107,7 @@ console.log(
 // 示例调用
 // await installation('yourScriptID', 'yourCurrentVersion');
 
-
+module.exports = { generateScriptsHTML, createHTMLContent }
 // 示例调用
 // const { generateScriptsHTML, createHTMLContent } = importModule('Ku');
 async function generateScriptsHTML(scriptList) {
@@ -334,6 +334,8 @@ async function createHTMLContent(scriptsHTML) {
  * @公历转农历：calendar.solar2lunar(1987,11,01); //[you can ignore params of prefix 0]
  * @农历转公历：calendar.lunar2solar(1987,09,10); //[you can ignore params of prefix 0]
  */
+module.exports = { calendar }
+
 const calendar = {
   /**
    * 农历1900-2100的润大小信息表
@@ -2786,6 +2788,8 @@ function searchCurrency(input) {
     }
     return searchResults;
 }
+
+module.exports = { currencyData, searchCurrency }
 /* 示例查询，使用方法
 const { currencyData, searchCurrency } = importModule('Money Code Exchange')
 导入方法
