@@ -812,7 +812,7 @@ if (config.runsInWidget) {
   timer.repeats = true;
   timer.timeInterval = 10000;
   timer.schedule(() => {
-    createTable();
+    createTable(currentStopCode, currentBusCode, currentUseLocation)
   });
 }
 Script.complete();
