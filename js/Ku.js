@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.2";
+this.version = "v3.3";
 
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
@@ -112,7 +112,7 @@ module.exports = { installation };
 // const { generateScriptsHTML, createHTMLContent } = importModule('Ku');
 module.exports = {
   generateScriptsHTML(scriptList) {
-    let scriptsHTML = '';
+    let scriptsHTML = "";
     for (const key in scriptList) {
       const script = scriptList[key];
       const small = script.small ? "✅" : "❌";
@@ -120,10 +120,10 @@ module.exports = {
       const large = script.large ? "✅" : "❌";
 
       scriptsHTML += `
-        <div class="script-container" data-id="${script.ID}">
+        <div class="script-container" data-id="${script.ID}" data-name="${script.name}">
           <div class="script-row">
-            <div class="script-id">${script.ID || ''}</div>
-            <div class="script-name">${script.name || ''}</div>
+            <div class="script-id">${script.argsID || ""}</div>
+            <div class="script-name">${script.name || ""}</div>
             <div class="script-support">
               <div class="support-icons">
                 <span class="support-icon">${large}</span>
@@ -132,7 +132,7 @@ module.exports = {
               </div>
             </div>
           </div>
-          <div class="update-row">${script.update || '无更新说明'}</div>
+          <div class="update-row">${script.update || "无更新说明"}</div>
           <div class="divider"></div>
         </div>
       `;
@@ -144,72 +144,89 @@ module.exports = {
     return `<!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     body {
-      font-family: -apple-system, sans-serif;
-      padding: 20px;
       margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: -apple-system, sans-serif;
     }
+
+    .fixed-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: white;
+    }
+
+    .scroll-container {
+      overflow-y: auto;
+      flex: 1;
+    }
+
     .clear-db {
       color: red;
       font-weight: bold;
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       cursor: pointer;
       padding: 10px;
       background-color: #f8f8f8;
       border-radius: 5px;
+      font-size: 20px;
     }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
+    
+    .header,.script-row {
+     display: grid;
+     grid-template-columns: 0.5fr 1.5fr 1fr;
+     align-items: center;
+     padding: 5px 0;
     }
+
     .header-item {
       flex: 1;
-      text-align: center;
-      font-weight: bold;
-    }
-    .script-container {
-      margin-bottom: 5px;
-    }
-    .script-row {
       display: flex;
-      justify-content: space-between;
-      margin-bottom: 5px;
+      flex-direction: column;
+      justify-content: center;
       align-items: center;
+      font-weight: bold;
+      font-size: 20px;
     }
-    .script-id, .script-name {
-      flex: 1;
-      text-align: center;
-      padding: 5px;
+
+    .header-item > div:first-child, .script-container {
+      margin-bottom: 5px;
     }
-    .script-support {
-      flex: 1;
-      text-align: center;
+
+    .script-id, .script-name, .script-support {
+     text-align: center;
+     font-size: 20px;
+     padding: 5px;
     }
+
     .support-icons {
       display: flex;
       justify-content: space-around;
-      padding: 0 8px;
+      width: 100%;
     }
+
     .support-icon {
       flex: 1;
-      font-size: 1em;
+      font-size: 0.9em;
       text-align: center;
     }
+
     .update-row {
       text-align: center;
-      font-size: 0.85em;
+      font-size: 1.2em;
       color: #666;
       margin: 5px 0;
       padding: 5px;
       background-color: #f5f5f5;
       border-radius: 3px;
     }
+
     .divider {
       border-bottom: 1px solid #eee;
       margin: 5px 0;
@@ -232,8 +249,10 @@ module.exports = {
     #overlay {
       display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(0,0,0,0.3);
       z-index: 998;
     }
@@ -250,7 +269,6 @@ module.exports = {
   </style>
 </head>
 <body>
-  <div class="clear-db" id="clearBtn">清除数据库</div>
 
   <div id="overlay"></div>
   <div id="popup">
@@ -258,23 +276,27 @@ module.exports = {
     <button onclick="hidePopup()">关闭</button>
   </div>
 
-  <div class="divider"></div>
-
-  <div class="header">
-    <div class="header-item">ID</div>
-    <div class="header-item">名称</div>
-    <div class="header-item">
-      <div>组件支持</div>
-      <div class="support-icons">
-        <span>大</span>
-        <span>中</span>
-        <span>小</span>
+  <div class="fixed-header">
+    <div class="clear-db" id="clearBtn">清除数据库</div>
+    <div class="divider"></div>
+    <div class="header">
+      <div class="header-item">ID</div>
+      <div class="header-item">名称</div>
+      <div class="header-item">
+        <div>组件支持</div>
+        <div class="support-icons">
+          <span>大</span>
+          <span>中</span>
+          <span>小</span>
+        </div>
       </div>
     </div>
+    <div class="divider"></div>
   </div>
-  <div class="divider"></div>
 
-  ${scriptsHTML}
+  <div class="scroll-container">
+    ${scriptsHTML}
+  </div>
 
   <script>
     function showPopup(message) {
@@ -297,8 +319,9 @@ module.exports = {
     containers.forEach(item => {
       item.addEventListener('click', () => {
         const id = item.dataset.id;
+        const name = item.dataset.name;
         window.clicked = id;
-        showPopup("正在安装脚本: " + id);
+        showPopup("正在安装脚本: " + id + name);
       });
     });
   </script>
