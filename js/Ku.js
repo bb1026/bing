@@ -16,8 +16,6 @@ function getUrls() {
 
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
-//   const KU_SCRIPT_URL = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
-//   const MASTER_JSON_URL = "https://raw.githubusercontent.com/bb1026/bing/main/js/Master.json";
 
   // 1. Ku.js 存 Local
   const localFm = FileManager.local();
@@ -69,7 +67,6 @@ console.log(
 );
 
     if (thisVersion !== remoteVersion) {
-//       const SCRIPT_DOWNLOAD_URL = `https://raw.githubusercontent.com/bb1026/bing/main/js/${scriptID}.js`;
       const SCRIPT_DOWNLOAD_URL = scriptList[`${scriptID}`].url;
       const LOCAL_SCRIPT_PATH = iCloudFm.joinPath(
         iCloudFm.documentsDirectory(),
@@ -117,33 +114,42 @@ console.log(
 
 
 async function generateScriptsHTML(scriptList) {
-    let scriptsHTML = "";
-    for (const key in scriptList) {
-      const script = scriptList[key];
+let scriptsHTML = "";
+
+    const scripts = Object.values(scriptList).sort((a, b) => {
+      const aID = parseInt(a.argsID || "0", 10);
+      const bID = parseInt(b.argsID || "0", 10);
+      return aID - bID;
+    });
+
+    for (const script of scripts) {
       const small = script.small ? "✅" : "❌";
       const medium = script.medium ? "✅" : "❌";
       const large = script.large ? "✅" : "❌";
 
       scriptsHTML += `
-        <div class="script-container" data-id="${script.ID}" data-name="${script.name}">
-          <div class="script-row">
-            <div class="script-id">${script.argsID || ""}</div>
-            <div class="script-name">${script.name || ""}</div>
-            <div class="script-support">
-              <div class="support-icons">
-                <span class="support-icon">${large}</span>
-                <span class="support-icon">${medium}</span>
-                <span class="support-icon">${small}</span>
-              </div>
+      <div class="script-container" data-id="${script.ID}" data-name="${
+        script.name
+      }">
+        <div class="script-row">
+          <div class="script-id">${script.argsID || ""}</div>
+          <div class="script-name">${script.name || ""}</div>
+          <div class="script-support">
+            <div class="support-icons">
+              <span class="support-icon">${large}</span>
+              <span class="support-icon">${medium}</span>
+              <span class="support-icon">${small}</span>
             </div>
           </div>
-          <div class="update-row">${script.update || "无更新说明"}</div>
-          <div class="divider"></div>
         </div>
-      `;
+        <div class="update-row">${script.update || "无更新说明"}</div>
+        <div class="divider"></div>
+      </div>
+    `;
     }
+
     return scriptsHTML;
-};
+  };
 
 async function createHTMLContent(scriptsHTML) {
     return `<!DOCTYPE html>
@@ -282,6 +288,11 @@ async function createHTMLContent(scriptsHTML) {
   </div>
 
   <div class="fixed-header">
+  
+  <marquee behavior="scroll" direction="left" scrollamount="5" style="color: #007AFF; font-size: 18px; padding: 5px 10px;">
+    欢迎使用脚本中心，点击下方脚本以安装，点击“清除数据库”以重置数据库。
+  </marquee>
+  
     <div class="clear-db" id="clearBtn">清除数据库</div>
     <div class="divider"></div>
     <div class="header">
