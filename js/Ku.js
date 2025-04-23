@@ -5,10 +5,19 @@ this.name = "Ku";
 this.widget_ID = "js-999";
 this.version = "v3.3";
 
+function getUrls() {
+  const BASE_URL = "https://raw.githubusercontent.com/bb1026/bing/main/js/"
+  return {
+    KU_SCRIPT_URL : `${BASE_URL}Ku.js`,
+    MASTER_JSON_URL : `${BASE_URL}Master.json`,
+    HTML_URL : `${BASE_URL}html.js`
+  };
+}
+
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
-  const KU_SCRIPT_URL = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
-  const MASTER_JSON_URL = "https://raw.githubusercontent.com/bb1026/bing/main/js/Master.json";
+//   const KU_SCRIPT_URL = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
+//   const MASTER_JSON_URL = "https://raw.githubusercontent.com/bb1026/bing/main/js/Master.json";
 
   // 1. Ku.js 存 Local
   const localFm = FileManager.local();
@@ -17,7 +26,7 @@ async function installation(scriptID, thisVersion) {
 
   try {
     // 1. 检查 Ku.js 更新（存 Local）
-    const remoteKuCode = await new Request(KU_SCRIPT_URL).loadString();
+    const remoteKuCode = await new Request(getUrls().KU_SCRIPT_URL).loadString();
     const REMOTE_VER = remoteKuCode.match(
       /version\s*=\s*["']([^"']+)["']/
     )?.[1];
@@ -39,7 +48,7 @@ async function installation(scriptID, thisVersion) {
     }
 
     // 2. 检查脚本更新（存 iCloud）
-    const scriptList = await new Request(MASTER_JSON_URL).loadJSON();
+    const scriptList = await new Request(getUrls().MASTER_JSON_URL).loadJSON();
     console.log("✔️ 连接成功，检查更新");
 
     const remoteScriptInfo = scriptList[scriptID];
@@ -60,7 +69,8 @@ console.log(
 );
 
     if (thisVersion !== remoteVersion) {
-      const SCRIPT_DOWNLOAD_URL = `https://raw.githubusercontent.com/bb1026/bing/main/js/${scriptID}.js`;
+//       const SCRIPT_DOWNLOAD_URL = `https://raw.githubusercontent.com/bb1026/bing/main/js/${scriptID}.js`;
+      const SCRIPT_DOWNLOAD_URL = scriptList[`${scriptID}`].url;
       const LOCAL_SCRIPT_PATH = iCloudFm.joinPath(
         iCloudFm.documentsDirectory(),
         `${scriptName}.js`
@@ -2786,7 +2796,7 @@ function searchCurrency(input) {
     return searchResults;
 }
 
-module.exports = { generateScriptsHTML, createHTMLContent, installation, currencyData, searchCurrency, calendar };
+module.exports = { generateScriptsHTML, createHTMLContent, installation, currencyData, searchCurrency, calendar, getUrls };
 
 /* 示例查询，使用方法
 const { currencyData, searchCurrency } = importModule('Money Code Exchange')
