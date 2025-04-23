@@ -119,5 +119,16 @@
     "small": true,
     "medium": true,
     "large": true
+    },
+    "js-111": {
+    "ID": "js-111",
+    "update": "新发布，可以自动获取Token",
+    "name": "Simba",
+    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-111.js",
+    "version": "v1.0",
+    "argsID": "111",
+    "small": false,
+    "medium": false,
+    "large": true
     }
 }
