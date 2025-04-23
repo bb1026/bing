@@ -5,8 +5,7 @@ this.name = "Master List";
 this.widget_ID = "js-105";
 this.version = "v1.5";
 
-let installation;
-let getUrls;
+let installation, getUrls;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 
@@ -65,16 +64,15 @@ async function main() {
   const scriptList = await getScriptList();
 
   // 尝试从远程获取HTML模块
-  let generateScriptsHTML, createHTMLContent;
   try {
     const htmlScriptURL = getUrls().HTML_URL;
-    const htmlScriptCode = await new Request(htmlScriptURL).loadString();
+    const htmlScriptCode = await new Request(htmlScriptURL1).loadString();
     ({ generateScriptsHTML, createHTMLContent } = new Function(
       "return " + htmlScriptCode
     )());
   } catch (e) {
     // 远程获取失败时从Ku模块获取
-    ({ generateScriptsHTML, createHTMLContent } = importModule("Ku"));
+    let generateScriptsHTML, createHTMLContent;
   }
 
   const scriptsHTML = await generateScriptsHTML(scriptList);
@@ -163,6 +161,11 @@ async function CheckKu() {
     console.log("数据库下载完成");
   }
 
-  ({ installation, getUrls } = importModule("Ku"));
+  ({
+    installation,
+    getUrls,
+    generateScriptsHTML,
+    createHTMLContent
+  } = importModule("Ku"));
   if (typeof installation !== "function") throw new Error("数据库模块无效");
 }
