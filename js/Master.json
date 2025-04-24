@@ -130,5 +130,16 @@
     "small": false,
     "medium": false,
     "large": true
+    },
+    "js-112": {
+    "ID": "js-112",
+    "update": "首次发布，可以查看或者删除缓存。",
+    "name": "缓存清理工具",
+    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-112.js",
+    "version": "v1.0",
+    "argsID": "110",
+    "small": false,
+    "medium": false,
+    "large": true
     }
 }
