@@ -122,10 +122,10 @@
     },
     "js-111": {
     "ID": "js-111",
-    "update": "新发布，可以自动获取Token",
+    "update": "首次使用需要填入手机号码，后续也可以更换手机号码。",
     "name": "Simba",
     "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-111.js",
-    "version": "v1.0",
+    "version": "v1.1",
     "argsID": "111",
     "small": false,
     "medium": false,
