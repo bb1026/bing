@@ -3,14 +3,13 @@
 // icon-color: purple; icon-glyph: mobile-alt;
 this.name = "Simba";
 this.widget_ID = "js-111";
-this.version = "v1.0";
+this.version = "v1.1";
 
 let installation, getUrls;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 
-// 输入手机号码
-const phone = "";
+const PHONE_KEY = "tpg_phone_number";
 const AUTH_KEY = "AuthorizationToken";
 const GetUrl = "https://mag.tpgtelecom.com.sg/smag/api/v2/getPlan";
 
@@ -23,6 +22,7 @@ const COMMON_HEADERS = {
   Accept: "application/json"
 };
 
+// 主流程
 async function main() {
   let token = Keychain.contains(AUTH_KEY) ? Keychain.get(AUTH_KEY) : null;
   let response = await get(GetUrl, token);
@@ -35,7 +35,6 @@ async function main() {
     console.log("Token 过期，获取新的 Authorization...");
     token = await getNewAuthorization();
     if (token) {
-      Keychain.set(AUTH_KEY, token);
       console.log("新 Token 已存储，重新请求 API...");
       response = await get(GetUrl, token);
     } else {
@@ -54,6 +53,12 @@ async function get(url, token) {
 }
 
 async function getNewAuthorization() {
+  const phone = await getPhoneNumber();
+  if (!phone) {
+    console.log("❌ 未获取有效手机号");
+    return null;
+  }
+
   const otpSent = await sendOtp(phone);
   if (!otpSent) {
     console.log("OTP 发送失败");
@@ -67,7 +72,55 @@ async function getNewAuthorization() {
   }
 
   const token = await loginWithOtp(phone, otp);
+
+  if (token) {
+    Keychain.set(AUTH_KEY, token);
+    Keychain.set(PHONE_KEY, phone);
+  }
+
   return token;
+}
+
+let newNumber;
+newNumber = false;
+
+async function getPhoneNumber() {
+  const savedPhone = Keychain.contains(PHONE_KEY)
+    ? Keychain.get(PHONE_KEY)
+    : null;
+  if (!newNumber && savedPhone) {
+    return savedPhone;
+  }
+
+  const alert = new Alert();
+  alert.title = "输入手机号";
+  alert.message = "请输入8位数字的手机号";
+  const textField = alert.addTextField("手机号", savedPhone || "");
+  textField.setNumberPadKeyboard();
+
+  alert.addAction("确认");
+  alert.addCancelAction("取消");
+
+  const tappedIndex = await alert.present();
+
+  if (tappedIndex === 0) {
+    const phone = alert.textFieldValue(0).trim();
+    console.log("用户输入内容: " + phone);
+    if (/^\d{8}$/.test(phone)) {
+      return phone; // 不在此处保存到
+    } else {
+      const errorAlert = new Alert();
+      errorAlert.title = "输入错误";
+      errorAlert.message = "请输入8位数字";
+      errorAlert.addAction("重试");
+      await errorAlert.present();
+      return await getPhoneNumber();
+    }
+  }
+
+  console.log("用户取消了输入");
+  newNumber = false;
+  return null;
 }
 
 async function sendOtp(phoneNumber) {
@@ -95,7 +148,7 @@ async function getOtpFromUser() {
   alert.addCancelAction("取消");
 
   const index = await alert.present();
-  return index === 0 ? alert.textFieldValue(0) : null;
+  return index === 0 ? alert.textFieldValue(0).trim() : null;
 }
 
 async function loginWithOtp(username, otp) {
@@ -137,9 +190,12 @@ w.backgroundColor = new Color("#222222");
 console.log(JSON.stringify(Dashboard, null, 2));
 
 console.log(
-  "当前保存的 Authorization:" + Keychain.contains("AuthorizationToken")
-    ? Keychain.get("AuthorizationToken")
-    : "未找到"
+  "当前保存的 Authorization: " +
+    (Keychain.contains(AUTH_KEY) ? Keychain.get(AUTH_KEY) : "未找到")
+);
+
+console.log(
+  "手机号码: " + (Keychain.contains(PHONE_KEY) ? Keychain.get(PHONE_KEY) : null)
 );
 
 if (Dashboard?.success !== undefined && Dashboard.success) {
@@ -249,8 +305,9 @@ if (Dashboard?.success !== undefined && Dashboard.success) {
 
   const table = new UITable();
   const buttonRow1 = new UITableRow();
-  const button1 = buttonRow1.addButton("更新 Authorization");
+  const button1 = buttonRow1.addButton("更换号码");
   button1.onTap = async () => {
+    newNumber = true;
     await getNewAuthorization();
   };
   button2 = buttonRow1.addButton("充值");
@@ -311,7 +368,7 @@ if (Dashboard?.success !== undefined && Dashboard.success) {
     `总共短信: ${Local_textallowance}条\n已用短信: ${Local_textused}条\n剩余短信: ${Local_textremain}条`
   );
 
-  table.present(true);
+  table.present();
 } else {
   const notice = `请更新Authorization.`;
   gettextwidget(notice);
