@@ -1,5 +1,7 @@
 module.exports = {
   generateScriptsHTML(scriptList) {
+    const marqueeText = "欢迎使用脚本中心，请点击下方脚本以安装，点击“清除数据库”以重置，最新脚本: Simba话费查询系统(111),缓存清理小工具(112)。";
+    
     let scriptsHTML = "";
 
     const scripts = Object.values(scriptList).sort((a, b) => {
@@ -34,10 +36,10 @@ module.exports = {
     `;
     }
 
-    return scriptsHTML;
+    return { scriptsHTML, marqueeText };
   },
 
-  createHTMLContent(scriptsHTML) {
+  createHTMLContent(scriptsHTML, marqueeText) {
     return `<!DOCTYPE html>
 <html>
 <head>
@@ -175,8 +177,8 @@ module.exports = {
 
   <div class="fixed-header">
   
-<marquee behavior="scroll" direction="left" scrollamount="5" style="color: #007AFF; font-size: 18px; padding: 5px 10px;">
-    欢迎使用脚本中心，请点击下方脚本以安装，点击“清除数据库”以重置，最新脚本: Simba话费查询系统(编号111)。
+  <marquee behavior="scroll" direction="left" scrollamount="5" style="color: #007AFF; font-size: 18px; padding: 5px 10px;">
+${marqueeText}
   </marquee>  
   
     <div class="clear-db" id="clearBtn">清除数据库</div>
