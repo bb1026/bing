@@ -219,6 +219,14 @@ searchBusButton.widthWeight = 0;
 const favoriteBusButton = buttonRow.addButton(buttonText7);
 favoriteBusButton.widthWeight = 0;
 
+const backRow = new UITableRow();
+const backtext = backRow.addText("退出");
+backtext.titleColor = Color.red();
+backtext.centerAligned();
+backRow.onSelect = async () => {
+  return; // 退出
+};
+
 async function initializeTable() {
   try {
     table.removeAllRows();
@@ -259,7 +267,7 @@ async function addNearestStops(latitude, longitude, busStops) {
       );
       stopRow.onSelect = async () => {
         await createTable(stop.BusStopCode);
-        table.present();
+        table.present(true);
       };
       table.addRow(stopRow);
       await addBusArrivalRows(table, null, stop.BusStopCode, null);
@@ -307,7 +315,7 @@ async function addBusRoutes(busCode, busRoutes, busStops) {
 
       row.onSelect = async () => {
         await createTable(route.BusStopCode);
-        table.present();
+        table.present(true);
       };
 
       table.addRow(row);
@@ -327,7 +335,7 @@ async function addMyBusCodes(myBusCodes, busStops) {
     stopRow.addText(`🚏 ${busstop} (${stopCode})`);
     stopRow.onSelect = async () => {
       await createTable(stopCode);
-      table.present();
+      table.present(true);
     };
     table.addRow(stopRow);
 
@@ -365,6 +373,7 @@ async function createTable(
     } else {
       await addMyBusCodes(myBusCodes, busStops);
     }
+    table.addRow(backRow); // 退出按钮
     table.reload();
   } catch (error) {
     console.error("创建表格时出错:", error);
@@ -559,24 +568,26 @@ async function showBusFirstLastTimes(busstop, stopCode, busCode) {
   for (const route of busRoute) {
     const row = new UITableRow();
 
-    let stopCodeCell = row.addText(route.busStopCode);
     row.onSelect = async () => {
       await createTable(route.busStopCode);
     };
-
+    
+    let stopCodeCell = row.addText(route.busStopCode);
     let stopNameCell = row.addText(route.stopName);
 
     stopCodeCell.widthWeight = 30;
     stopNameCell.widthWeight = 70;
 
     if (route.busStopCode === stopCode) {
-      stopCodeCell.titleFont = Font.boldSystemFont(16);
-      stopNameCell.titleFont = Font.boldSystemFont(16);
+      stopCodeCell.titleFont = Font.boldSystemFont(17);
+      stopNameCell.titleFont = Font.boldSystemFont(17);
+      stopCodeCell.titleColor = Color.blue();
+      stopNameCell.titleColor = Color.blue();
     }
     table.addRow(row);
   }
-
-  table.present();
+  table.addRow(backRow);
+  table.present(true);
 }
 
 async function getArrivalInfoForStop(stopCode, busCodes) {
@@ -766,7 +777,7 @@ async function promptUserForInput(type) {
 async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-  const url = "https://bb1026.github.io/bing/js/Ku.js";
+  const url = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
   let needDownload = false;
 
   try {
@@ -805,8 +816,10 @@ if (config.runsInWidget) {
 } else {
   let widget = await createWidget();
   //  widget.presentLarge();
+
   await createTable();
   table.present(true);
+  
   // 倒计时刷新间隔10秒(10000毫秒)
   const timer = new Timer();
   timer.repeats = true;
