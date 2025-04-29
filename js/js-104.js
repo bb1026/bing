@@ -157,7 +157,7 @@ for (i = 0; i < 3; i++) {
 async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-  const url = "https://bb1026.github.io/bing/js/Ku.js";
+  const url = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
   let needDownload = false;
 
   try {
