@@ -316,7 +316,7 @@ async function createHTMLContent(scriptsHTML) {
 
   <script>
     function showPopup(message) {
-      document.getElementById('popup-message').textContent = message;
+      document.getElementById('popup-message').innerHTML = message;
       document.getElementById('popup').style.display = 'block';
       document.getElementById('overlay').style.display = 'block';
     }
@@ -337,7 +337,7 @@ async function createHTMLContent(scriptsHTML) {
         const id = item.dataset.id;
         const name = item.dataset.name;
         window.clicked = id;
-        showPopup("正在安装脚本: " + id + name);
+        showPopup("正在安装脚本<br>请退出查看<br>" + id + "<br>" + name);
       });
     });
   </script>
