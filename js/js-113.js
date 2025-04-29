@@ -10,7 +10,7 @@ await CheckKu();
 await installation(this.widget_ID, this.version);
 
 // 控制圆形(1)
-const useCircleStyle = args.widgetParameter?.includes(";") ? args.widgetParameter.split(";")[1]?.trim() : args.widgetParameter || 1;
+const useCircleStyle = args.widgetParameter?.includes(";") ? args.widgetParameter.split(";")[1].trim() : args.widgetParameter || 1;
 
 const today = new Date();
 const year = today.getFullYear();
