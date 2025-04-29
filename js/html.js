@@ -222,7 +222,7 @@ module.exports = {
         const id = item.dataset.id;
         const name = item.dataset.name;
         window.clicked = id;
-        showPopup("正在安装脚本<br>请退出查看<br>" + id + "<br>" + name);
+        showPopup("脚本ID: " + id + "<br>" + "脚本名称: " + name + "<br>正在安装脚本...<br>请退出查看");
       });
     });
   </script>
