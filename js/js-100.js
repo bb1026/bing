@@ -7,6 +7,7 @@ this.version = "v1.2";
 
 // 检查更新
 let installation;
+let getUrls;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 /* 
@@ -14,9 +15,7 @@ await installation(this.widget_ID, this.version);
 以下开始运行代码
 */
 
-const scriptListURL = "https://bb1026.github.io/bing/js/Master.json";
-
-let scriptList = await new Request(scriptListURL).loadJSON();
+let scriptList = await new Request(getUrls().MASTER_JSON_URL).loadJSON();
 if (scriptList[this.widget_ID]) {
   let scriptversion = scriptList[this.widget_ID].version;
   if (this.version !== scriptversion) {
@@ -65,16 +64,14 @@ if (!scriptID) {
   }
 }
 
-console.log(`脚本 ID: ${scriptID}`);
-
-const scriptURL = `https://bb1026.github.io/bing/js/${scriptID}.js`;
+console.log(scriptID);
 
 // 发起网络请求获取网页内容
-const req = new Request(scriptListURL);
+const req = new Request(getUrls().MASTER_JSON_URL);
 const responseBody = await req.loadJSON();
 
 // 获取用户输入的脚本信息
-const scriptInfo = responseBody[`${scriptID}`];
+const scriptInfo = responseBody[scriptID];
 
 if (scriptInfo) {
   const scriptName = scriptInfo.name;
@@ -97,7 +94,7 @@ if (scriptInfo) {
       // 用户选择覆盖安装，继续安装脚本
       console.log(`<${scriptName}>已经存在相同名称的脚本，覆盖安装中...`);
       // 下载脚本
-      const req = new Request(scriptURL);
+      const req = new Request(responseBody[scriptID].url);
       console.log("[*] 开始下载脚本...");
       const scriptContent = await req.loadString();
       console.log("[+] 脚本下载完成...");
@@ -138,7 +135,7 @@ if (scriptInfo) {
     }
   } else {
     // 下载脚本
-    const req = new Request(scriptURL);
+    const req = new Request(responseBody[scriptID].url);
     console.log("[*] 开始下载脚本...");
     const scriptContent = await req.loadString();
     console.log("[+] 脚本下载完成...");
@@ -200,6 +197,6 @@ async function CheckKu() {
       console.log("数据库下载完成");
     }
 
-    ({ installation } = importModule("Ku"));
+    ({ installation,getUrls } = importModule("Ku"));
     if (typeof installation !== "function") throw new Error("数据库模块无效");
   }
