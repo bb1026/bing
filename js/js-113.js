@@ -9,7 +9,8 @@ let installation;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 
-const useCircleStyle = Number(args.widgetParameter) || 1;
+// 控制圆形(1)
+const useCircleStyle = args.widgetParameter?.includes(";") ? args.widgetParameter.split(";")[1]?.trim() : args.widgetParameter || 1;
 
 const today = new Date();
 const year = today.getFullYear();
