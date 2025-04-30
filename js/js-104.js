@@ -153,6 +153,12 @@ for (i = 0; i < 3; i++) {
 }
 /*日历事件*/
 
+widgetcarton.addSpacer();
+
+Script.setWidget(widget);
+Script.complete();
+widget.presentMedium();
+
 async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
@@ -182,6 +188,3 @@ async function CheckKu() {
     if (typeof installation !== "function") throw new Error("数据库模块无效");
   }
 }
-
-  widgetcarton.addSpacer();
-  widget.presentMedium();
