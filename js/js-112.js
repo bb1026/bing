@@ -112,8 +112,13 @@ async function CheckKu() {
   const url = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
   let needDownload = false;
   try {
-    if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
-      console.log("数据库异常，准备重新下载");
+    try {
+    ({
+      installation, getUrls
+    } = importModule("Ku"));
+    
+    if (typeof installation !== "function") {
+      console.log("数据库模块无效，准备重新下载");
       needDownload = true;
     }
   } catch {
@@ -125,7 +130,7 @@ async function CheckKu() {
     fm.writeString(path, await new Request(url).loadString());
     if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
     console.log("数据库下载完成");
-  }
+
   ({
     installation,
     getUrls,
@@ -134,3 +139,4 @@ async function CheckKu() {
   } = importModule("Ku"));
   if (typeof installation !== "function") throw new Error("数据库模块无效");
   }
+}
