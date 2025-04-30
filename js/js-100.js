@@ -6,8 +6,7 @@ this.widget_ID = "js-100";
 this.version = "v1.2";
 
 // 检查更新
-let installation;
-let getUrls;
+let installation, getUrls;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 /* 
@@ -174,10 +173,7 @@ async function CheckKu() {
 
   try {
     ({
-      installation,
-      getUrls,
-      generateScriptsHTML,
-      createHTMLContent
+      installation, getUrls
     } = importModule("Ku"));
     
     if (typeof installation !== "function") {
@@ -194,7 +190,7 @@ async function CheckKu() {
       if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
       console.log("数据库下载完成");
 
-    ({ installation,getUrls } = importModule("Ku"));
+    ({ installation, getUrls } = importModule("Ku"));
     if (typeof installation !== "function") throw new Error("数据库模块无效");
   }
 }
