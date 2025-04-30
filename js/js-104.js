@@ -6,8 +6,7 @@ this.widget_ID = "js-104";
 this.version = "v2.0";
 
 // 检查更新
-let installation;
-let calendar;
+let installation, calendar;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 /* 
@@ -162,10 +161,7 @@ async function CheckKu() {
 
   try {
     ({
-      installation,
-      getUrls,
-      generateScriptsHTML,
-      createHTMLContent
+      installation, calendar
     } = importModule("Ku"));
     
     if (typeof installation !== "function") {
