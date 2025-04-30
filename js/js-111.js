@@ -487,20 +487,11 @@ async function CheckKu() {
   try {
     if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
       console.log("数据库异常，准备重新下载");
-      notify("数据库异常", "本地数据库无效，准备重新下载");
       needDownload = true;
     }
   } catch {
     console.log("数据库异常，准备重新下载");
-    notify("数据库异常", "读取数据库出错，准备重新下载");
     needDownload = true;
-  }
-
-  async function notify(title, body) {
-    const n = new Notification();
-    n.title = title;
-    n.body = body;
-    await n.schedule();
   }
 
   if (needDownload) {
