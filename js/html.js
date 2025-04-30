@@ -161,7 +161,7 @@ module.exports = {
       z-index: 998;
     }
 
-    #popup button {
+    #popup-buttons {
       gap: 30px;
       margin-top: 10px;
       padding: 8px 16px;
