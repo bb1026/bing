@@ -274,7 +274,7 @@ document.getElementById('clearBtn').addEventListener('click', () => {
       item.addEventListener('click', () => {
         const id = item.dataset.id;
         const name = item.dataset.name;
-        showPopup("正在安装脚本: <br>" + id + name, 'dual', id);
+        showPopup("正在安装脚本: " + name, 'dual', id);
       });
     });
     document.getElementById('searchInput').addEventListener('keydown', (e) => {
