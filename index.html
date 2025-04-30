@@ -81,7 +81,6 @@
         } else if (device === 'tablet') {
           frame.style.height = vh;
         } else {
-          // 桌面端：考虑顶部输入框高度后剩余的空间
           frame.style.height = vh;
         }
       }
@@ -112,7 +111,6 @@ document.getElementById("keyInput").value = "";
           });
       }
 
-      // 页面加载和窗口大小变化时都调整 iframe 大小
       window.addEventListener('load', adjustIframeSize);
       window.addEventListener('resize', adjustIframeSize);
     </script>
