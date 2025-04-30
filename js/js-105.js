@@ -3,7 +3,7 @@
 // icon-color: cyan; icon-glyph: theater-masks;
 this.name = "Master List";
 this.widget_ID = "js-105";
-this.version = "v1.5";
+this.version = "v1.6";
 
 let installation, getUrls;
 await CheckKu();
@@ -59,14 +59,13 @@ if (args.widgetParameter) {
   }
 }
 
-// 主函数
 async function main() {
   const scriptList = await getScriptList();
 
   // 尝试从远程获取HTML模块
   try {
     const htmlScriptURL = getUrls().HTML_URL;
-    const htmlScriptCode = await new Request(htmlScriptURL1).loadString();
+    const htmlScriptCode = await new Request(htmlScriptURL).loadString();
     ({ generateScriptsHTML, createHTMLContent } = new Function(
       "return " + htmlScriptCode
     )());
@@ -76,13 +75,12 @@ async function main() {
   }
 
   const scriptsHTML = await generateScriptsHTML(scriptList);
-  const htmlContent = await createHTMLContent(scriptsHTML);
+const htmlContent = await createHTMLContent(scriptsHTML, Object.values(scriptList));
 
   const webView = new WebView();
   await webView.loadHTML(htmlContent);
   await webView.present(true);
 
-  // 保持原有点击处理逻辑不变
   while (true) {
     const result = await webView.evaluateJavaScript("window.clicked || null");
     if (result) {
@@ -118,7 +116,6 @@ async function clearKu() {
   await notice.schedule();
 }
 
-// 获取脚本列表
 async function getScriptList() {
   try {
     const scriptListURL = getUrls().MASTER_JSON_URL;
