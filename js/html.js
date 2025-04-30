@@ -162,13 +162,19 @@ module.exports = {
     }
 
     #popup-buttons {
+      display: flex;
+      justify-content: center;
       gap: 30px;
       margin-top: 10px;
-      padding: 8px 16px;
-      border: none;
-      color: white;
-      border-radius: 8px;
+    }
+
+    #popup-buttons button {
       font-size: 15px;
+      padding: 10px 20px;
+      color: white;
+      background-color: #007AFF;
+      border: none;
+      border-radius: 8px;
     }
     
     .search-container {
