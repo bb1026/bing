@@ -102,7 +102,9 @@
               adjustIframeSize();
             } else {
               pageFrame.src = "";
-              pageFrame.contentWindow.document.write('<div style="text-align:center">暗号不对</div>');
+
+document.getElementById("keyInput").value = "";
+               pageFrame.contentWindow.document.write('<div style="text-align:center">暗号不对</div>');
             }
           })
           .catch(error => {
