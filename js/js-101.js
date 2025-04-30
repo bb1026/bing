@@ -75,6 +75,13 @@ async function CheckKu() {
   let needDownload = false;
 
   try {
+    ({
+      installation,
+      getUrls,
+      generateScriptsHTML,
+      createHTMLContent
+    } = importModule("Ku"));
+    
     if (typeof installation !== "function") {
       console.log("数据库模块无效，准备重新下载");
       needDownload = true;
