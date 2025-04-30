@@ -312,14 +312,14 @@ async function createHTMLContent(scriptsHTML, scripts) {
   </div>
 
   <div class="fixed-header">
-    <marquee behavior="scroll" direction="left" scrollamount="8" style="color: #007AFF; font-size: 18px; padding: 5px 10px;">
-      欢迎使用脚本中心，请点击下方脚本以安装。最新脚本: Simba话费查询系统(111),缓存清理工具(112)。
+    <marquee behavior="scroll" direction="left" scrollamount="3" style="color: #007AFF; font-size: 18px; padding: 5px 10px;">
+      欢迎使用脚本中心，请点击下方脚本以安装。
     </marquee>  
     
     <div class="clear-db" id="clearBtn">清除数据库</div>
     <!-- 添加在清除按钮下方 -->
     <div class="search-container">
-      <input type="text" id="searchInput" placeholder="输入关键词并按回车" />
+      <input type="text" id="searchInput" placeholder="输入ID并按回车" />
     </div>
     
     <div class="divider"></div>
