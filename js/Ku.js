@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.5";
+this.version = "v3.6";
 
 function getUrls() {
   const BASE_URL = "https://raw.githubusercontent.com/bb1026/bing/main/js/"
@@ -16,14 +16,10 @@ function getUrls() {
 
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
-
-  // 1. Ku.js 存 Local
   const localFm = FileManager.local();
-  // 2. 其他脚本存 iCloud
   const iCloudFm = FileManager.iCloud();
 
   try {
-    // 1. 检查 Ku.js 更新（存 Local）
     const remoteKuCode = await new Request(getUrls().KU_SCRIPT_URL).loadString();
     const REMOTE_VER = remoteKuCode.match(
       /version\s*=\s*["']([^"']+)["']/
@@ -65,30 +61,28 @@ console.log(
 );
 
     if (thisVersion !== remoteVersion) {
-      const SCRIPT_DOWNLOAD_URL = scriptList[`${scriptID}`].url;
-      const LOCAL_SCRIPT_PATH = iCloudFm.joinPath(
+    const SCRIPT_DOWNLOAD_URL = scriptList[scriptID].url;
+    const LOCAL_SCRIPT_PATH = iCloudFm.joinPath(
         iCloudFm.documentsDirectory(),
         `${scriptName}.js`
-      );
+    );
 
-      console.log("[*] 开始下载脚本...");
-      const scriptContent = await new Request(SCRIPT_DOWNLOAD_URL).loadString();
+    console.log("[*] 开始下载脚本...");
+    const scriptContent = await new Request(SCRIPT_DOWNLOAD_URL).loadString();
+    console.log("[+] 脚本下载完成");
 
-      console.log("[+] 脚本下载完成");
+    console.log("[#] 开始写入脚本...");
+    iCloudFm.writeString(LOCAL_SCRIPT_PATH, scriptContent);
+    console.log("[-] 脚本安装完成（iCloud）");
 
-      console.log("[#] 开始安装脚本...");
-      iCloudFm.writeString(LOCAL_SCRIPT_PATH, scriptContent);
-      console.log("[-] 脚本安装完成（iCloud）");
+    const isUpdate = thisVersion !== undefined;
+    const successAlert = new Notification();
+    successAlert.title = `✅ ${isUpdate ? "更新成功" : "安装成功"}`;
+    successAlert.body = `点击运行 ${scriptName}\n版本 ${remoteVersion}`;
+    successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`;
+    await successAlert.schedule();
+}
 
-      const successAlert = new Notification();
-      successAlert.title = `✅ 安装成功`;
-      successAlert.body = `点击运行${scriptName}\n版本 ${remoteVersion}`;
-      successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
-        scriptName
-      )}`;
-      await successAlert.schedule();
-
-      // 新增：立即停止当前脚本的执行
       if (typeof Script !== "undefined") {
         Script.complete();
       }
