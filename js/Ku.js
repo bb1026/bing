@@ -379,7 +379,7 @@ async function createHTMLContent(scriptsHTML, scripts) {
       item.addEventListener('click', () => {
         const id = item.dataset.id;
         const name = item.dataset.name;
-        showPopup("正在安装脚本: <br>" + id + name, 'dual', id);
+        showPopup("确认安装脚本: " + name, 'dual', id);
       });
     });
 
