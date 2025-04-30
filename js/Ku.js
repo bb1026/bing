@@ -36,7 +36,7 @@ async function installation(scriptID, thisVersion) {
       await localFm.writeString(kuScriptPath, remoteKuCode);
       console.log("✅ 数据库更新成功");
     } else {
-      console.log(`数据库版本: ${this.version}\n✅ 已是最新版`);
+      console.log(`数据库版本: ${this.version}`);
     }
 
     // 2. 检查脚本更新（存 iCloud）
