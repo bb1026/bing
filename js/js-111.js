@@ -486,7 +486,7 @@ async function CheckKu() {
 
   try {
     ({
-      installation, getUrls,
+      installation
     } = importModule("Ku"));
     
     if (typeof installation !== "function") {
@@ -503,7 +503,7 @@ async function CheckKu() {
     if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
     console.log("数据库下载完成");
 
-  ({ installation, getUrls } = importModule("Ku"));
+  ({ installation } = importModule("Ku"));
   if (typeof installation !== "function") throw new Error("数据库模块无效");
   }
 }
