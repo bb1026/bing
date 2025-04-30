@@ -195,10 +195,7 @@ async function CheckKu() {
 
   try {
     ({
-      installation,
-      getUrls,
-      generateScriptsHTML,
-      createHTMLContent
+      installation
     } = importModule("Ku"));
     
     if (typeof installation !== "function") {
