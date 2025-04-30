@@ -151,13 +151,8 @@ for (i = 0; i < 3; i++) {
   event_time.textColor = eventdata().textcolor;
   widgetcarton2.addSpacer(2);
 }
-/*日历事件*/
-
 widgetcarton.addSpacer();
-
-Script.setWidget(widget);
-Script.complete();
-widget.presentMedium();
+/*日历事件*/
 
 async function CheckKu() {
   const fm = FileManager.local();
@@ -188,3 +183,7 @@ async function CheckKu() {
     if (typeof installation !== "function") throw new Error("数据库模块无效");
   }
 }
+
+Script.setWidget(widget);
+Script.complete();
+widget.presentMedium();
