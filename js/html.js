@@ -257,7 +257,7 @@ module.exports = {
       hidePopup();
     }
     
-    document.getElementById('clearBtn').addEventListener('click', () => {
+document.getElementById('clearBtn').addEventListener('click', () => {
       showPopup("清除指令已发出...", 'single');
       window.clicked = 'clear';
     });
@@ -270,7 +270,6 @@ module.exports = {
         showPopup("正在安装脚本: <br>" + id + name, 'dual', id);
       });
     });
-
     document.getElementById('searchInput').addEventListener('keydown', (e) => {
       if (e.keyCode === 13) {
         const value = e.target.value.trim();
