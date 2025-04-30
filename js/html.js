@@ -166,7 +166,6 @@ module.exports = {
       margin-top: 10px;
       padding: 8px 16px;
       border: none;
-      background-color: #007AFF;
       color: white;
       border-radius: 8px;
       font-size: 15px;
