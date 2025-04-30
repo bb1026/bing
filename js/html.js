@@ -162,6 +162,7 @@ module.exports = {
     }
 
     #popup button {
+      gap: 30px;
       margin-top: 10px;
       padding: 8px 16px;
       border: none;
@@ -184,6 +185,7 @@ module.exports = {
       border: 1px solid #ccc;
       border-radius: 8px;
       box-sizing: border-box;
+      text-align: center;
     }
     
     @keyframes scroll {
