@@ -81,7 +81,6 @@ console.log(
     successAlert.body = `点击运行 ${scriptName}\n版本 ${remoteVersion}`;
     successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`;
     await successAlert.schedule();
-}
 
       if (typeof Script !== "undefined") {
         Script.complete();
