@@ -5,8 +5,7 @@ this.name = "农历";
 this.widget_ID = "js-110";
 this.version = "v2.0";
 
-let installation;
-let calendarf;
+let installation, calendar;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 
@@ -489,10 +488,7 @@ async function CheckKu() {
 
   try {
     ({
-      installation,
-      getUrls,
-      generateScriptsHTML,
-      createHTMLContent
+      installation, calendar
     } = importModule("Ku"));
     
     if (typeof installation !== "function") {
