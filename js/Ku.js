@@ -30,10 +30,8 @@ async function installation(scriptID, thisVersion) {
     )?.[1];
 
     if (REMOTE_VER && LOCAL_VER !== REMOTE_VER) {
-      const updateAlert = new Notification();
-      updateAlert.title = "发现新版本数据库";
-      updateAlert.body = `✅ 数据库已更新: ${REMOTE_VER}`;
-      await updateAlert.schedule();
+      console.log("发现新版本数据库");
+      console.log(`✅ 数据库已更新: ${REMOTE_VER}`);
 
       const kuScriptPath = localFm.joinPath(
         localFm.documentsDirectory(),
