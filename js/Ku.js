@@ -299,6 +299,11 @@ async function createHTMLContent(scriptsHTML, scripts) {
       border-radius: 8px;
       box-sizing: border-box;
     }
+    
+    @keyframes scroll {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
   </style>
 </head>
 <body>
@@ -312,9 +317,11 @@ async function createHTMLContent(scriptsHTML, scripts) {
   </div>
 
   <div class="fixed-header">
-    <marquee behavior="scroll" direction="left" scrollamount="3" style="color: #007AFF; font-size: 18px; padding: 5px 10px;">
-      欢迎使用脚本中心，请点击下方脚本以安装。
-    </marquee>  
+  <div class="marquee" style="color: #007AFF; font-size: 18px; padding: 5px 10px; white-space: nowrap; overflow: hidden;">
+  <div class="marquee-inner" style="display: inline-block; animation: scroll 10s linear infinite;">
+    欢迎使用，请点击下方ID或者搜索ID进行安装。
+  </div>
+  </div>
     
     <div class="clear-db" id="clearBtn">清除数据库</div>
     <!-- 添加在清除按钮下方 -->
