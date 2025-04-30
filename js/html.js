@@ -37,7 +37,7 @@ module.exports = {
     return scriptsHTML;
   },
 
-  createHTMLContent(scriptsHTML) {
+  createHTMLContent(scriptsHTML, scripts) {
     return `<!DOCTYPE html>
 <html>
 <head>
@@ -75,11 +75,12 @@ module.exports = {
       font-size: 20px;
     }
     
-    .header,.script-row {
-     display: grid;
-     grid-template-columns: 0.5fr 1.5fr 1fr;
-     align-items: center;
-     padding: 5px 0;
+    .header,
+    .script-row {
+      display: grid;
+      grid-template-columns: 0.5fr 1.5fr 1fr;
+      align-items: center;
+      padding: 5px 0;
     }
 
     .header-item {
@@ -92,14 +93,17 @@ module.exports = {
       font-size: 20px;
     }
 
-    .header-item > div:first-child, .script-container {
+    .header-item > div:first-child,
+    .script-container {
       margin-bottom: 5px;
     }
 
-    .script-id, .script-name, .script-support {
-     text-align: center;
-     font-size: 20px;
-     padding: 5px;
+    .script-id,
+    .script-name,
+    .script-support {
+      text-align: center;
+      font-size: 20px;
+      padding: 5px;
     }
 
     .support-icons {
@@ -138,9 +142,12 @@ module.exports = {
       background: white;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       z-index: 999;
       text-align: center;
+      max-width: 90vw;
+      min-width: 80%;
+      word-wrap: break-word;
     }
 
     #overlay {
@@ -150,7 +157,7 @@ module.exports = {
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0, 0, 0, 0.3);
       z-index: 998;
     }
 
@@ -163,22 +170,44 @@ module.exports = {
       border-radius: 8px;
       font-size: 15px;
     }
+    
+    .search-container {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 0 10px 10px;
+    }
+
+    #searchInput {
+      padding: 10px;
+      font-size: 18px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
   <div id="overlay"></div>
   <div id="popup">
     <p id="popup-message"></p>
-    <button onclick="hidePopup()">关闭</button>
+    <div id="popup-buttons">
+      <button id="confirmBtn" onclick="confirmPopup()">安装</button>
+      <button onclick="hidePopup()">关闭</button>
+    </div>
   </div>
 
   <div class="fixed-header">
-  
-  <marquee behavior="scroll" direction="left" scrollamount="8" style="color: #007AFF; font-size: 18px; padding: 5px 10px;">
-欢迎使用脚本中心，请点击下方脚本以安装。最新脚本: Simba话费查询系统(111),缓存清理工具(112)。
-  </marquee>  
-  
+    <marquee behavior="scroll" direction="left" scrollamount="8" style="color: #007AFF; font-size: 18px; padding: 5px 10px;">
+      欢迎使用脚本中心，请点击下方脚本以安装。最新脚本: Simba话费查询系统(111),缓存清理工具(112)。
+    </marquee>  
+    
     <div class="clear-db" id="clearBtn">清除数据库</div>
+    <!-- 添加在清除按钮下方 -->
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="输入关键词并按回车" />
+    </div>
+    
     <div class="divider"></div>
     <div class="header">
       <div class="header-item">ID</div>
@@ -200,19 +229,36 @@ module.exports = {
   </div>
 
   <script>
-    function showPopup(message) {
+    const allScripts = ${JSON.stringify(scripts)};
+
+    let currentScriptID = null;
+    
+    function showPopup(message, type = 'dual', id = null) {
       document.getElementById('popup-message').innerHTML = message;
       document.getElementById('popup').style.display = 'block';
       document.getElementById('overlay').style.display = 'block';
+      
+      currentScriptID = id;
+
+      const confirmBtn = document.getElementById('confirmBtn');
+      confirmBtn.style.display = type === 'single' ? 'none' : 'inline-block';
     }
 
     function hidePopup() {
       document.getElementById('popup').style.display = 'none';
       document.getElementById('overlay').style.display = 'none';
     }
-
+    
+    function confirmPopup() {
+      if (currentScriptID) {
+        window.clicked = currentScriptID;
+        console.log("已确认 ID:" + currentScriptID);
+      }
+      hidePopup();
+    }
+    
     document.getElementById('clearBtn').addEventListener('click', () => {
-      showPopup("清除指令已发出...");
+      showPopup("清除指令已发出...", 'single');
       window.clicked = 'clear';
     });
 
@@ -221,9 +267,54 @@ module.exports = {
       item.addEventListener('click', () => {
         const id = item.dataset.id;
         const name = item.dataset.name;
-        window.clicked = id;
-        showPopup("脚本ID: " + id + "<br>" + "脚本名称: " + name + "<br>正在安装脚本...<br>请退出查看");
+        showPopup("正在安装脚本: <br>" + id + name, 'dual', id);
       });
+    });
+
+    document.getElementById('searchInput').addEventListener('keydown', (e) => {
+      if (e.keyCode === 13) {
+        const value = e.target.value.trim();
+        window.searchValue = value;
+
+        if (value) {
+          const matchedScript = allScripts.find(s => s.argsID === value);
+          if (matchedScript) {
+            showPopup(
+              '<div style="font-weight:bold; font-size:18px; margin-bottom:15px;">匹配脚本</div>' +
+              '<div style="display: grid; grid-template-columns: 0.5fr 1.5fr 1fr; font-weight: bold; text-align: center; font-size: 16px; margin-bottom: 15px;">' +
+                '<div>ID</div>' +
+                '<div>名称</div>' +
+                '<div>' +
+                  '<div>组件支持</div>' +
+                  '<div style="display: flex; justify-content: space-around; font-weight: normal; margin-top: 5px;">' +
+                    '<span>大</span>' +
+                    '<span>中</span>' +
+                    '<span>小</span>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+              '<div style="display: grid; grid-template-columns: 0.5fr 1.5fr 1fr; text-align: center; font-size: 16px; margin-bottom: 15px;">' +
+                '<div>' + (matchedScript.argsID || matchedScript.ID) + '</div>' +
+                '<div>' + (matchedScript.name || '') + '</div>' +
+                '<div>' +
+                  '<div style="display: flex; justify-content: space-around;">' +
+                    '<span>' + (matchedScript.large ? '✅' : '❌') + '</span>' +
+                    '<span>' + (matchedScript.medium ? '✅' : '❌') + '</span>' +
+                    '<span>' + (matchedScript.small ? '✅' : '❌') + '</span>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+              '<div style="text-align: center; font-size: 1.2em; color: #666; margin: 5px 0; padding: 5px; background-color: #f5f5f5; border-radius: 3px;">' +
+                (matchedScript.update || '无更新说明') +
+              '</div>',
+              'dual',
+              matchedScript.ID
+            );
+          } else {
+            showPopup("未找到匹配的脚本: <br>" + value, 'single');
+          }
+        }
+      }
     });
   </script>
 </body>
