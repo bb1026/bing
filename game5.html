@@ -146,7 +146,7 @@
 <div id="stats">
   状态：<span id="status" style="display: inline-block; width: 4em;">未开始</span>
   用时：<span id="time" style="display: inline-block; width: 3em;">0</span> 秒
-  步数：<span id="steps" style="display: inline-block; width: 3em;">0</span>
+    步数：<span id="steps" style="display: inline-block; width: 3em;">0</span>
 </div>
 
 <div id="puzzle"></div>
@@ -299,10 +299,7 @@
         steps++;
         stepsDisplay.textContent = steps;
         draw();
-        setTimeout(() => {
-          if (checkWin()) gameOver();
-        }
-        }, 100);
+        if (checkWin()) gameOver();
         return;
       }
     }
