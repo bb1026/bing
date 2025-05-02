@@ -18,7 +18,8 @@ async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
   const localFm = FileManager.local();
   const iCloudFm = FileManager.iCloud();
-
+  
+  remoteKuCode.timeoutInterval = 5;
   try {
     const remoteKuCode = await new Request(getUrls().KU_SCRIPT_URL).loadString();
     const REMOTE_VER = remoteKuCode.match(
