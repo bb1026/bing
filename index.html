@@ -12,7 +12,7 @@
       gtag('config', 'G-DJGT6TL1SB');
     </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>Bing的网站</title>
     <link rel="icon" href="imgs/logo.ico" type="image/x-icon">
     <style>
@@ -50,7 +50,7 @@
     <div id="keyInputContainer">
       <input type="text" autocomplete="off" id="keyInput" onkeydown="checkKey(event)">
     </div>
-    <iframe id="pageFrame"></iframe>
+    <iframe id="pageFrame" scrolling="no"></iframe>
 
     <script>
       function checkKey(event) {
@@ -114,6 +114,14 @@ document.getElementById("keyInput").value = "";
 
       window.addEventListener('load', adjustIframeSize);
       window.addEventListener('resize', adjustIframeSize);
+      
+      document.addEventListener('gesturestart', function(e) {
+        e.preventDefault();
+      });
+      
+      document.addEventListener('dblclick', function(e) {
+        e.preventDefault();
+      }, { passive: false });
     </script>
   </body>
 </html>
