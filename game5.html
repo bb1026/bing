@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>华容道</title>
   <style>
     body {
@@ -317,7 +317,10 @@
     playing = false;
     clearInterval(intervalId);
     statusDisplay.textContent = "已完成";
-    alert(`恭喜过关！用时 ${timer} 秒，步数 ${steps} 步！`);
+    setTimeout(() => {
+      alert(`恭喜过关！用时 ${timer} 秒，步数 ${steps} 步！`);
+      endGame();
+    }, 100);
   }
 
   // 初始化显示
