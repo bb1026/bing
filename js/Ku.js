@@ -19,9 +19,10 @@ async function installation(scriptID, thisVersion) {
   const localFm = FileManager.local();
   const iCloudFm = FileManager.iCloud();
   
-  remoteKuCode.timeoutInterval = 5;
+  const req = new Request(getUrls().KU_SCRIPT_URL);
+  req.timeoutInterval = 5;
   try {
-    const remoteKuCode = await new Request(getUrls().KU_SCRIPT_URL).loadString();
+    const remoteKuCode = await req.loadString();
     const REMOTE_VER = remoteKuCode.match(
       /version\s*=\s*["']([^"']+)["']/
     )?.[1];
