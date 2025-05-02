@@ -230,11 +230,11 @@ async function CheckKu() {
   }
 
   if (needDownload) {
-    const req = new Request(url);
-    req.req.timeoutInterval = 5;
-  try {
-    fm.writeString(path, await req.loadString());
-  if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+      const req = new Request(url);
+      req.req.timeoutInterval = 5;
+    try {
+      fm.writeString(path, await req.loadString());
+      if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
     console.log("数据库下载完成");
 
   ({ installation, searchCurrency, currencyData } = importModule("Ku"));
