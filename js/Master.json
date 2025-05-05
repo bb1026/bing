@@ -111,10 +111,10 @@
     },
     "js-110": {
     "ID": "js-110",
-    "update": "支持大中小三种组件",
+    "update": "修改一行显示两个事件",
     "name": "农历",
     "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-110.js",
-    "version": "v2.0",
+    "version": "v2.1",
     "argsID": "110",
     "small": true,
     "medium": true,
