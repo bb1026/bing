@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v2.0";
+this.version = "v2.1";
 
 let installation, calendar;
 await CheckKu();
@@ -388,7 +388,7 @@ async function createCalendarWidget() {
 
         // 事件圆点
         const dotCell = dateCell.addStack();
-        dotCell.size = new Size(40, 6);
+        dotCell.size = new Size(50, 6);
         dotCell.centerAlignContent();
 
         const dayStart = new Date(date);
@@ -412,7 +412,7 @@ async function createCalendarWidget() {
           // 添加前置 spacer 使圆点整体居中
           const totalWidth =
             shownColors.length * 6 + (shownColors.length - 1) * 2;
-          const remainingSpace = 40 - totalWidth;
+          const remainingSpace = 12 - totalWidth;
           if (remainingSpace > 0) {
             dotCell.addSpacer(remainingSpace / 2);
           }
@@ -446,27 +446,80 @@ async function createCalendarWidget() {
     // 事件列表
     const upcomingEvents = allEvents
       .filter(e => e.startDate >= weekStart && e.endDate <= weekEnd)
-      .sort((a, b) => a.startDate - b.startDate)
-      .slice(0, 5);
+      .sort((a, b) => a.startDate - b.startDate);
 
-    for (const event of upcomingEvents) {
-      const eventStack = widget.addStack();
+    let i = 0;
+    while (i < upcomingEvents.length) {
+      const event1 = upcomingEvents[i];
+      const eventTitle1 = formatTitle(event1);
+
+      if (eventTitle1.length > 8) {
+        const rowStack = widget.addStack();
+        rowStack.layoutHorizontally();
+        rowStack.topAlignContent();
+
+        addEventToStack(rowStack, event1, eventTitle1);
+
+        i += 1;
+      } else {
+        const rowStack = widget.addStack();
+        rowStack.layoutHorizontally();
+        rowStack.spacing = 16;
+        rowStack.topAlignContent();
+
+        for (let j = 0; j < 2; j++) {
+          const event = upcomingEvents[i + j];
+          if (!event) break;
+
+          const fullTitle = formatTitle(event);
+
+          if (j === 1 && fullTitle.length > 8) break;
+
+          const container = rowStack.addStack();
+          container.size = new Size(160, 15);
+          container.layoutVertically();
+          container.topAlignContent();
+
+          addEventToStack(container, event, fullTitle);
+        }
+
+        if (
+          i + 1 < upcomingEvents.length &&
+          formatTitle(upcomingEvents[i + 1]).length <= 8
+        ) {
+          i += 2;
+        } else {
+          i += 1;
+        }
+      }
+    }
+
+    function addEventToStack(stack, event, title) {
+      const eventStack = stack.addStack();
       eventStack.layoutHorizontally();
-      const bullet = eventStack.addText("    ● ");
+      eventStack.spacing = 4;
+      eventStack.setPadding(0, 10, 0, 10);
+
+      const bullet = eventStack.addText("●");
       bullet.textColor = new Color("#" + event.calendar.color.hex);
       bullet.font = Font.systemFont(12);
+
+      const titleText = eventStack.addText(title);
+      titleText.font = Font.systemFont(12);
+      titleText.textColor = COLORS.eventText;
+      titleText.lineLimit = 1;
+    }
+
+    function formatTitle(event) {
       const eventDate = event.startDate;
       const datePrefix = `${
         eventDate.getMonth() + 1
       }月${eventDate.getDate()}日 `;
-      const title = eventStack.addText(datePrefix + event.title);
-      title.font = Font.systemFont(12);
-      title.textColor = COLORS.eventText;
+      return datePrefix + event.title;
     }
     widget.addSpacer();
   }
 
-  // 设置点击跳转到日历
   widget.url = "calshow://";
 
   return config.runsInWidget
@@ -487,10 +540,8 @@ async function CheckKu() {
   let needDownload = false;
 
   try {
-    ({
-      installation, calendar
-    } = importModule("Ku"));
-    
+    ({ installation, calendar } = importModule("Ku"));
+
     if (typeof installation !== "function") {
       console.log("数据库模块无效，准备重新下载");
       needDownload = true;
@@ -501,17 +552,17 @@ async function CheckKu() {
   }
 
   if (needDownload) {
-        const req = new Request(url);
-        req.req.timeoutInterval = 5;
-      try {
-        fm.writeString(path, await req.loadString());
-        if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
-    console.log("数据库下载完成");
+    const req = new Request(url);
+    req.req.timeoutInterval = 5;
+    try {
+      fm.writeString(path, await req.loadString());
+      if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+      console.log("数据库下载完成");
 
-  ({ installation, calendar } = importModule("Ku"));
-  if (typeof installation !== "function") throw new Error("数据库模块无效");
-  } catch (error) {
-    console.error("请求失败:" + error.message);
+      ({ installation, calendar } = importModule("Ku"));
+      if (typeof installation !== "function") throw new Error("数据库模块无效");
+    } catch (error) {
+      console.error("请求失败:" + error.message);
     }
   }
 }
