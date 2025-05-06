@@ -111,13 +111,13 @@
   },
   "js-110": {
     "name": "农历",
-    "version": "v2.1",
+    "version": "v2.2",
     "ID": "js-110",
     "argsID": "110",
     "small": true,
     "medium": true,
     "large": true,
-    "update": "修改一行显示两个事件",
+    "update": "修复节假日不显示问题",
     "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-110.js"
   },
   "js-111": {
