@@ -1,9 +1,6 @@
-// Variables used by Scriptable.
-// These must be at the very top of the file. Do not edit.
-// icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v2.2";
+this.version = "v2.3";
 
 let installation, calendar;
 await CheckKu();
@@ -116,8 +113,8 @@ async function createCalendarWidget() {
   const widget = new ListWidget();
   widget.backgroundColor = COLORS.widgetBg;
   const widgetWidth = 350;
-  const today = new Date();
-  //   const today = new Date(2025,04,01);
+  //   const today = new Date();
+  const today = new Date(2025, 04, 01);
   const year = today.getFullYear();
   const month = today.getMonth();
   const dayOfWeek = today.getDay();
@@ -125,15 +122,15 @@ async function createCalendarWidget() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const widgetFamily = config.widgetFamily || "large"; /*small, medium, large*/
 
-  const weekStart = new Date(year, month, 1);
-  weekStart.setHours(0, 0, 0, 0);
-  const weekEnd = new Date(year, month + 1, 0);
-  weekEnd.setHours(23, 59, 59, 999);
+  const monthStart = new Date(year, month, 1);
+  monthStart.setHours(0, 0, 0, 0);
+  const monthEnd = new Date(year, month + 1, 0);
+  monthEnd.setHours(23, 59, 59, 999);
 
   let allEvents = [];
   try {
     const calendars = await Calendar.forEvents();
-    allEvents = await CalendarEvent.between(weekStart, weekEnd, calendars);
+    allEvents = await CalendarEvent.between(monthStart, monthEnd, calendars);
   } catch (error) {
     console.error("获取月事件失败:", error);
   }
@@ -176,10 +173,9 @@ async function createCalendarWidget() {
     }
 
     const lunarText = lunarRow.addText(lunarTextContent);
-    lunarText.font = Font.boldSystemFont(16);
     lunarText.textColor = isWeekend ? COLORS.weekend : COLORS.weekday;
-    lunarRow.addSpacer();
 
+    lunarRow.addSpacer();
     widget.addSpacer();
 
     // 添加事件
@@ -188,6 +184,11 @@ async function createCalendarWidget() {
     const end = new Date(today);
     end.setHours(23, 59, 59, 999);
     const upcoming = await getUpcomingEvents(start, end);
+
+    lunarText.font =
+      WidgetUtils.getIsTerm(today) || upcoming.length > 0
+        ? Font.boldSystemFont(15)
+        : Font.boldSystemFont(30);
 
     if (upcoming.length > 0) {
       const eventRow = widget.addStack();
@@ -200,11 +201,10 @@ async function createCalendarWidget() {
 
       for (const event of upcoming) {
         const eventText = eventStack.addText("● " + event.title);
-        eventText.font = Font.systemFont(14);
+        eventText.font = Font.systemFont(12);
         eventText.textColor = new Color("#" + event.color);
         eventText.lineLimit = 1;
       }
-
       eventRow.addSpacer();
     }
   } else if (widgetFamily === "medium") {
@@ -225,11 +225,12 @@ async function createCalendarWidget() {
     const weekRow = WidgetUtils.createCenteredRow(widget);
     WEEK_DAYS.forEach((day, i) => {
       const dayCell = weekRow.addStack();
-      dayCell.size = new Size(40, 20);
+      dayCell.size = new Size(45, 20);
       dayCell.centerAlignContent();
       WidgetUtils.createDateText(dayCell, day, WidgetUtils.isWeekend(i));
       if (i < 6) weekRow.addSpacer(5);
     });
+    widget.addSpacer(5);
 
     const dateRow = WidgetUtils.createCenteredRow(widget);
     const dotRow = WidgetUtils.createCenteredRow(widget);
@@ -245,7 +246,7 @@ async function createCalendarWidget() {
 
       // 日期单元格
       const dayCell = dateRow.addStack();
-      dayCell.size = new Size(40, 40);
+      dayCell.size = new Size(45, 20);
       dayCell.centerAlignContent();
       const dayText = WidgetUtils.createDateText(
         dayCell,
@@ -257,7 +258,7 @@ async function createCalendarWidget() {
 
       // 事件圆点
       const dotCell = dotRow.addStack();
-      dotCell.size = new Size(40, 6);
+      dotCell.size = new Size(45, 6);
       dotCell.centerAlignContent();
 
       const dayStart = new Date(dayDate);
@@ -283,26 +284,37 @@ async function createCalendarWidget() {
         }
       }
 
-      const festivalEvents = dayEvents.filter(event =>
-        event.title.includes("节")
-      );
-      let displayText = "";
-      if (festivalEvents.length > 0) {
-        displayText = festivalEvents[0].title.substring(0, 5);
-      }
-
       // 农历信息
       const lunarCell = lunarRow.addStack();
-      lunarCell.size = new Size(40, 40);
+      lunarCell.size = new Size(45, 30);
       const isTerm = WidgetUtils.getIsTerm(dayDate);
       const lunarDisplay = WidgetUtils.getLunarDisplayDate(
         dayDate,
         widgetFamily
       );
 
+      const daysEvents = allEvents.filter(
+        e => e.startDate >= dayStart && e.startDate <= dayEnd
+      );
+
+      let eventOutput = "";
+      if (
+        daysEvents.length > 0 &&
+        !daysEvents[0].calendar.title.includes("生日") &&
+        !daysEvents[0].calendar.title.toLowerCase().includes("birthday")
+      ) {
+        eventOutput += daysEvents[0].title;
+      } else if (
+        daysEvents.length > 1 &&
+        !daysEvents[1].calendar.title.includes("生日") &&
+        !daysEvents[1].calendar.title.toLowerCase().includes("birthday")
+      ) {
+        eventOutput += `\n${daysEvents[1].title}`;
+      }
+
       let displayContent = "";
-      if (displayText) {
-        displayContent = displayText;
+      if (eventOutput) {
+        displayContent = eventOutput;
       } else if (isTerm) {
         displayContent = WidgetUtils.getTerm(dayDate);
       } else {
@@ -312,11 +324,9 @@ async function createCalendarWidget() {
       const lunarText = lunarCell.addText(displayContent);
 
       lunarText.font = Font.mediumSystemFont(14);
-      lunarText.textColor = displayText
-        ? COLORS.weekend
-        : isTerm
-        ? COLORS.weekend
-        : COLORS.lunarText;
+      lunarText.textColor = isTerm ? COLORS.weekend : COLORS.lunarText;
+      lunarText.lineLimit = 2;
+      lunarText.minimumScaleFactor = 0.5;
 
       if (i < 6) {
         dateRow.addSpacer(5);
@@ -340,13 +350,14 @@ async function createCalendarWidget() {
           (e.endDate >= weekStart && e.endDate <= weekEnd) ||
           (e.startDate <= weekStart && e.endDate >= weekEnd)
       )
-      .sort((a, b) => a.startDate - b.startDate)
-      .slice(0, 2);
+      .sort((a, b) => a.startDate - b.startDate);
 
     for (const event of thisWeekEvents) {
       const eventStack = widget.addStack();
       eventStack.layoutHorizontally();
       const bullet = eventStack.addText("● ");
+      eventStack.setPadding(0, 10, 0, 10);
+
       bullet.textColor = new Color("#" + event.calendar.color.hex);
       bullet.font = Font.systemFont(12);
 
@@ -393,7 +404,7 @@ async function createCalendarWidget() {
       for (let j = 0; j < 7; j++) {
         const dateCell = dateRow.addStack();
         dateCell.layoutVertically();
-        dateCell.size = new Size(50, 60);
+        dateCell.size = new Size(50, 50);
         dateCell.centerAlignContent();
 
         if ((i === 0 && j < firstDayOfWeek) || currentDate > daysInMonth) {
@@ -460,26 +471,37 @@ async function createCalendarWidget() {
           });
         }
 
-        const festivalEvents = dayEvents.filter(event =>
-          event.title.includes("节")
-        );
-        let displayText = "";
-        if (festivalEvents.length > 0) {
-          displayText = festivalEvents[0].title.substring(0, 5);
-        }
-
         // 农历信息
         const lunarStack = dateCell.addStack();
-        lunarStack.size = new Size(50, 30);
+        lunarStack.size = new Size(50, 20);
         const isTerm = WidgetUtils.getIsTerm(date);
         const lunarDisplay = WidgetUtils.getLunarDisplayDate(
           date,
           widgetFamily
         );
 
+        const daysEvents = allEvents.filter(
+          e => e.startDate >= dayStart && e.startDate <= dayEnd
+        );
+
+        let eventOutput = "";
+        if (
+          daysEvents.length > 0 &&
+          !daysEvents[0].calendar.title.includes("生日") &&
+          !daysEvents[0].calendar.title.toLowerCase().includes("birthday")
+        ) {
+          eventOutput += daysEvents[0].title;
+        } else if (
+          daysEvents.length > 1 &&
+          !daysEvents[1].calendar.title.includes("生日") &&
+          !daysEvents[1].calendar.title.toLowerCase().includes("birthday")
+        ) {
+          eventOutput += `\n${daysEvents[1].title}`;
+        }
+
         let displayContent = "";
-        if (displayText) {
-          displayContent = displayText;
+        if (eventOutput) {
+          displayContent = eventOutput;
         } else if (isTerm) {
           displayContent = WidgetUtils.getTerm(date);
         } else {
@@ -488,12 +510,10 @@ async function createCalendarWidget() {
 
         const lunarText = lunarStack.addText(displayContent);
 
-        lunarText.font = Font.mediumSystemFont(12);
-        lunarText.textColor = displayText
-          ? COLORS.weekend
-          : isTerm
-          ? COLORS.weekend
-          : COLORS.lunarText;
+        lunarText.font = Font.mediumSystemFont(14);
+        lunarText.textColor = isTerm ? COLORS.weekend : COLORS.lunarText;
+        lunarText.lineLimit = 2;
+        lunarText.minimumScaleFactor = 0.5;
 
         currentDate++;
       }
@@ -501,15 +521,19 @@ async function createCalendarWidget() {
 
     // 事件列表
     const upcomingEvents = allEvents
-      .filter(e => e.startDate >= weekStart && e.endDate <= weekEnd)
+      .filter(e => e.startDate >= monthStart && e.endDate <= monthEnd)
       .sort((a, b) => a.startDate - b.startDate);
 
     let i = 0;
     while (i < upcomingEvents.length) {
       const event1 = upcomingEvents[i];
       const eventTitle1 = formatTitle(event1);
+      const calendarTitle = event1.calendar.title.toLowerCase();
 
-      if (eventTitle1.length > 8) {
+      if (
+        calendarTitle.includes("生日") ||
+        calendarTitle.includes("birthday")
+      ) {
         const rowStack = widget.addStack();
         rowStack.layoutHorizontally();
         rowStack.topAlignContent();
@@ -529,8 +553,6 @@ async function createCalendarWidget() {
 
           const fullTitle = formatTitle(event);
 
-          if (j === 1 && fullTitle.length > 8) break;
-
           const container = rowStack.addStack();
           container.size = new Size(160, 15);
           container.layoutVertically();
@@ -538,15 +560,7 @@ async function createCalendarWidget() {
 
           addEventToStack(container, event, fullTitle);
         }
-
-        if (
-          i + 1 < upcomingEvents.length &&
-          formatTitle(upcomingEvents[i + 1]).length <= 8
-        ) {
-          i += 2;
-        } else {
-          i += 1;
-        }
+        i += 2;
       }
     }
 
