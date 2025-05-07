@@ -117,7 +117,7 @@ async function createCalendarWidget() {
   widget.backgroundColor = COLORS.widgetBg;
   const widgetWidth = 350;
   const today = new Date();
-//   const today = new Date(2025, 04, 01);
+  //   const today = new Date(2025, 04, 01);
   const year = today.getFullYear();
   const month = today.getMonth();
   const dayOfWeek = today.getDay();
@@ -135,7 +135,7 @@ async function createCalendarWidget() {
     const calendars = await Calendar.forEvents();
     allEvents = await CalendarEvent.between(monthStart, monthEnd, calendars);
   } catch (error) {
-    console.error("获取月事件失败:", error);
+    console.error("获取月事件失败:" + error);
   }
 
   if (widgetFamily === "small") {
@@ -289,7 +289,7 @@ async function createCalendarWidget() {
 
       // 农历信息
       const lunarCell = lunarRow.addStack();
-      lunarCell.size = new Size(45, 30);
+      lunarCell.size = new Size(45, 20);
       const isTerm = WidgetUtils.getIsTerm(dayDate);
       const lunarDisplay = WidgetUtils.getLunarDisplayDate(
         dayDate,
@@ -327,7 +327,8 @@ async function createCalendarWidget() {
       const lunarText = lunarCell.addText(displayContent);
 
       lunarText.font = Font.mediumSystemFont(14);
-      lunarText.textColor = isTerm ? COLORS.weekend : COLORS.lunarText;
+      lunarText.textColor =
+        isTerm || eventOutput ? COLORS.weekend : COLORS.lunarText;
       lunarText.lineLimit = 2;
       lunarText.minimumScaleFactor = 0.5;
 
@@ -355,7 +356,7 @@ async function createCalendarWidget() {
       )
       .sort((a, b) => a.startDate - b.startDate);
 
-    for (const event of thisWeekEvents) {
+    for (const event of thisWeekEvents.slice(0, 6)) {
       const eventStack = widget.addStack();
       eventStack.layoutHorizontally();
       const bullet = eventStack.addText("● ");
@@ -514,7 +515,8 @@ async function createCalendarWidget() {
         const lunarText = lunarStack.addText(displayContent);
 
         lunarText.font = Font.mediumSystemFont(14);
-        lunarText.textColor = isTerm ? COLORS.weekend : COLORS.lunarText;
+        lunarText.textColor =
+          isTerm || eventOutput ? COLORS.weekend : COLORS.lunarText;
         lunarText.lineLimit = 2;
         lunarText.minimumScaleFactor = 0.5;
 
@@ -525,17 +527,20 @@ async function createCalendarWidget() {
     // 事件列表
     const upcomingEvents = allEvents
       .filter(e => e.startDate >= monthStart && e.endDate <= monthEnd)
-      .sort((a, b) => a.startDate - b.startDate);
+      .sort((a, b) => a.startDate - b.startDate)
+      .slice(0, 14);
 
     let i = 0;
     while (i < upcomingEvents.length) {
       const event1 = upcomingEvents[i];
       const eventTitle1 = formatTitle(event1);
-      const calendarTitle = event1.calendar.title.toLowerCase();
+      const calendarTitle1 = event1.calendar.title.toLowerCase();
+      const event2 = upcomingEvents[i + 1];
+      const calendarTitle2 = event2?.calendar.title.toLowerCase();
 
       if (
-        calendarTitle.includes("生日") ||
-        calendarTitle.includes("birthday")
+        calendarTitle1.includes("生日") ||
+        calendarTitle1.includes("birthday")
       ) {
         const rowStack = widget.addStack();
         rowStack.layoutHorizontally();
@@ -544,6 +549,31 @@ async function createCalendarWidget() {
         addEventToStack(rowStack, event1, eventTitle1);
 
         i += 1;
+      } else if (
+        event2 &&
+        (calendarTitle2.includes("生日") || calendarTitle2.includes("birthday"))
+      ) {
+        // 第一项单独显示在当前行左边
+        const rowStack1 = widget.addStack();
+        rowStack1.layoutHorizontally();
+        rowStack1.spacing = 16;
+        rowStack1.topAlignContent();
+
+        const container = rowStack1.addStack();
+        container.size = new Size(160, 15);
+        container.layoutVertically();
+        container.topAlignContent();
+
+        addEventToStack(container, event1, eventTitle1);
+
+        // 第二项为生日，单独显示在下一行
+        const rowStack2 = widget.addStack();
+        rowStack2.layoutHorizontally();
+        rowStack2.topAlignContent();
+
+        addEventToStack(rowStack2, event2, formatTitle(event2));
+
+        i += 2;
       } else {
         const rowStack = widget.addStack();
         rowStack.layoutHorizontally();
