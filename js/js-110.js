@@ -116,8 +116,8 @@ async function createCalendarWidget() {
   const widget = new ListWidget();
   widget.backgroundColor = COLORS.widgetBg;
   const widgetWidth = 350;
-  //   const today = new Date();
-  const today = new Date(2025, 04, 01);
+  const today = new Date();
+//   const today = new Date(2025, 04, 01);
   const year = today.getFullYear();
   const month = today.getMonth();
   const dayOfWeek = today.getDay();
