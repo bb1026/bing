@@ -621,10 +621,9 @@ async function createCalendarWidget() {
       return datePrefix + event.title;
     }
     widget.addSpacer();
-  }
-
-  widget.url = "calshow://";
-
+    widget.url = "calshow://";
+    }
+    
   return config.runsInWidget
     ? Script.setWidget(widget)
     : widgetFamily === "small"
