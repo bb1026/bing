@@ -61,6 +61,8 @@ const WidgetUtils = {
     const lunar = this.getLunarData(date);
     return widgetFamily === "small"
       ? lunar.IMonthCn + lunar.IDayCn
+      : lunar.IDayCn === "初一"
+      ? lunar.IMonthCn
       : lunar.IDayCn;
   },
 
@@ -186,7 +188,21 @@ async function createCalendarWidget() {
     start.setHours(0, 0, 0, 0);
     const end = new Date(today);
     end.setHours(23, 59, 59, 999);
-    const upcoming = await getUpcomingEvents(start, end);
+
+    const allTodayEvents = await getUpcomingEvents(start, end);
+
+    const prefixSet = new Set();
+    const upcoming = [];
+
+    for (const e of allTodayEvents) {
+      const title = e.title.trim();
+      const prefix = title.slice(0, 3);
+
+      if (!prefixSet.has(prefix)) {
+        prefixSet.add(prefix);
+        upcoming.push(e);
+      }
+    }
 
     lunarText.font =
       WidgetUtils.getIsTerm(today) || upcoming.length > 0
@@ -347,16 +363,27 @@ async function createCalendarWidget() {
     weekEnd.setDate(weekStart.getDate() + 6);
     weekEnd.setHours(23, 59, 59, 999);
 
-    const thisWeekEvents = allEvents
-      .filter(
-        e =>
-          (e.startDate >= weekStart && e.startDate <= weekEnd) ||
-          (e.endDate >= weekStart && e.endDate <= weekEnd) ||
-          (e.startDate <= weekStart && e.endDate >= weekEnd)
-      )
-      .sort((a, b) => a.startDate - b.startDate);
+    const thisWeekEvents = allEvents.filter(
+      e =>
+        (e.startDate >= weekStart && e.startDate <= weekEnd) ||
+        (e.endDate >= weekStart && e.endDate <= weekEnd) ||
+        (e.startDate <= weekStart && e.endDate >= weekEnd)
+    );
 
-    for (const event of thisWeekEvents.slice(0, 6)) {
+    const prefixSet = new Set();
+    const filteredEvents = [];
+
+    for (const e of thisWeekEvents) {
+      const title = e.title.trim();
+      const prefix = title.slice(0, 3);
+
+      if (!prefixSet.has(prefix)) {
+        prefixSet.add(prefix);
+        filteredEvents.push(e);
+      }
+    }
+
+    for (const event of filteredEvents) {
       const eventStack = widget.addStack();
       eventStack.layoutHorizontally();
       const bullet = eventStack.addText("● ");
@@ -456,7 +483,7 @@ async function createCalendarWidget() {
             }
           }
 
-          // 添加前置 spacer 使圆点整体居中
+          // 添加前置 spacer
           const totalWidth =
             shownColors.length * 6 + (shownColors.length - 1) * 2;
           const remainingSpace = 12 - totalWidth;
@@ -525,75 +552,35 @@ async function createCalendarWidget() {
     }
 
     // 事件列表
-    const upcomingEvents = allEvents
-      .filter(e => e.startDate >= monthStart && e.endDate <= monthEnd)
-      .sort((a, b) => a.startDate - b.startDate)
-      .slice(0, 14);
+    const prefixSet = new Set();
+    const upcomingEvents = [];
 
-    let i = 0;
-    while (i < upcomingEvents.length) {
-      const event1 = upcomingEvents[i];
-      const eventTitle1 = formatTitle(event1);
-      const calendarTitle1 = event1.calendar.title.toLowerCase();
-      const event2 = upcomingEvents[i + 1];
-      const calendarTitle2 = event2?.calendar.title.toLowerCase();
+    for (const e of allEvents) {
+      const title = e.title.trim();
+      const prefix = title.slice(0, 3);
 
-      if (
-        calendarTitle1.includes("生日") ||
-        calendarTitle1.includes("birthday")
-      ) {
-        const rowStack = widget.addStack();
-        rowStack.layoutHorizontally();
-        rowStack.topAlignContent();
+      if (prefixSet.has(prefix)) continue;
 
-        addEventToStack(rowStack, event1, eventTitle1);
+      prefixSet.add(prefix);
+      upcomingEvents.push(e);
+    }
 
-        i += 1;
-      } else if (
-        event2 &&
-        (calendarTitle2.includes("生日") || calendarTitle2.includes("birthday"))
-      ) {
-        // 第一项单独显示在当前行左边
-        const rowStack1 = widget.addStack();
-        rowStack1.layoutHorizontally();
-        rowStack1.spacing = 16;
-        rowStack1.topAlignContent();
+    for (let i = 0; i < upcomingEvents.length; i += 2) {
+      const row = widget.addStack();
+      row.layoutHorizontally();
+      row.spacing = 16;
+      row.topAlignContent();
 
-        const container = rowStack1.addStack();
+      for (let j = 0; j < 2; j++) {
+        const event = upcomingEvents[i + j];
+        if (!event) break;
+
+        const container = row.addStack();
         container.size = new Size(160, 15);
         container.layoutVertically();
         container.topAlignContent();
 
-        addEventToStack(container, event1, eventTitle1);
-
-        // 第二项为生日，单独显示在下一行
-        const rowStack2 = widget.addStack();
-        rowStack2.layoutHorizontally();
-        rowStack2.topAlignContent();
-
-        addEventToStack(rowStack2, event2, formatTitle(event2));
-
-        i += 2;
-      } else {
-        const rowStack = widget.addStack();
-        rowStack.layoutHorizontally();
-        rowStack.spacing = 16;
-        rowStack.topAlignContent();
-
-        for (let j = 0; j < 2; j++) {
-          const event = upcomingEvents[i + j];
-          if (!event) break;
-
-          const fullTitle = formatTitle(event);
-
-          const container = rowStack.addStack();
-          container.size = new Size(160, 15);
-          container.layoutVertically();
-          container.topAlignContent();
-
-          addEventToStack(container, event, fullTitle);
-        }
-        i += 2;
+        addEventToStack(container, event, formatTitle(event));
       }
     }
 
@@ -611,6 +598,7 @@ async function createCalendarWidget() {
       titleText.font = Font.systemFont(12);
       titleText.textColor = COLORS.eventText;
       titleText.lineLimit = 1;
+      titleText.minimumScaleFactor = 0.8;
     }
 
     function formatTitle(event) {
@@ -622,8 +610,8 @@ async function createCalendarWidget() {
     }
     widget.addSpacer();
     widget.url = "calshow://";
-    }
-    
+  }
+
   return config.runsInWidget
     ? Script.setWidget(widget)
     : widgetFamily === "small"
