@@ -3,14 +3,14 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v2.1";
+this.version = "v2.2";
 
 let installation;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 
 const myBusCodes = [
-  { busstop: "Yishun Int", stopCode: "59009", busCodes: ["804", "800"] },
+  { busstop: "Yishun Int", stopCode: "59009", busCodes: [/*"804", */ "800"] },
   { busstop: "Blk 236", stopCode: "59241", busCodes: ["804"] },
   { busstop: "Boon Lay Int", stopCode: "22009", busCodes: ["246", "249"] },
   {
@@ -200,6 +200,7 @@ const buttonText4 = "🛰️ 附近站点";
 const buttonText5 = "🚏 搜索站点";
 const buttonText6 = "🚌 搜索巴士";
 const buttonText7 = "💟 收藏";
+const buttonText8 = "MRT路线图";
 
 const UpdateCleanRow = new UITableRow();
 const updatebutton = UpdateCleanRow.addButton(buttonText);
@@ -219,6 +220,10 @@ searchBusButton.widthWeight = 0;
 const favoriteBusButton = buttonRow.addButton(buttonText7);
 favoriteBusButton.widthWeight = 0;
 
+const MRTRow = new UITableRow();
+const MRTMap = MRTRow.addButton(buttonText8);
+MRTMap.centerAligned();
+
 const backRow = new UITableRow();
 const backtext = backRow.addText("退出");
 backtext.titleColor = Color.red();
@@ -232,6 +237,7 @@ async function initializeTable() {
     table.removeAllRows();
     table.addRow(UpdateCleanRow);
     table.addRow(buttonRow);
+    table.addRow(MRTRow);
   } catch (error) {
     console.error("初始化表格时出错:", error);
     table.addRow(new UITableRow().addText("初始化表格时出错"));
@@ -343,6 +349,212 @@ async function addMyBusCodes(myBusCodes, busStops) {
   }
 }
 
+// 函数：展示 MRT 线路页面（HTML WebView）
+async function showMRTLines() {
+  const MapUrl = "https://transport.nestia.com/api/v4.5/stations-for-sync?";
+  const req = new Request(MapUrl);
+  const raw = await req.loadJSON();
+
+  const lineMap = {};
+  const lineList = [];
+
+  for (const line of raw) {
+    if (!lineMap[line.name]) {
+      lineMap[line.name] = {
+        name: line.name,
+        short: line.line_short_name,
+        code: line.code,
+        color: line.color,
+        stations: []
+      };
+      lineList.push(line.name);
+    }
+
+    const seen = new Set();
+    for (const station of line.stations) {
+      if (!seen.has(station.id)) {
+        seen.add(station.id);
+        lineMap[line.name].stations.push(station);
+      }
+    }
+  }
+
+  async function fetchTimetable(stationId) {
+    const url = `https://transport.nestia.com/api/v4.5/stations/${stationId}`;
+    const req = new Request(url);
+    const stationData = await req.loadJSON();
+
+    const firstTrainTimes = stationData.timetables.flatMap(t =>
+      t.first.map(entry => ({
+        time: entry.weekday,
+        direction: entry.description,
+        to: entry.to ? entry.to.name : "未知"
+      }))
+    );
+
+    const lastTrainTimes = stationData.timetables.flatMap(t =>
+      t.last.map(entry => ({
+        time: entry.weekday,
+        direction: entry.description,
+        to: entry.to ? entry.to.name : "未知"
+      }))
+    );
+
+    return { firstTrainTimes, lastTrainTimes };
+  }
+
+  const allStationHtmlArray = await Promise.all(
+    lineList.map(async (name, index) => {
+      const line = lineMap[name];
+      const stationHtml = await Promise.all(
+        line.stations.map(async station => {
+          const timetable = await fetchTimetable(station.id);
+
+          const firstTrainDetails = timetable.firstTrainTimes
+            .map(
+              train =>
+                `<div class="train-time" style="display:none;">首班车: ${train.time} - ${train.direction} to ${train.to}</div>`
+            )
+            .join("");
+
+          const lastTrainDetails = timetable.lastTrainTimes
+            .map(
+              train =>
+                `<div class="train-time" style="display:none;">末班车: ${train.time} - ${train.direction} to ${train.to}</div>`
+            )
+            .join("");
+
+          const primaryCode = station.line_codes.find(
+            c => c.name === line.name
+          );
+          const otherCodes = station.line_codes.filter(
+            c => c.name !== line.name
+          );
+
+          const dotsWithCodes = [
+            `<span class="dot" style="background-color: ${primaryCode.color}"></span><span class="dot-code">${primaryCode.code}</span>`,
+            ...otherCodes.map(
+              code =>
+                `<span class="dot" style="background-color: ${code.color}"></span><span class="dot-code">${code.code}</span>`
+            )
+          ].join("");
+
+          return `
+        <div class="station" onclick="toggleStationTime('${station.id}', this)">
+          ${dotsWithCodes}
+          <span class="station-name">${station.name}</span>
+          ${firstTrainDetails}
+          ${lastTrainDetails}
+        </div>`;
+        })
+      ).then(results => results.join("\n"));
+
+      return `<div class="station-list" id="station-list-${index}" style="display: none">${stationHtml}</div>`;
+    })
+  );
+
+  const lineListHtml = lineList
+    .map((name, index) => {
+      const line = lineMap[name];
+      return `
+      <div class="line" onclick="toggleStations(${index})" id="line-${index}">
+        <span class="dot" style="background-color: ${line.color}"></span>
+        <span class="line-name" id="line-name-${index}">${line.name}</span>
+      </div>
+    `;
+    })
+    .join("\n");
+
+  const allStationHtml = allStationHtmlArray.join("\n");
+
+  const html = `
+  <html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body { font-family: -apple-system; padding: 10px; }
+      .line, .station {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 17px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .dot {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 7px;
+        margin-right: 4px;
+      }
+      .dot-code {
+        font-size: 17px;
+        margin-right: 8px;
+        color: #444;
+      }
+      .station-name {
+        margin-left: auto;
+      }
+      .train-time {
+        font-size: 14px;
+        color: #555;
+        width: 100%;
+        margin-top: 4px;
+      }
+      .line-name.bold {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>选择地铁线路</h2>
+    <div id="lines">${lineListHtml}</div>
+    <div id="stations">${allStationHtml}</div>
+
+    <script>
+      let activeIndex = null
+      function toggleStations(index) {
+        const total = ${lineList.length}
+        for (let i = 0; i < total; i++) {
+          const lineElem = document.getElementById("line-" + i)
+          const nameElem = document.getElementById("line-name-" + i)
+          const stationElem = document.getElementById("station-list-" + i)
+          if (activeIndex === index) {
+            lineElem.style.display = "flex"
+            stationElem.style.display = "none"
+            nameElem.classList.remove("bold")
+          } else if (i === index) {
+            lineElem.style.display = "flex"
+            stationElem.style.display = "block"
+            nameElem.classList.add("bold")
+          } else {
+            lineElem.style.display = "none"
+            stationElem.style.display = "none"
+            nameElem.classList.remove("bold")
+          }
+        }
+        activeIndex = (activeIndex === index) ? null : index
+      }
+
+      function toggleStationTime(stationId, elem) {
+        const timesElem = elem.querySelectorAll('.train-time')
+        if (timesElem[0].style.display === "block") {
+          timesElem.forEach(time => time.style.display = "none")
+        } else {
+          timesElem.forEach(time => time.style.display = "block")
+        }
+      }
+    </script>
+  </body>
+  </html>
+  `;
+
+  const wv = new WebView();
+  await wv.loadHTML(html);
+  await wv.present(true);
+}
+
 let currentStopCode = null;
 let currentBusCode = null;
 let currentUseLocation = false;
@@ -421,6 +633,10 @@ searchBusButton.onTap = async () => {
 
 favoriteBusButton.onTap = async () => {
   await createTable();
+};
+
+MRTMap.onTap = async () => {
+  await showMRTLines();
 };
 
 async function addBusArrivalRows(
@@ -571,7 +787,7 @@ async function showBusFirstLastTimes(busstop, stopCode, busCode) {
     row.onSelect = async () => {
       await createTable(route.busStopCode);
     };
-    
+
     let stopCodeCell = row.addText(route.busStopCode);
     let stopNameCell = row.addText(route.stopName);
 
@@ -777,37 +993,36 @@ async function promptUserForInput(type) {
 async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-  const url = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
+  const url = "https://bb1026.github.io/bing/js/Ku.js";
   let needDownload = false;
 
   try {
-    ({
-      installation
-    } = importModule("Ku"));
-    
-    if (typeof installation !== "function") {
-      console.log("数据库模块无效，准备重新下载");
+    if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
+      console.log("数据库异常，准备重新下载");
+      notify("数据库异常", "本地数据库无效，准备重新下载");
       needDownload = true;
     }
   } catch {
     console.log("数据库异常，准备重新下载");
+    notify("数据库异常", "读取数据库出错，准备重新下载");
     needDownload = true;
   }
 
+  async function notify(title, body) {
+    const n = new Notification();
+    n.title = title;
+    n.body = body;
+    await n.schedule();
+  }
+
   if (needDownload) {
-        const req = new Request(url);
-        req.req.timeoutInterval = 5;
-      try {
-        fm.writeString(path, await req.loadString());
-        if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+    fm.writeString(path, await new Request(url).loadString());
+    if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
     console.log("数据库下载完成");
+  }
 
   ({ installation } = importModule("Ku"));
   if (typeof installation !== "function") throw new Error("数据库模块无效");
-  } catch (error) {
-    console.error("请求失败:" + error.message);
-    }
-  }
 }
 
 if (config.runsInWidget) {
@@ -820,13 +1035,13 @@ if (config.runsInWidget) {
 
   await createTable();
   table.present(true);
-  
+
   // 倒计时刷新间隔10秒(10000毫秒)
   const timer = new Timer();
   timer.repeats = true;
   timer.timeInterval = 10000;
   timer.schedule(() => {
-    createTable(currentStopCode, currentBusCode, currentUseLocation)
+    createTable(currentStopCode, currentBusCode, currentUseLocation);
   });
 }
 Script.complete();
