@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: dove;
 this.name = "缓存清理工具";
 this.widget_ID = "js-112";
-this.version = "v1.0";
+this.version = "v1.1";
 
 let installation;
 await CheckKu();
@@ -58,6 +58,41 @@ async function showFileList() {
   const fileList = listAllFiles(fm, base);
   const table = new UITable();
   table.showSeparators = true;
+  
+  if (fileList.length > 0) {
+    const clearAllRow = new UITableRow();
+    clearAllRow.addText("🗑️ 清除所有缓存", "此操作不可恢复");
+    clearAllRow.onSelect = async () => {
+      const alert = new Alert();
+      alert.title = "确认清除";
+      alert.message = "确定要删除所有缓存文件吗？此操作无法恢复。";
+      alert.addDestructiveAction("清除所有");
+      alert.addCancelAction("取消");
+      const index = await alert.present();
+      if (index === 0) {
+        const items = fm.listContents(base);
+        for (let name of items) {
+          const fullPath = fm.joinPath(base, name);
+          try {
+            if (fm.isDirectory(fullPath)) {
+              removeFolderRecursively(fm, fullPath);
+            } else {
+              fm.remove(fullPath);
+            }
+          } catch (e) {
+            console.error(`无法删除 ${name}: ${e}`);
+          }
+        }
+        const notification = new Notification();
+        notification.title = "已清除缓存";
+        notification.body = "所有缓存文件已被删除。";
+        await notification.schedule();
+        await showFileList();
+      }
+    };
+    table.addRow(clearAllRow);
+  }
+  
   fileList.forEach(file => {
     const row = new UITableRow();
     const name = file.isDir ? `[文件夹] ${file.name}` : `[文件] ${file.name}`;
@@ -127,7 +162,7 @@ async function CheckKu() {
 
   if (needDownload) {
       const req = new Request(url);
-      req.req.timeoutInterval = 5;
+      req.timeoutInterval = 5;
     try {
       fm.writeString(path, await req.loadString());
       if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
