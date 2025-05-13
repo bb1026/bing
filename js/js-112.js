@@ -111,7 +111,6 @@ async function CheckKu() {
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
   const url = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
   let needDownload = false;
-  try {
     try {
     ({
       installation
