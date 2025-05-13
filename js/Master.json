@@ -133,13 +133,13 @@
   },
   "js-112": {
     "name": "缓存清理工具",
-    "version": "v1.0",
+    "version": "v1.1",
     "ID": "js-112",
     "argsID": "112",
     "small": false,
     "medium": false,
     "large": false,
-    "update": "首次发布，可以查看或者删除缓存。",
+    "update": "增加清除所有缓存功能",
     "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-112.js"
   },
   "js-113": {
