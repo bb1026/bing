@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v2.2";
+this.version = "v2.3";
 
 let installation;
 await CheckKu();
@@ -36,7 +36,9 @@ const apiUrls = {
     "https://datamall2.mytransport.sg/ltaodataservice/BusServices?$skip=",
   busStops: "https://datamall2.mytransport.sg/ltaodataservice/BusStops?$skip=",
   BusArrival:
-    "https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival?BusStopCode="
+    "https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival?BusStopCode=",
+  MrtUrl: "https://transport.nestia.com/api/v4.5/stations-for-sync?",
+  TimetableUrl: "https://transport.nestia.com/api/v4.5/stations/"
 };
 
 const maxSkip = { busRoutes: 26000, busServices: 1000, busStops: 5500 };
@@ -44,20 +46,31 @@ const maxSkip = { busRoutes: 26000, busServices: 1000, busStops: 5500 };
 const cachePaths = {
   busRoutes: fm.joinPath(fm.documentsDirectory(), "busRoutesCache.json"),
   busServices: fm.joinPath(fm.documentsDirectory(), "busServicesCache.json"),
-  busStops: fm.joinPath(fm.documentsDirectory(), "busStopsCache.json")
+  busStops: fm.joinPath(fm.documentsDirectory(), "busStopsCache.json"),
+  mrtMap: fm.joinPath(fm.documentsDirectory(), "subway-map.json"),
+  timeTable: fm.joinPath(fm.documentsDirectory(), "station-timetable.json")
 };
 
 async function checkAndFetchData(forceUpdate = false) {
-  let needsUpdate = forceUpdate;
-  for (const key in cachePaths) {
-    if (!fm.fileExists(cachePaths[key])) {
-      console.log(`${key} 缓存文件不存在，开始更新...`);
-      needsUpdate = true;
-    } else {
-      console.log(`${key} 缓存正常`);
+  let tasksToUpdate = [];
+
+  if (forceUpdate) {
+    tasksToUpdate = Object.keys(cachePaths);
+    console.log("⚠️ 强制更新模式：正在更新所有数据");
+  } else {
+    for (const key in cachePaths) {
+      if (!fm.fileExists(cachePaths[key])) {
+        console.log(`[${key}] 缓存不存在，需要更新`);
+        tasksToUpdate.push(key);
+      } else {
+        console.log(`[${key}] 缓存有效`);
+      }
     }
   }
-  if (needsUpdate) await fetchAllData(forceUpdate);
+
+  if (tasksToUpdate.length > 0) {
+    await showLoadingAndFetchData(tasksToUpdate);
+  }
 }
 
 const headers = {
@@ -81,12 +94,95 @@ async function fetchAndCacheData(apiKey) {
     }
     fm.writeString(cachePath, JSON.stringify(allData));
     console.log(`Saved ${allData.length} records to ${cachePath}`);
-
-    const now = new Date().toISOString();
-    fm.writeString(updateTimeCachePath, JSON.stringify({ lastUpdate: now }));
   } catch (error) {
     console.error(`Failed to fetch ${apiKey}: ${error}`);
     throw error;
+  }
+}
+
+async function fetchAndCacheMrtMap() {
+  const req = new Request(apiUrls.MrtUrl);
+  try {
+    const raw = await req.loadJSON();
+    fm.writeString(cachePaths.mrtMap, JSON.stringify(raw));
+  } catch (e) {
+    console.error("下载 subway-map.json 失败：", e);
+    throw e;
+  }
+}
+
+async function fetchAndCacheTimeTable() {
+  try {
+    const mrtMap = JSON.parse(fm.readString(cachePaths.mrtMap));
+    const stations = [];
+    for (const line of mrtMap) {
+      if (Array.isArray(line.stations)) {
+        stations.push(...line.stations);
+      }
+    }
+    const uniqueStations = [];
+    const seenIds = new Set();
+    for (const station of stations) {
+      if (!seenIds.has(station.id)) {
+        seenIds.add(station.id);
+        uniqueStations.push(station);
+      }
+    }
+
+    let successCount = 0;
+    const timetableCache = {};
+
+    for (let i = 0; i < uniqueStations.length; i++) {
+      const stationId = uniqueStations[i].id;
+      const url = `${apiUrls.TimetableUrl}${stationId}`;
+      const req = new Request(url);
+      try {
+        const stationData = await req.loadJSON();
+        const firstTrainTimes = stationData.timetables.flatMap(t =>
+          t.first.map(entry => ({
+            time: entry.weekday,
+            direction: entry.description,
+            to: entry.to?.name || "未知"
+          }))
+        );
+        const lastTrainTimes = stationData.timetables.flatMap(t =>
+          t.last.map(entry => ({
+            time: entry.weekday,
+            direction: entry.description,
+            to: entry.to?.name || "未知"
+          }))
+        );
+        timetableCache[stationId] = { firstTrainTimes, lastTrainTimes };
+        successCount++;
+
+        if ((i + 1) % 10 === 0) {
+          fm.writeString(cachePaths.timeTable, JSON.stringify(timetableCache));
+          console.log(
+            `写入进度：${i + 1}/${uniqueStations.length}，成功：${successCount}`
+          );
+        }
+      } catch (e) {
+        console.error(`站点 ${stationId} 时刻表获取失败: `, e);
+        timetableCache[stationId] = {
+          firstTrainTimes: [],
+          lastTrainTimes: [],
+          error: `获取失败: ${e.message}`
+        };
+      }
+    }
+
+    fm.writeString(cachePaths.timeTable, JSON.stringify(timetableCache));
+    console.log(
+      `时刻表下载完成，共${uniqueStations.length}个站点，成功${successCount}个`
+    );
+
+    if (successCount === 0) {
+      throw new Error("所有站点时刻表下载失败");
+    }
+
+    return successCount;
+  } catch (e) {
+    throw e;
   }
 }
 
@@ -95,45 +191,46 @@ const updateTimeCachePath = fm.joinPath(
   "updateTimeCache.json"
 );
 
-async function fetchAllData(forceUpdate = false) {
+async function fetchAllData(tasks, onProgress) {
   try {
-    const startNotification = new Notification();
-    startNotification.title = Script.name();
-    startNotification.body = "正在更新数据，请稍候...";
-    await startNotification.schedule();
-
-    const tasks = ["busRoutes", "busServices", "busStops"];
     const failedTasks = [];
+    const partialSuccessTasks = [];
 
-    for (const key of tasks) {
+    const tasksToProcess = tasks === true ? Object.keys(cachePaths) : tasks;
+    const total = tasksToProcess.length;
+
+    for (let i = 0; i < total; i++) {
+      const key = tasksToProcess[i];
+      const current = i + 1;
+
+      if (onProgress) {
+        await onProgress(current, total, key);
+      }
+
       try {
-        await fetchAndCacheData(key);
+        if (key === "mrtMap") {
+          await fetchAndCacheMrtMap();
+        } else if (key === "timeTable") {
+          await fetchAndCacheTimeTable();
+        } else {
+          await fetchAndCacheData(key);
+        }
+        console.log(`[${key}] 更新成功`);
       } catch (error) {
+        console.error(`[${key}] 更新失败:`, error);
         failedTasks.push(key);
-        console.error(`Task ${key} failed: ${error}`);
       }
     }
 
     if (failedTasks.length === 0) {
-      const endNotification = new Notification();
-      endNotification.title = Script.name();
-      endNotification.body = "所有数据已成功更新！";
-      await endNotification.schedule();
+      console.log("全部数据更新成功");
+      const now = new Date().toISOString();
+      fm.writeString(updateTimeCachePath, JSON.stringify({ lastUpdate: now }));
     } else {
-      const errorNotification = new Notification();
-      errorNotification.title = Script.name();
-      errorNotification.body = `以下任务更新失败: ${failedTasks.join(", ")}`;
-      await errorNotification.schedule();
+      throw new Error(`以下任务失败: ${failedTasks.join(", ")}`);
     }
-
-    console.log("数据更新任务完成");
   } catch (error) {
-    const errorNotification = new Notification();
-    errorNotification.title = Script.name();
-    errorNotification.body = `更新数据时出错: ${error.message}`;
-    await errorNotification.schedule();
-
-    console.error(`数据更新失败: ${error}`);
+    throw error;
   }
 }
 
@@ -188,7 +285,7 @@ function formatArrivalTime(busInfo) {
   return diff < 60 ? "即将到站" : `${Math.ceil(diff / 60)}分钟`;
 }
 
-await checkAndFetchData();
+await checkAndFetchData(false);
 
 let table = new UITable();
 table.showSeparators = true;
@@ -200,7 +297,7 @@ const buttonText4 = "🛰️ 附近站点";
 const buttonText5 = "🚏 搜索站点";
 const buttonText6 = "🚌 搜索巴士";
 const buttonText7 = "💟 收藏";
-const buttonText8 = "MRT路线图";
+const buttonText8 = "MRT站点";
 
 const UpdateCleanRow = new UITableRow();
 const updatebutton = UpdateCleanRow.addButton(buttonText);
@@ -229,7 +326,7 @@ const backtext = backRow.addText("退出");
 backtext.titleColor = Color.red();
 backtext.centerAligned();
 backRow.onSelect = async () => {
-  return; // 退出
+  return;
 };
 
 async function initializeTable() {
@@ -349,11 +446,8 @@ async function addMyBusCodes(myBusCodes, busStops) {
   }
 }
 
-// 函数：展示 MRT 线路页面（HTML WebView）
 async function showMRTLines() {
-  const MapUrl = "https://transport.nestia.com/api/v4.5/stations-for-sync?";
-  const req = new Request(MapUrl);
-  const raw = await req.loadJSON();
+  const raw = readCache("mrtMap");
 
   const lineMap = {};
   const lineList = [];
@@ -380,28 +474,40 @@ async function showMRTLines() {
   }
 
   async function fetchTimetable(stationId) {
-    const url = `https://transport.nestia.com/api/v4.5/stations/${stationId}`;
-    const req = new Request(url);
-    const stationData = await req.loadJSON();
+    let timetableCache = {};
+    try {
+      timetableCache = readCache("timeTable");
+    } catch (e) {
+      console.warn("读取缓存失败，未找到时刻表数据");
+      return { firstTrainTimes: [], lastTrainTimes: [] };
+    }
 
-    const firstTrainTimes = stationData.timetables.flatMap(t =>
-      t.first.map(entry => ({
-        time: entry.weekday,
-        direction: entry.description,
-        to: entry.to ? entry.to.name : "未知"
-      }))
-    );
+    if (!timetableCache[stationId]) {
+      console.warn(`站点 ${stationId} 无缓存数据`);
+      return { firstTrainTimes: [], lastTrainTimes: [] };
+    }
 
-    const lastTrainTimes = stationData.timetables.flatMap(t =>
-      t.last.map(entry => ({
-        time: entry.weekday,
-        direction: entry.description,
-        to: entry.to ? entry.to.name : "未知"
-      }))
-    );
-
-    return { firstTrainTimes, lastTrainTimes };
+    const { firstTrainTimes, lastTrainTimes } = timetableCache[stationId];
+    const result = { firstTrainTimes, lastTrainTimes };
+    return result;
   }
+
+  const lineListHtml = [
+    `<div class="line" onclick="showMap()" id="map-line">
+    <span class="dot" style="background-color: #007AFF;"></span>
+    <span class="line-name" id="map-line-name">查看地图 🗺️</span>
+  </div>`,
+    ...lineList.map((name, index) => {
+      const line = lineMap[name];
+      return `
+      <div class="line" onclick="toggleStations(${index})" id="line-${index}">
+        <span class="dot" style="background-color: ${line.color}"></span>
+        <span class="line-name" id="line-name-${index}">${line.name}</span>
+        <span class="toggle-btn" id="toggle-btn-${index}">＋</span>
+      </div>
+    `;
+    })
+  ].join("\n");
 
   const allStationHtmlArray = await Promise.all(
     lineList.map(async (name, index) => {
@@ -440,119 +546,174 @@ async function showMRTLines() {
           ].join("");
 
           return `
-        <div class="station" onclick="toggleStationTime('${station.id}', this)">
-          ${dotsWithCodes}
-          <span class="station-name">${station.name}</span>
-          ${firstTrainDetails}
-          ${lastTrainDetails}
-        </div>`;
+      <div class="station" onclick="toggleStationTime('${station.id}', this)">
+        ${dotsWithCodes}
+        <span class="station-name">${station.name}</span>
+        ${firstTrainDetails}
+        ${lastTrainDetails}
+      </div>`;
         })
-      ).then(results => results.join("\n"));
-
-      return `<div class="station-list" id="station-list-${index}" style="display: none">${stationHtml}</div>`;
+      );
+      return `<div class="station-list" id="station-list-${index}" style="display: none">${stationHtml.join(
+        "\n"
+      )}</div>`;
     })
   );
 
-  const lineListHtml = lineList
-    .map((name, index) => {
-      const line = lineMap[name];
-      return `
-      <div class="line" onclick="toggleStations(${index})" id="line-${index}">
-        <span class="dot" style="background-color: ${line.color}"></span>
-        <span class="line-name" id="line-name-${index}">${line.name}</span>
-      </div>
-    `;
-    })
-    .join("\n");
-
   const allStationHtml = allStationHtmlArray.join("\n");
 
-  const html = `
-  <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-      body { font-family: -apple-system; padding: 10px; }
-      .line, .station {
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-        font-size: 17px;
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .dot {
-        display: inline-block;
-        width: 14px;
-        height: 14px;
-        border-radius: 7px;
-        margin-right: 4px;
-      }
-      .dot-code {
-        font-size: 17px;
-        margin-right: 8px;
-        color: #444;
-      }
-      .station-name {
-        margin-left: auto;
-      }
-      .train-time {
-        font-size: 14px;
-        color: #555;
-        width: 100%;
-        margin-top: 4px;
-      }
-      .line-name.bold {
-        font-weight: bold;
-      }
-    </style>
-  </head>
-  <body>
-    <h2>选择地铁线路</h2>
-    <div id="lines">${lineListHtml}</div>
-    <div id="stations">${allStationHtml}</div>
+  const mainHtml = `
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style>
+    body { font-family: -apple-system; padding: 10px; }
+    .line, .station {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .dot {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 7px;
+      margin-right: 4px;
+    }
+    .dot-code {
+      font-size: 13px;
+      margin-right: 8px;
+      color: #444;
+    }
+    .station-name {
+      margin-left: auto;
+    }
+    .train-time {
+      font-size: 14px;
+      color: #555;
+      width: 100%;
+      margin-top: 4px;
+    }
+    .line-name.bold {
+      font-weight: bold;
+    }
+    .toggle-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 12px;
+      background-color: green;
+      color: white !important;
+      font-size: 24px;
+      line-height: 24px;
+      text-align: center;
+      font-weight: bold;
+      display: inline-block;
+      margin-left: auto;
+      user-select: none;
+    }
+    .toggle-btn.active {
+      background-color: red;
+    }
+  </style>
+</head>
+<body>
+  <h2>选择地铁线路</h2>
+  <div id="lines">
+    ${lineListHtml}
+  </div>
+  <div id="stations">
+    ${allStationHtml}
+  </div>
 
-    <script>
-      let activeIndex = null
-      function toggleStations(index) {
-        const total = ${lineList.length}
-        for (let i = 0; i < total; i++) {
-          const lineElem = document.getElementById("line-" + i)
-          const nameElem = document.getElementById("line-name-" + i)
-          const stationElem = document.getElementById("station-list-" + i)
-          if (activeIndex === index) {
-            lineElem.style.display = "flex"
-            stationElem.style.display = "none"
-            nameElem.classList.remove("bold")
-          } else if (i === index) {
-            lineElem.style.display = "flex"
-            stationElem.style.display = "block"
-            nameElem.classList.add("bold")
-          } else {
-            lineElem.style.display = "none"
-            stationElem.style.display = "none"
-            nameElem.classList.remove("bold")
-          }
-        }
-        activeIndex = (activeIndex === index) ? null : index
-      }
+  <script>
+    let activeIndex = null
+    function toggleStations(index) {
+  const total = ${lineList.length}
+  for (let i = 0; i < total; i++) {
+    const lineElem = document.getElementById("line-" + i)
+    const nameElem = document.getElementById("line-name-" + i)
+    const stationElem = document.getElementById("station-list-" + i)
+    const toggleBtn = document.getElementById("toggle-btn-" + i)
+    if (activeIndex === index) {
+      lineElem.style.display = "flex"
+      stationElem.style.display = "none"
+      nameElem.classList.remove("bold")
+      toggleBtn.classList.remove("active")
+      toggleBtn.textContent = "＋"
+    } else if (i === index) {
+      lineElem.style.display = "flex"
+      stationElem.style.display = "block"
+      nameElem.classList.add("bold")
+      toggleBtn.classList.add("active")
+      toggleBtn.textContent = "－"
+    } else {
+      lineElem.style.display = "none"
+      stationElem.style.display = "none"
+      nameElem.classList.remove("bold")
+      toggleBtn.classList.remove("active")
+      toggleBtn.textContent = "＋"
+    }
+  }
+  activeIndex = (activeIndex === index) ? null : index
+}
 
-      function toggleStationTime(stationId, elem) {
-        const timesElem = elem.querySelectorAll('.train-time')
-        if (timesElem[0].style.display === "block") {
-          timesElem.forEach(time => time.style.display = "none")
-        } else {
-          timesElem.forEach(time => time.style.display = "block")
-        }
-      }
-    </script>
-  </body>
-  </html>
-  `;
+    function toggleStationTime(stationId, elem) {
+      const timesElem = elem.querySelectorAll('.train-time')
+      const isVisible = timesElem[0]?.style.display === "block"
+      timesElem.forEach(t => t.style.display = isVisible ? "none" : "block")
+    }
+
+
+  function showMap() {
+  const metaTag = document.querySelector('meta[name="viewport"]');
+  const originalMetaContent = metaTag.getAttribute('content');
+  metaTag.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes');
+
+    const mapContainer = document.createElement('div');
+    mapContainer.id = 'map-container';
+    mapContainer.style.position = 'fixed';
+    mapContainer.style.top = '0';
+    mapContainer.style.left = '0';
+    mapContainer.style.width = '100%';
+    mapContainer.style.height = '100%';
+    mapContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    mapContainer.style.zIndex = '9999';
+
+    mapContainer.style.backgroundImage = 'url("https://raw.githubusercontent.com/bb1026/bing/main/imgs/mrt-map.png")';
+    mapContainer.style.backgroundSize = 'contain';
+    mapContainer.style.backgroundPosition = 'center';
+    mapContainer.style.backgroundRepeat = 'no-repeat';
+
+    const closeButton = document.createElement('button');
+    closeButton.innerText = '关闭';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '20px';
+    closeButton.style.right = '20px';
+    closeButton.style.fontSize = '16px';
+    closeButton.style.padding = '10px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.backgroundColor = '#fff';
+closeButton.style.border = '1px solid #ccc';
+closeButton.style.borderRadius = '6px';
+    closeButton.onclick = function() {
+    document.body.removeChild(mapContainer);
+    metaTag.setAttribute('content', originalMetaContent);
+  };
+
+    mapContainer.appendChild(closeButton);
+    document.body.appendChild(mapContainer);
+  };
+  </script>
+</body>
+</html>
+`;
 
   const wv = new WebView();
-  await wv.loadHTML(html);
-  await wv.present(true);
+  await wv.loadHTML(mainHtml);
+  await wv.present();
 }
 
 let currentStopCode = null;
@@ -585,7 +746,7 @@ async function createTable(
     } else {
       await addMyBusCodes(myBusCodes, busStops);
     }
-    table.addRow(backRow); // 退出按钮
+    table.addRow(backRow);
     table.reload();
   } catch (error) {
     console.error("创建表格时出错:", error);
@@ -598,8 +759,9 @@ refreshButton.onTap = async () => {
 };
 
 updatebutton.onTap = async () => {
-  await fetchAllData(true); // 获取最新数据
-  await createTable(stopCode, busCode, useLocation);
+  await showLoadingAndFetchData(true, async () => {
+    await createTable(currentStopCode, currentBusCode, currentUseLocation);
+  });
 };
 
 cleanbutton.onTap = async () => {
@@ -638,6 +800,124 @@ favoriteBusButton.onTap = async () => {
 MRTMap.onTap = async () => {
   await showMRTLines();
 };
+
+async function showLoadingAndFetchData(tasksToUpdate, afterSuccess) {
+  const loadingView = new WebView();
+
+  await loadingView.loadHTML(`
+    <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+      <style>
+        body {
+          font-family: -apple-system;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          flex-direction: column;
+          background-color: white;
+        }
+        .spinner {
+          border: 8px solid #f3f3f3;
+          border-top: 8px solid #3498db;
+          border-radius: 50%;
+          width: 60px;
+          height: 60px;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .text {
+          margin-top: 20px;
+          font-size: 18px;
+          color: #555;
+          text-align: center;
+          padding: 0 20px;
+        }
+        .progress {
+          width: 80%;
+          margin-top: 20px;
+          background-color: #f3f3f3;
+          border-radius: 5px;
+          overflow: hidden;
+        }
+        .progress-bar {
+          height: 10px;
+          background-color: #4CAF50;
+          width: 0%;
+          transition: width 0.3s;
+        }
+        .error {
+          color: red;
+          margin-top: 20px;
+          display: none;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="spinner"></div>
+      <div class="text" id="loading-text">正在准备下载数据...</div>
+      <div class="progress">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="error" id="error-message"></div>
+    </body>
+    </html>
+  `);
+
+  const presentPromise = loadingView.present(true);
+
+  try {
+    await loadingView.evaluateJavaScript(`
+      document.getElementById('loading-text').textContent = '正在下载数据...';
+      document.getElementById('progress-bar').style.width = '0%';
+      document.getElementById('error-message').style.display = 'none';
+    `);
+
+    await fetchAllData(tasksToUpdate, async (current, total, name) => {
+      const progress = Math.round((current / total) * 100);
+      const text = `正在下载 ${name} (${current}/${total})`;
+
+      await loadingView.evaluateJavaScript(`
+        document.getElementById('loading-text').textContent = ${JSON.stringify(
+          text
+        )};
+        document.getElementById('progress-bar').style.width = '${progress}%';
+      `);
+    });
+
+    await loadingView.evaluateJavaScript(`
+      document.querySelector('.spinner').outerHTML = '<div style="font-size: 60px; color: #4CAF50;">✓</div>';
+      document.getElementById('loading-text').textContent = '数据下载成功！请关闭此界面...';
+      document.getElementById('progress-bar').style.width = '100%';
+      document.getElementById('progress-bar').style.backgroundColor = '#4CAF50';
+    `);
+
+    const now = new Date().toISOString();
+    fm.writeString(updateTimeCachePath, JSON.stringify({ lastUpdate: now }));
+  } catch (error) {
+    console.error("下载过程中出错:", error);
+    await loadingView.evaluateJavaScript(`
+      document.querySelector('.spinner').outerHTML = '<div style="font-size: 60px; color: red;">✗</div>';
+      document.getElementById('loading-text').textContent = '数据下载失败';
+      document.getElementById('progress-bar').style.backgroundColor = 'red';
+      document.getElementById('error-message').textContent = ${JSON.stringify(
+        error.message
+      )};
+      document.getElementById('error-message').style.display = 'block';
+    `);
+    throw error;
+  }
+
+  await presentPromise;
+
+  if (typeof afterSuccess === "function") {
+    await afterSuccess();
+  }
+}
 
 async function addBusArrivalRows(
   table,
@@ -949,7 +1229,6 @@ async function createWidget() {
   return widget;
 }
 
-// 异步清除缓存的函数
 async function clearCache() {
   const deletedFiles = [];
 
@@ -1026,7 +1305,7 @@ async function CheckKu() {
 }
 
 if (config.runsInWidget) {
-  await checkAndFetchData();
+  await checkAndFetchData(false);
   let widget = await createWidget();
   Script.setWidget(widget);
 } else {
@@ -1036,7 +1315,6 @@ if (config.runsInWidget) {
   await createTable();
   table.present(true);
 
-  // 倒计时刷新间隔10秒(10000毫秒)
   const timer = new Timer();
   timer.repeats = true;
   timer.timeInterval = 10000;
