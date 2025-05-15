@@ -519,14 +519,14 @@ async function showMRTLines() {
           const firstTrainDetails = timetable.firstTrainTimes
             .map(
               train =>
-                `<div class="train-time" style="display:none;">首班车: ${train.time} - ${train.direction} to ${train.to}</div>`
+                `<div class="train-time" style="display:none;">首班车: ${train.time} - ${train.direction}</div>`
             )
             .join("");
 
           const lastTrainDetails = timetable.lastTrainTimes
             .map(
               train =>
-                `<div class="train-time" style="display:none;">末班车: ${train.time} - ${train.direction} to ${train.to}</div>`
+                `<div class="train-time" style="display:none;">末班车: ${train.time} - ${train.direction}</div>`
             )
             .join("");
 
