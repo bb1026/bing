@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v2.3";
+this.version = "v2.4";
 
 let installation, calendar;
 await CheckKu();
@@ -31,6 +31,7 @@ const COLORS = {
 };
 
 const lunarCache = {};
+const NOTIFICATION_KEY = "lastNotificationDate";
 
 const WidgetUtils = {
   createBackgroundImage(size = 200) {
@@ -112,6 +113,59 @@ async function getUpcomingEvents(startDate, endDate, maxEventsToShow = 2) {
     console.error("获取日历事件失败:", error);
     return [];
   }
+}
+
+async function getLastNotificationDate() {
+  return Keychain.contains(NOTIFICATION_KEY)
+    ? JSON.parse(Keychain.get(NOTIFICATION_KEY)).date
+    : "";
+}
+
+async function setLastNotificationDate(date) {
+  Keychain.set(NOTIFICATION_KEY, JSON.stringify({ date }));
+}
+
+async function sendNotificationIfNeeded(today, events) {
+  if (!(await shouldSendNotification())) return;
+
+  // 获取当天事件（去重）
+  const todayEvents = [
+    ...new Set(
+      events
+        .filter(e => {
+          const eventDate = new Date(e.startDate);
+          return (
+            eventDate.getFullYear() === today.getFullYear() &&
+            eventDate.getMonth() === today.getMonth() &&
+            eventDate.getDate() === today.getDate()
+          );
+        })
+        .map(e => e.title.trim())
+    )
+  ];
+
+  // 获取节气信息
+  const term = WidgetUtils.getIsTerm(today) ? WidgetUtils.getTerm(today) : null;
+
+  // 没有事件和节气则不通知
+  if (todayEvents.length === 0 && !term) return;
+
+  // 构建通知内容
+  const lunar = WidgetUtils.getLunarData(today);
+  const dateStr = `${today.getMonth() + 1}月${today.getDate()}日`;
+  const lunarStr = `${lunar.IMonthCn}${lunar.IDayCn}`;
+  const eventStr = todayEvents.join("、");
+
+  const body = [dateStr, lunarStr, term, eventStr].filter(Boolean).join(" ");
+
+  // 发送通知并记录
+  const notification = new Notification();
+  notification.title = "今日提醒";
+  notification.body = body;
+  await notification.schedule();
+  console.log("已发送通知:" + body);
+
+  await setLastNotificationDate(new Date().toDateString());
 }
 
 async function createCalendarWidget() {
@@ -404,13 +458,14 @@ async function createCalendarWidget() {
   } else {
     // 大尺寸 - 完整月历
     const monthNumber = month + 1;
-    const bgImg = WidgetUtils.createBackgroundImage(400);
-    bgImg.setFont(Font.boldSystemFont(200));
-    bgImg.setTextColor(COLORS.monthBgText);
-    const x = monthNumber.toString().length === 1 ? 40 : 10;
-    bgImg.drawTextInRect(`${monthNumber}月`, new Rect(x, 55, 800, 400));
-    widget.backgroundImage = await bgImg.getImage();
-
+    if (config.runsInApp) {
+      const bgImg = WidgetUtils.createBackgroundImage(400);
+      bgImg.setFont(Font.boldSystemFont(200));
+      bgImg.setTextColor(COLORS.monthBgText);
+      const x = monthNumber.toString().length === 1 ? 40 : 10;
+      bgImg.drawTextInRect(`${monthNumber}月`, new Rect(x, 55, 800, 400));
+      widget.backgroundImage = await bgImg.getImage();
+    }
     widget.addSpacer(4);
     const weekRow = WidgetUtils.createCenteredRow(widget);
     WEEK_DAYS.forEach((day, i) => {
