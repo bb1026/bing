@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>高级 VBA 代码混淆器 / 还原器</title>
+<style>
+  body { font-family: Consolas, monospace; margin: 20px; background: #fafafa; color: #222; }
+  textarea { width: 100%; height: 220px; font-family: Consolas, monospace; font-size: 14px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+  button {
+    padding: 8px 18px; 
+    margin: 10px 8px 20px 0; 
+    cursor: pointer; 
+    border: none; 
+    border-radius: 5px; 
+    font-weight: bold; 
+    font-family: Consolas, monospace;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+  button#btnObfuscate { background-color: #007bff; }
+  button#btnObfuscate:hover { background-color: #0056b3; }
+  button#btnDeobfuscate { background-color: #28a745; }
+  button#btnDeobfuscate:hover { background-color: #1e7e34; }
+  button#btnCopy { background-color: #ffc107; color: #212529; }
+  button#btnCopy:hover { background-color: #d39e00; color: #212529; }
+  button#btnClear { background-color: #dc3545; }
+  button#btnClear:hover { background-color: #a71d2a; }
+  pre {
+    background: #f4f4f4; 
+    padding: 10px; 
+    white-space: pre-wrap; 
+    word-wrap: break-word; 
+    border: 1px solid #ccc; 
+    min-height: 150px;
+    font-family: Consolas, monospace;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<h2>高级 VBA 代码混淆器 / 还原器</h2>
+
+<label for="inputCode">请输入 VBA 代码：</label><br/>
+<textarea id="inputCode" placeholder="粘贴你的 VBA 代码..."></textarea><br/>
+
+<button id="btnObfuscate" onclick="obfuscateVBA()">开始混淆</button>
+<button id="btnDeobfuscate" onclick="deobfuscateVBA()">还原混淆代码</button>
+<button id="btnCopy" onclick="copyOutput()">复制结果</button>
+<button id="btnClear" onclick="clearAll()">清空</button>
+
+<h3>输出结果：</h3>
+<pre id="outputCode"></pre>
+
+<script>
+  // VBA关键字集，避免替换关键字
+  const keywords = new Set([
+    "Sub","Function","Dim","As","If","Then","Else","End","For","Next","While","Wend",
+    "Do","Loop","Select","Case","With","Set","Let","Call","Option","Explicit","Private",
+    "Public","On","Error","Resume","Exit","True","False","Nothing","ByVal",
+    "ByRef","And","Or","Not","Xor","Mod","Is","In","Like","ReDim","Erase","Const","Stop",
+    "GoTo","Class","Property","Get","Let","Set","Static","Declare","Friend","Type",
+    "New","Me","Nothing","Empty","Variant","Integer","Long","Double","Single","String",
+    "Boolean","Object","Variant","Date","Currency","Byte","Chr","MsgBox","InputBox","Debug",
+    "Application","Range","Cells","Rows","Columns","Worksheet","Workbook","ActiveSheet","ActiveWorkbook",
+    "ThisWorkbook","OnErrorResumeNext","CallByName","Print","Err","Load","Unload","RGB",
+    "Len","Mid","Left","Right","Trim","LCase","UCase","Replace","Instr","Split","Join","CStr",
+    "CInt","CLng","CDbl","CSng","CDate","IsEmpty","IsNumeric","IsArray","TypeName","VarType"
+  ]);
+
+  function generateVarName(i) {
+    return "x" + i;
+  }
+
+  function extractVariables(code) {
+    let vars = new Set();
+    const dimRegex = /Dim\s+([^:\n\r]+)/gi;
+    let match;
+    while ((match = dimRegex.exec(code)) !== null) {
+      let decl = match[1];
+      let parts = decl.split(",");
+      parts.forEach(p=>{
+        p = p.trim();
+        let name = p.split(/\s+As\s+/i)[0].trim();
+        name = name.replace(/[\$\%\#\!\@]$/,"");
+        if (name.length > 0 && !keywords.has(name)) {
+          vars.add(name);
+        }
+      });
+    }
+    return Array.from(vars);
+  }
+
+  function replaceVarNames(code, vars) {
+    vars.sort((a,b) => b.length - a.length);
+    let replacedCode = code;
+    let map = {};
+    vars.forEach((v,i)=>{
+      let newName = generateVarName(i+1);
+      map[v] = newName;
+      let reg = new RegExp("\\b"+v+"\\b","g");
+      replacedCode = replacedCode.replace(reg, newName);
+    });
+    return {code: replacedCode, map: map};
+  }
+
+  function replaceStrings(code) {
+    let lines = code.split(/\r?\n/);
+    for (let i=0; i<lines.length; i++) {
+      let line = lines[i];
+      lines[i] = line.replace(/"([^"]*)"/g, (match, p1) => {
+        if(p1.length === 0) return '""';
+        return strToChr(p1);
+      });
+    }
+    return lines.join("\n");
+  }
+
+  function strToChr(str) {
+    let result = "";
+    for (let i = 0; i < str.length; i++) {
+      result += "Chr(" + str.charCodeAt(i) + ")";
+      if (i !== str.length - 1) result += " & ";
+    }
+    return result;
+  }
+
+  function chrToStr(match) {
+    let regex = /Chr\((\d+)\)/g;
+    let chars = [];
+    let m;
+    while ((m = regex.exec(match)) !== null) {
+      chars.push(String.fromCharCode(parseInt(m[1],10)));
+    }
+    return '"' + chars.join('') + '"';
+  }
+
+  function restoreStrings(code) {
+    return code.replace(/(Chr\(\d+\)(?:\s*&\s*Chr\(\d+\))+)/g, chrToStr);
+  }
+
+  function restoreVarNames(code, map) {
+    let invMap = {};
+    for(let k in map) {
+      invMap[map[k]] = k;
+    }
+    let keys = Object.keys(invMap);
+    keys.sort((a,b) => b.length - a.length);
+    let replacedCode = code;
+    keys.forEach(v=>{
+      let orig = invMap[v];
+      let reg = new RegExp("\\b"+v+"\\b","g");
+      replacedCode = replacedCode.replace(reg, orig);
+    });
+    return replacedCode;
+  }
+
+  let currentVarMap = null;
+
+  function obfuscateVBA() {
+    let code = document.getElementById("inputCode").value;
+    if (!code.trim()) {
+      alert("请输入 VBA 代码");
+      return;
+    }
+    let vars = extractVariables(code);
+    let res = replaceVarNames(code, vars);
+    currentVarMap = res.map;
+    let codeVarReplaced = res.code;
+    let codeStrReplaced = replaceStrings(codeVarReplaced);
+    document.getElementById("outputCode").textContent = codeStrReplaced;
+  }
+
+  function deobfuscateVBA() {
+    let code = document.getElementById("inputCode").value;
+    if (!code.trim()) {
+      alert("请输入混淆后的 VBA 代码");
+      return;
+    }
+    if (!currentVarMap) {
+      alert("没有混淆的变量映射，无法还原变量名。建议先用本工具混淆后再还原。");
+      return;
+    }
+    let restoredStr = restoreStrings(code);
+    let restoredCode = restoreVarNames(restoredStr, currentVarMap);
+    document.getElementById("outputCode").textContent = restoredCode;
+  }
+
+  function copyOutput() {
+    let output = document.getElementById("outputCode");
+    if (!output.textContent.trim()) {
+      alert("没有可复制的内容！");
+      return;
+    }
+    navigator.clipboard.writeText(output.textContent).then(() => {
+      alert("代码已复制到剪贴板！");
+    }, () => {
+      alert("复制失败，请手动复制！");
+    });
+  }
+
+  function clearAll() {
+    document.getElementById("inputCode").value = "";
+    document.getElementById("outputCode").textContent = "";
+    currentVarMap = null;
+  }
+</script>
+
+</body>
+</html>
