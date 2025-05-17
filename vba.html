@@ -270,30 +270,44 @@ textarea {
   // 这里的还原只能针对原始映射预先知道的情况，实际需保存映射才能完美还原
   // 简单演示去除 ChrW() 拼接转为字符串
   function deobfuscateVBA() {
-    let code = document.getElementById("inputCode").value;
-    if(!code.trim()){
-      alert("请先输入混淆后的 VBA 代码！");
-      return;
-    }
+  let code = document.getElementById("inputCode").value;
+  if (!code.trim()) {
+    alert("请先输入混淆后的 VBA 代码！");
+    return;
+  }
 
-    // 同时还原 Chr() 和 ChrW() 拼接成字符串
+    // 把所有 Chr() 或 ChrW() 片段合成字符串，且去掉 & 和多余的引号
     function chrToString(str) {
-      return str.replace(/(ChrW?\(\d+\)(?:&ChrW?\(\d+\))*)/g, (m) => {
-        let matches = m.match(/ChrW?\((\d+)\)/g);
-        if (!matches) return m;
-        let chars = matches.map(x => {
-          let n = x.match(/\d+/)[0];
-          return String.fromCharCode(n);
+      return str.replace(/((?:ChrW?\(\d+\)\s*&\s*)*ChrW?\(\d+\))/g, (match) => {
+        // 找到所有单个 Chr/ChrW 调用
+        let parts = match.match(/ChrW?\((\d+)\)/g);
+        if (!parts) return match;
+
+        // 转换成字符，拼接成一个整体字符串
+        let chars = parts.map(p => {
+          let num = p.match(/\d+/)[0];
+          return String.fromCharCode(parseInt(num, 10));
         });
-        return '"' + chars.join('') + '"';
+        return '"' + chars.join('') + '"'; // 返回一个完整字符串
       });
     }
 
     let decoded = chrToString(code);
 
+    // 再去掉连续多个字符串字面量间的 & 连接符，合并成一个整体字符串
+    decoded = decoded.replace(/"([^"]+)"\s*&\s*"([^"]+)"/g, (m, g1, g2) => {
+      return '"' + g1 + g2 + '"';
+    });
+
+    // 这个替换要做多次，直到不能再合并为止
+    while (/"[^"]+"\s*&\s*"[^"]+"/.test(decoded)) {
+      decoded = decoded.replace(/"([^"]+)"\s*&\s*"([^"]+)"/g, (m, g1, g2) => {
+        return '"' + g1 + g2 + '"';
+      });
+    }
+
     document.getElementById("outputCode").textContent = decoded;
   }
-
 
   // 复制输出内容到剪贴板
   function copyOutput(){
@@ -341,6 +355,5 @@ textarea {
     URL.revokeObjectURL(a.href);
   }
 </script>
-
 </body>
 </html>
