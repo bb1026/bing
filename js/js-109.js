@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v2.3";
+this.version = "v2.4";
 
 let installation;
 await CheckKu();
@@ -23,7 +23,7 @@ const myBusCodes = [
     stopCode: "21491",
     busCodes: ["246"]
   },
-  //   { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] },
+  { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] },
   { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: ["858"] }
 ];
 
@@ -111,27 +111,17 @@ async function fetchAndCacheMrtMap() {
   }
 }
 
+function formatTimeStr(t) {
+  if (!t || typeof t !== "string" || !t.includes(":")) return t;
+  const [h, m] = t.split(":").map(n => n.trim());
+  if (isNaN(h) || isNaN(m)) return t;
+  return `${h.padStart(2, "0")}:${m.padStart(2, "0")}`;
+}
+
 async function fetchAndCacheTimeTable() {
   try {
     const mrtMap = JSON.parse(fm.readString(cachePaths.mrtMap));
     const stations = [];
-    for (const line of mrtMap) {
-      if (Array.isArray(line.stations)) {
-        stations.push(...line.stations);
-      }
-    }
-    const uniqueStations = [];
-    const seenIds = new Set();
-    for (const station of stations) {
-      if (!seenIds.has(station.id)) {
-        seenIds.add(station.id);
-        uniqueStations.push(station);
-      }
-    }
-
-    let successCount = 0;
-    const timetableCache = {};
-
     for (let i = 0; i < uniqueStations.length; i++) {
       const stationId = uniqueStations[i].id;
       const url = `${apiUrls.TimetableUrl}${stationId}`;
@@ -140,14 +130,14 @@ async function fetchAndCacheTimeTable() {
         const stationData = await req.loadJSON();
         const firstTrainTimes = stationData.timetables.flatMap(t =>
           t.first.map(entry => ({
-            time: entry.weekday,
+            time: formatTimeStr(entry.weekday),
             direction: entry.description,
             to: entry.to?.name || "未知"
           }))
         );
         const lastTrainTimes = stationData.timetables.flatMap(t =>
           t.last.map(entry => ({
-            time: entry.weekday,
+            time: formatTimeStr(entry.weekday),
             direction: entry.description,
             to: entry.to?.name || "未知"
           }))
@@ -516,19 +506,63 @@ async function showMRTLines() {
         line.stations.map(async station => {
           const timetable = await fetchTimetable(station.id);
 
-          const firstTrainDetails = timetable.firstTrainTimes
-            .map(
-              train =>
-                `<div class="train-time" style="display:none;">首班车: ${train.time} - ${train.direction}</div>`
-            )
-            .join("");
+          const firstTrainDetails =
+            timetable.firstTrainTimes.length > 0
+              ? `
+    <div class="train-header">
+      <div class="train-title">首班车</div>
+      <div class="train-columns-container">
+        <div class="train-columns">
+          <div class="train-column train-time-column">时间</div>
+          <div class="train-column train-direction-column">方向</div>
+          <div class="train-column train-destination-column">终点站</div>
+        </div>
+      </div>
+      <div class="train-rows-container">
+        ${timetable.firstTrainTimes
+          .map(
+            train => `
+          <div class="train-row">
+            <div class="train-cell train-time-cell">${train.time}</div>
+            <div class="train-cell train-direction-cell">${train.direction}</div>
+            <div class="train-cell train-destination-cell">${train.to}</div>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    </div>
+  `
+              : `<div class="train-header no-train-info">无首班车信息</div>`;
 
-          const lastTrainDetails = timetable.lastTrainTimes
-            .map(
-              train =>
-                `<div class="train-time" style="display:none;">末班车: ${train.time} - ${train.direction}</div>`
-            )
-            .join("");
+          const lastTrainDetails =
+            timetable.lastTrainTimes.length > 0
+              ? `
+    <div class="train-header">
+      <div class="train-title">末班车</div>
+      <div class="train-columns-container">
+        <div class="train-columns">
+          <div class="train-column train-time-column">时间</div>
+          <div class="train-column train-direction-column">方向</div>
+          <div class="train-column train-destination-column">终点站</div>
+        </div>
+      </div>
+      <div class="train-rows-container">
+        ${timetable.lastTrainTimes
+          .map(
+            train => `
+          <div class="train-row">
+            <div class="train-cell train-time-cell">${train.time}</div>
+            <div class="train-cell train-direction-cell">${train.direction}</div>
+            <div class="train-cell train-destination-cell">${train.to}</div>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    </div>
+  `
+              : `<div class="train-header no-train-info">无末班车信息</div>`;
 
           const primaryCode = station.line_codes.find(
             c => c.name === line.name
@@ -568,6 +602,13 @@ async function showMRTLines() {
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <style>
     body { font-family: -apple-system; padding: 10px; }
+    #lines {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: white;
+      padding-bottom: 10px;
+    }
     .line, .station {
       padding: 10px;
       border-bottom: 1px solid #eee;
@@ -617,6 +658,77 @@ async function showMRTLines() {
     .toggle-btn.active {
       background-color: red;
     }
+    .train-header {
+    display: none;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  .train-title {
+    text-align: center;
+    font-weight: bold;
+    margin: 8px 0;
+    width: 100%;
+    font-size: 14px;
+  }
+  .train-columns-container {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+  .train-columns {
+    display: table-row;
+  }
+  .train-column {
+    display: table-cell;
+    text-align: left;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-bottom: 1px solid #eee;
+  }
+  .train-time-column {
+    width: 15%;
+  }
+  .train-direction-column {
+    width: 45%;
+  }
+  .train-destination-column {
+    width: 40%;
+  }
+  .train-rows-container {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+  .train-row {
+    display: table-row;
+  }
+  .train-cell {
+    display: table-cell;
+    text-align: left;
+    padding: 4px 8px;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 12px;
+  }
+  .train-time-cell {
+    width: 15%;
+  }
+  .train-direction-cell {
+    width: 45%;
+  }
+  .train-destination-cell {
+    width: 40%;
+  }
+  .no-train-info {
+    text-align: center;
+    color: #999;
+    padding: 8px 0;
+    font-style: italic;
+    font-size: 12px;
+  }
   </style>
 </head>
 <body>
@@ -660,12 +772,15 @@ async function showMRTLines() {
   activeIndex = (activeIndex === index) ? null : index
 }
 
-    function toggleStationTime(stationId, elem) {
-      const timesElem = elem.querySelectorAll('.train-time')
-      const isVisible = timesElem[0]?.style.display === "block"
-      timesElem.forEach(t => t.style.display = isVisible ? "none" : "block")
-    }
+    function toggleStationTime(stationId, element) {
+  const headers = element.querySelectorAll('.train-header');
+  if (headers.length === 0) return;
 
+  const isVisible = headers[0].style.display === 'block';
+  headers.forEach(h => {
+    h.style.display = isVisible ? 'none' : 'block';
+  });
+}
 
   function showMap() {
   const metaTag = document.querySelector('meta[name="viewport"]');
@@ -803,7 +918,6 @@ MRTMap.onTap = async () => {
 
 async function showLoadingAndFetchData(tasksToUpdate, afterSuccess) {
   const loadingView = new WebView();
-
   await loadingView.loadHTML(`
     <html>
     <head>
