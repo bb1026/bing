@@ -11,15 +11,15 @@ await installation(this.widget_ID, this.version);
 
 const myBusCodes = [
   { busstop: "Yishun Int", stopCode: "59009", busCodes: [/*"804", */ "800"] },
-  { busstop: "Blk 236", stopCode: "59241", busCodes: ["804"] },
+  { busstop: "🏠Blk 236", stopCode: "59241", busCodes: ["804"] },
   { busstop: "Boon Lay Int", stopCode: "22009", busCodes: ["246", "249"] },
   {
-    busstop: "Bef Jln Tukang(To Lakeside)",
+    busstop: "❤️Bef Jln Tukang(To Lakeside)",
     stopCode: "21499",
     busCodes: ["246"]
   },
   {
-    busstop: "Bef Intl Rd(To Boon Lay)⭐",
+    busstop: "⭐Bef Intl Rd(To Boon Lay)",
     stopCode: "21491",
     busCodes: ["246"]
   },
@@ -520,15 +520,22 @@ async function showMRTLines() {
       </div>
       <div class="train-rows-container">
         ${timetable.firstTrainTimes
-          .map(
-            train => `
+          .map(train => {
+            const directionParts = train.direction.split("(");
+            const formattedDirection =
+              directionParts.length > 1
+                ? `${directionParts[0]}<br>(${directionParts
+                    .slice(1)
+                    .join("(")}`
+                : train.direction;
+            return `
           <div class="train-row">
             <div class="train-cell train-time-cell">${train.time}</div>
-            <div class="train-cell train-direction-cell">${train.direction}</div>
+            <div class="train-cell train-direction-cell">${formattedDirection}</div>
             <div class="train-cell train-destination-cell">${train.to}</div>
           </div>
-        `
-          )
+          `;
+          })
           .join("")}
       </div>
     </div>
@@ -549,15 +556,22 @@ async function showMRTLines() {
       </div>
       <div class="train-rows-container">
         ${timetable.lastTrainTimes
-          .map(
-            train => `
+          .map(train => {
+            const directionParts = train.direction.split("(");
+            const formattedDirection =
+              directionParts.length > 1
+                ? `${directionParts[0]}<br>(${directionParts
+                    .slice(1)
+                    .join("(")}`
+                : train.direction;
+            return `
           <div class="train-row">
             <div class="train-cell train-time-cell">${train.time}</div>
-            <div class="train-cell train-direction-cell">${train.direction}</div>
+            <div class="train-cell train-direction-cell">${formattedDirection}</div>
             <div class="train-cell train-destination-cell">${train.to}</div>
           </div>
-        `
-          )
+          `;
+          })
           .join("")}
       </div>
     </div>
@@ -601,21 +615,62 @@ async function showMRTLines() {
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <style>
-    body { font-family: -apple-system; padding: 10px; }
+    :root {
+      --bg-color: white;
+      --text-color: black;
+      --line-bg: white;
+      --station-bg: white;
+      --border-color: #eee;
+      --secondary-text: #555;
+      --progress-bg: #f3f3f3;
+      --header-bg: white;
+      --train-row-bg: white;
+      --train-row-border: #f5f5f5;
+      --toggle-btn-bg: green;
+      --toggle-btn-active-bg: red;
+      --map-bg: rgba(0, 0, 0, 0.5);
+    }
+    
+    .dark-mode {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --line-bg: #1e1e1e;
+      --station-bg: #1e1e1e;
+      --border-color: #333;
+      --secondary-text: #aaa;
+      --progress-bg: #333;
+      --header-bg: #1e1e1e;
+      --train-row-bg: #2d2d2d;
+      --train-row-border: #333;
+      --toggle-btn-bg: #2e7d32;
+      --toggle-btn-active-bg: #c62828;
+      --map-bg: rgba(0, 0, 0, 0.8);
+    }
+    
+    body {
+      font-family: -apple-system;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 10px;
+    }
+    .train-direction-cell {
+    white-space: pre-line;
+    }
     #lines {
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: white;
+      background: var(--header-bg);
       padding-bottom: 10px;
     }
     .line, .station {
       padding: 10px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--border-color);
       font-size: 17px;
       display: flex;
       align-items: center;
       flex-wrap: wrap;
+      background-color: var(--line-bg);
     }
     .dot {
       display: inline-block;
@@ -627,14 +682,15 @@ async function showMRTLines() {
     .dot-code {
       font-size: 13px;
       margin-right: 8px;
-      color: #444;
+      color: var(--secondary-text);
     }
     .station-name {
       margin-left: auto;
+      color: var(--text-color);
     }
     .train-time {
       font-size: 14px;
-      color: #555;
+      color: var(--secondary-text);
       width: 100%;
       margin-top: 4px;
     }
@@ -645,7 +701,7 @@ async function showMRTLines() {
       width: 24px;
       height: 24px;
       border-radius: 12px;
-      background-color: green;
+      background-color: var(--toggle-btn-bg);
       color: white !important;
       font-size: 24px;
       line-height: 24px;
@@ -656,79 +712,104 @@ async function showMRTLines() {
       user-select: none;
     }
     .toggle-btn.active {
-      background-color: red;
+      background-color: var(--toggle-btn-active-bg);
     }
     .train-header {
-    display: none;
-    width: 100%;
-    box-sizing: border-box;
-    margin-top: 10px;
-    font-size: 14px;
-  }
-  .train-title {
-    text-align: center;
-    font-weight: bold;
-    margin: 8px 0;
-    width: 100%;
-    font-size: 14px;
-  }
-  .train-columns-container {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-  }
-  .train-columns {
-    display: table-row;
-  }
-  .train-column {
-    display: table-cell;
-    text-align: left;
-    font-weight: bold;
-    padding: 4px 8px;
-    border-bottom: 1px solid #eee;
-  }
-  .train-time-column {
-    width: 15%;
-  }
-  .train-direction-column {
-    width: 45%;
-  }
-  .train-destination-column {
-    width: 40%;
-  }
-  .train-rows-container {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-  }
-  .train-row {
-    display: table-row;
-  }
-  .train-cell {
-    display: table-cell;
-    text-align: left;
-    padding: 4px 8px;
-    border-bottom: 1px solid #f5f5f5;
-    font-size: 12px;
-  }
-  .train-time-cell {
-    width: 15%;
-  }
-  .train-direction-cell {
-    width: 45%;
-  }
-  .train-destination-cell {
-    width: 40%;
-  }
-  .no-train-info {
-    text-align: center;
-    color: #999;
-    padding: 8px 0;
-    font-style: italic;
-    font-size: 12px;
-  }
+      display: none;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 10px;
+      font-size: 14px;
+      background-color: var(--station-bg);
+    }
+    .train-title {
+      text-align: center;
+      font-weight: bold;
+      margin: 8px 0;
+      width: 100%;
+      font-size: 14px;
+      color: var(--text-color);
+    }
+    .train-columns-container {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+    .train-columns {
+      display: table-row;
+    }
+    .train-column {
+      display: table-cell;
+      text-align: left;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-color);
+    }
+    .train-time-column {
+      width: 15%;
+    }
+    .train-direction-column {
+      width: 45%;
+    }
+    .train-destination-column {
+      width: 40%;
+    }
+    .train-rows-container {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+    .train-row {
+      display: table-row;
+      background-color: var(--train-row-bg);
+    }
+    .train-cell {
+      display: table-cell;
+      text-align: left;
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--train-row-border);
+      font-size: 12px;
+      color: var(--text-color);
+    }
+    .train-time-cell {
+      width: 15%;
+    }
+    .train-direction-cell {
+      width: 45%;
+    }
+    .train-destination-cell {
+      width: 40%;
+    }
+    .no-train-info {
+      text-align: center;
+      color: var(--secondary-text);
+      padding: 8px 0;
+      font-style: italic;
+      font-size: 12px;
+    }
+    .theme-switch {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 25px;
+      background-color: var(--toggle-btn-bg);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 1001;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #map-container {
+      background-color: var(--map-bg);
+    }
   </style>
 </head>
 <body>
@@ -739,9 +820,28 @@ async function showMRTLines() {
   <div id="stations">
     ${allStationHtml}
   </div>
+  <div class="theme-switch" onclick="toggleTheme()" id="theme-switch">🌙</div>
 
   <script>
-    let activeIndex = null
+    let activeIndex = null;
+    let isDarkMode = false;
+    
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      document.body.classList.toggle('dark-mode', isDarkMode);
+      document.getElementById('theme-switch').textContent = isDarkMode ? '☀️' : '🌙';
+    }
+    
+    // 初始化时检查保存的主题偏好
+    function initTheme() {
+      if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-switch').textContent = '☀️';
+      }
+    }
+    
+    initTheme();
+
     function toggleStations(index) {
   const total = ${lineList.length}
   for (let i = 0; i < total; i++) {
@@ -794,7 +894,7 @@ async function showMRTLines() {
     mapContainer.style.left = '0';
     mapContainer.style.width = '100%';
     mapContainer.style.height = '100%';
-    mapContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    mapContainer.style.backgroundColor = 'var(--map-bg)';
     mapContainer.style.zIndex = '9999';
 
     mapContainer.style.backgroundImage = 'url("https://raw.githubusercontent.com/bb1026/bing/main/imgs/mrt-map.png")';
@@ -828,7 +928,7 @@ closeButton.style.borderRadius = '6px';
 
   const wv = new WebView();
   await wv.loadHTML(mainHtml);
-  await wv.present();
+  await wv.present(true);
 }
 
 let currentStopCode = null;
@@ -923,6 +1023,26 @@ async function showLoadingAndFetchData(tasksToUpdate, afterSuccess) {
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
       <style>
+      :root {
+          --bg-color: white;
+          --text-color: #555;
+          --spinner-border: #f3f3f3;
+          --spinner-top: #3498db;
+          --progress-bg: #f3f3f3;
+          --progress-bar: #4CAF50;
+          --error-color: red;
+        }
+        
+        .dark-mode {
+          --bg-color: #121212;
+          --text-color: #e0e0e0;
+          --spinner-border: #333;
+          --spinner-top: #3498db;
+          --progress-bg: #333;
+          --progress-bar: #4CAF50;
+          --error-color: #ff5252;
+        }
+        
         body {
           font-family: -apple-system;
           display: flex;
@@ -930,11 +1050,11 @@ async function showLoadingAndFetchData(tasksToUpdate, afterSuccess) {
           align-items: center;
           height: 100vh;
           flex-direction: column;
-          background-color: white;
+          background-color: var(--bg-color);
         }
         .spinner {
-          border: 8px solid #f3f3f3;
-          border-top: 8px solid #3498db;
+          border: 8px solid var(--spinner-border);
+          border-top: 8px solid var(--spinner-top);
           border-radius: 50%;
           width: 60px;
           height: 60px;
@@ -947,25 +1067,25 @@ async function showLoadingAndFetchData(tasksToUpdate, afterSuccess) {
         .text {
           margin-top: 20px;
           font-size: 18px;
-          color: #555;
+          color: var(--text-color);
           text-align: center;
           padding: 0 20px;
         }
         .progress {
           width: 80%;
           margin-top: 20px;
-          background-color: #f3f3f3;
+          background-color: var(--progress-bg);
           border-radius: 5px;
           overflow: hidden;
         }
         .progress-bar {
           height: 10px;
-          background-color: #4CAF50;
+          background-color: var(--progress-bar);
           width: 0%;
           transition: width 0.3s;
         }
         .error {
-          color: red;
+          color: var(--error-color);
           margin-top: 20px;
           display: none;
         }
