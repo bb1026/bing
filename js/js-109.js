@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v2.4";
+this.version = "v2.5";
 
 let installation;
 await CheckKu();
