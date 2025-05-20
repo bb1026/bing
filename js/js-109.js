@@ -122,6 +122,23 @@ async function fetchAndCacheTimeTable() {
   try {
     const mrtMap = JSON.parse(fm.readString(cachePaths.mrtMap));
     const stations = [];
+    for (const line of mrtMap) {
+      if (Array.isArray(line.stations)) {
+        stations.push(...line.stations);
+      }
+    }
+    const uniqueStations = [];
+    const seenIds = new Set();
+    for (const station of stations) {
+      if (!seenIds.has(station.id)) {
+        seenIds.add(station.id);
+        uniqueStations.push(station);
+      }
+    }
+
+    let successCount = 0;
+    const timetableCache = {};
+
     for (let i = 0; i < uniqueStations.length; i++) {
       const stationId = uniqueStations[i].id;
       const url = `${apiUrls.TimetableUrl}${stationId}`;
