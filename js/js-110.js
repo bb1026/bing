@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v2.4";
+this.version = "v2.5";
 
 let installation, calendar;
 await CheckKu();
@@ -115,6 +115,14 @@ async function getUpcomingEvents(startDate, endDate, maxEventsToShow = 2) {
   }
 }
 
+async function shouldSendNotification() {
+  const now = new Date();
+  if (now.getHours() < 6) return false;
+  const lastDate = await getLastNotificationDate();
+  return lastDate !== new Date().toDateString();
+  return true;
+}
+
 async function getLastNotificationDate() {
   return Keychain.contains(NOTIFICATION_KEY)
     ? JSON.parse(Keychain.get(NOTIFICATION_KEY)).date
@@ -129,20 +137,16 @@ async function sendNotificationIfNeeded(today, events) {
   if (!(await shouldSendNotification())) return;
 
   // 获取当天事件（去重）
-  const todayEvents = [
-    ...new Set(
-      events
-        .filter(e => {
-          const eventDate = new Date(e.startDate);
-          return (
-            eventDate.getFullYear() === today.getFullYear() &&
-            eventDate.getMonth() === today.getMonth() &&
-            eventDate.getDate() === today.getDate()
-          );
-        })
-        .map(e => e.title.trim())
-    )
-  ];
+  const todayEvents = events
+    .filter(e => {
+      const eventDate = new Date(e.startDate);
+      return (
+        eventDate.getFullYear() === today.getFullYear() &&
+        eventDate.getMonth() === today.getMonth() &&
+        eventDate.getDate() === today.getDate()
+      );
+    })
+    .map(e => e.title.trim());
 
   // 获取节气信息
   const term = WidgetUtils.getIsTerm(today) ? WidgetUtils.getTerm(today) : null;
@@ -156,7 +160,9 @@ async function sendNotificationIfNeeded(today, events) {
   const lunarStr = `${lunar.IMonthCn}${lunar.IDayCn}`;
   const eventStr = todayEvents.join("、");
 
-  const body = [dateStr, lunarStr, term, eventStr].filter(Boolean).join(" ");
+  const body = [
+    ...new Set([dateStr, lunarStr, term, eventStr].filter(Boolean))
+  ].join(" ");
 
   // 发送通知并记录
   const notification = new Notification();
@@ -193,6 +199,9 @@ async function createCalendarWidget() {
   } catch (error) {
     console.error("获取月事件失败:" + error);
   }
+
+  // 检查是否需要发送通知
+  await sendNotificationIfNeeded(today, allEvents, widgetFamily);
 
   if (widgetFamily === "small") {
     const bgImg = WidgetUtils.createBackgroundImage();
