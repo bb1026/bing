@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小学生数学题生成器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .control-panel {
+            background-color: #eaf2f8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .questions-container {
+            margin-top: 20px;
+        }
+        .question {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+        }
+        .question-number {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input[type="number"].answer {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .result {
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        .correct {
+            color: #27ae60;
+        }
+        .incorrect {
+            color: #e74c3c;
+        }
+        .locked {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .score-display {
+            text-align: center;
+            font-size: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+        .timer {
+            text-align: center;
+            font-size: 18px;
+            margin: 10px 0;
+            display: none;
+        }
+        .wrong-questions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fde8e8;
+            border-radius: 8px;
+            display: none;
+        }
+        .wrong-questions h3 {
+            color: #e74c3c;
+            margin-top: 0;
+        }
+        .history-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4f8;
+            border-radius: 8px;
+            display: none;
+        }
+        .history-panel h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .history-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+        }
+        .hidden {
+            display: none;
+        }
+        .print-only {
+            display: none;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+            .print-only {
+                display: block;
+            }
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            .question {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>小学生数学题生成器</h1>
+        
+        <div class="control-panel no-print" id="controlPanel">
+            <div class="form-group">
+                <label for="questionType">选择题型：</label>
+                <select id="questionType">
+                    <option value="addition">加法</option>
+                    <option value="subtraction">减法</option>
+                    <option value="multiplication">乘法</option>
+                    <option value="division">除法</option>
+                    <option value="mixed">混合运算</option>
+                    <option value="parentheses">带括号运算</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="questionCount">题目数量：</label>
+                <input type="number" id="questionCount" min="1" max="100" value="10">
+            </div>
+            
+            <div class="form-group">
+                <label for="difficulty">难度：</label>
+                <select id="difficulty">
+                    <option value="easy">简单 (1-10)</option>
+                    <option value="medium">中等 (1-100)</option>
+                    <option value="hard">困难 (1-1000)</option>
+                    <option value="custom">自定义范围</option>
+                </select>
+            </div>
+            
+            <div class="form-group hidden" id="customRangeGroup">
+                <label for="minNumber">最小值：</label>
+                <input type="number" id="minNumber" min="1" value="1">
+                
+                <label for="maxNumber">最大值：</label>
+                <input type="number" id="maxNumber" min="1" value="100">
+            </div>
+            
+            <div class="button-group">
+                <button id="generateBtn">生成题目</button>
+                <button id="restartBtn" class="hidden">重新开始</button>
+                <button id="printBtn" class="hidden no-print">打印题目</button>
+                <button id="exportPdfBtn" class="hidden no-print">导出PDF</button>
+            </div>
+        </div>
+        
+        <div id="timer" class="timer"></div>
+        
+        <div id="questionsContainer" class="questions-container" style="display: none;">
+            <div id="questionsList"></div>
+            <div class="button-group no-print">
+                <button id="submitBtn">提交答案</button>
+            </div>
+            <div id="scoreDisplay" class="score-display"></div>
+        </div>
+        
+        <div id="wrongQuestions" class="wrong-questions no-print">
+            <h3>错题集</h3>
+            <div id="wrongQuestionsList"></div>
+        </div>
+        
+        <div id="historyPanel" class="history-panel no-print">
+            <h3>历史记录</h3>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        // 使用jsPDF
+        const { jsPDF } = window.jspdf;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            const printBtn = document.getElementById('printBtn');
+            const exportPdfBtn = document.getElementById('exportPdfBtn');
+            const questionsList = document.getElementById('questionsList');
+            const controlPanel = document.getElementById('controlPanel');
+            const questionsContainer = document.getElementById('questionsContainer');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const timerDisplay = document.getElementById('timer');
+            const wrongQuestions = document.getElementById('wrongQuestions');
+            const wrongQuestionsList = document.getElementById('wrongQuestionsList');
+            const historyPanel = document.getElementById('historyPanel');
+            const historyList = document.getElementById('historyList');
+            const customRangeGroup = document.getElementById('customRangeGroup');
+            const difficultySelect = document.getElementById('difficulty');
+            
+            let questions = [];
+            let startTime;
+            let timerInterval;
+            let history = JSON.parse(localStorage.getItem('mathHistory')) || [];
+            
+            // 初始化显示历史记录
+            renderHistory();
+            
+            // 事件监听
+            generateBtn.addEventListener('click', generateQuestions);
+            submitBtn.addEventListener('click', checkAnswers);
+            restartBtn.addEventListener('click', restart);
+            printBtn.addEventListener('click', printQuestions);
+            exportPdfBtn.addEventListener('click', exportToPdf);
+            difficultySelect.addEventListener('change', toggleCustomRange);
+            
+            function toggleCustomRange() {
+                if (difficultySelect.value === 'custom') {
+                    customRangeGroup.classList.remove('hidden');
+                } else {
+                    customRangeGroup.classList.add('hidden');
+                }
+            }
+            
+            function generateQuestions() {
+                const questionType = document.getElementById('questionType').value;
+                const questionCount = parseInt(document.getElementById('questionCount').value);
+                const difficulty = document.getElementById('difficulty').value;
+                
+                // 根据难度设置数字范围
+                let minNumber, maxNumber;
+                switch(difficulty) {
+                    case 'easy': 
+                        minNumber = 1;
+                        maxNumber = 10; 
+                        break;
+                    case 'medium': 
+                        minNumber = 1;
+                        maxNumber = 100; 
+                        break;
+                    case 'hard': 
+                        minNumber = 1;
+                        maxNumber = 1000; 
+                        break;
+                    case 'custom':
+                        minNumber = parseInt(document.getElementById('minNumber').value) || 1;
+                        maxNumber = parseInt(document.getElementById('maxNumber').value) || 100;
+                        break;
+                    default: 
+                        minNumber = 1;
+                        maxNumber = 10;
+                }
+                
+                // 确保最大值不小于最小值
+                if (maxNumber < minNumber) maxNumber = minNumber;
+                
+                questions = [];
+                questionsList.innerHTML = '';
+                
+                for (let i = 0; i < questionCount; i++) {
+                    let question, answer;
+                    let currentQuestionType = questionType;
+                    
+                    // 如果是混合运算，随机选择一种运算
+                    if (questionType === 'mixed') {
+                        const types = ['addition', 'subtraction', 'multiplication', 'division'];
+                        currentQuestionType = types[Math.floor(Math.random() * types.length)];
+                    }
+                    
+                    // 生成带括号的运算
+                    if (questionType === 'parentheses') {
+                        const a = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+                        const b = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+                        const c = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+                        
+                        // 随机选择括号位置
+                        const bracketType = Math.floor(Math.random() * 3);
+                        switch(bracketType) {
+                            case 0: // (a + b) + c
+                                question = `(${a} + ${b}) + ${c} = `;
+                                answer = (a + b) + c;
+                                break;
+                            case 1: // a + (b - c)
+                                question = `${a} + (${b} - ${c}) = `;
+                                answer = a + (b - c);
+                                break;
+                            case 2: // (a × b) - c
+                                question = `(${a} × ${b}) - ${c} = `;
+                                answer = (a * b) - c;
+                                break;
+                        }
+                    } else {
+                        // 普通运算
+                        switch(currentQuestionType) {
+                            case 'addition':
+                                const a = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+                                const b = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+                                question = `${a} + ${b} = `;
+                                answer = a + b;
+                                break;
+                            case 'subtraction':
+                                const c = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+                                let d = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+                                // 确保减法结果为正数
+                                if (d > c) [c, d] = [d, c];
+                                question = `${c} - ${d} = `;
+                                answer = c - d;
+                                break;
+                            case 'multiplication':
+                                const e = Math.floor(Math.random() * (Math.min(maxNumber, 100) - minNumber + 1)) + minNumber;
+                                const f = Math.floor(Math.random() * (Math.min(maxNumber, 100) - minNumber + 1)) + minNumber;
+                                question = `${e} × ${f} = `;
+                                answer = e * f;
+                                break;
+                            case 'division':
+                                const g = Math.floor(Math.random() * (Math.min(maxNumber, 100) - minNumber + 1)) + minNumber;
+                                const h = Math.floor(Math.random() * (Math.min(maxNumber, 100) - minNumber + 1)) + minNumber;
+                                const product = g * h;
+                                question = `${product} ÷ ${g} = `;
+                                answer = h;
+                                break;
+                        }
+                    }
+                    
+                    questions.push({
+                        question: question,
+                        answer: answer,
+                        userAnswer: null,
+                        isCorrect: false
+                    });
+                    
+                    // 创建题目元素
+                    const questionElement = document.createElement('div');
+                    questionElement.className = 'question';
+                    questionElement.innerHTML = `
+                        <div class="question-number">题目 ${i + 1}</div>
+                        <div class="question-text">
+                            ${question} 
+                            <input type="number" class="answer" id="answer-${i}" data-index="${i}">
+                        </div>
+                        <div class="result" id="result-${i}"></div>
+                    `;
+                    questionsList.appendChild(questionElement);
+                }
+                
+                // 显示题目区域
+                questionsContainer.style.display = 'block';
+                printBtn.classList.remove('hidden');
+                exportPdfBtn.classList.remove('hidden');
+                restartBtn.classList.remove('hidden');
+                
+                // 隐藏历史记录和错题集
+                wrongQuestions.style.display = 'none';
+                historyPanel.style.display = 'none';
+                
+                // 开始计时
+                startTimer();
+                
+                // 添加答案输入事件监听
+                document.querySelectorAll('.answer').forEach(input => {
+                    input.addEventListener('input', function() {
+                        const index = parseInt(this.dataset.index);
+                        questions[index].userAnswer = parseInt(this.value) || null;
+                    });
+                });
+            }
+            
+            function startTimer() {
+                startTime = new Date();
+                timerDisplay.style.display = 'block';
+                updateTimer();
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+            
+            function updateTimer() {
+                const now = new Date();
+                const elapsed = Math.floor((now - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                timerDisplay.textContent = `用时: ${minutes}分${seconds}秒`;
+            }
+            
+            function checkAnswers() {
+                clearInterval(timerInterval);
+                let correctCount = 0;
+                const wrongQuestionsArray = [];
+                
+                questions.forEach((q, index) => {
+                    const resultElement = document.getElementById(`result-${index}`);
+                    resultElement.style.display = 'block';
+                    
+                    if (q.userAnswer === q.answer) {
+                        resultElement.textContent = '✓ 正确！';
+                        resultElement.className = 'result correct';
+                        q.isCorrect = true;
+                        correctCount++;
+                    } else {
+                        resultElement.textContent = `✗ 错误！正确答案是 ${q.answer}`;
+                        resultElement.className = 'result incorrect';
+                        q.isCorrect = false;
+                        wrongQuestionsArray.push(q);
+                    }
+                });
+                
+                // 显示得分
+                const scorePercentage = Math.round((correctCount / questions.length) * 100);
+                scoreDisplay.textContent = `你的得分: ${correctCount}/${questions.length} (${scorePercentage}%)`;
+                scoreDisplay.style.display = 'block';
+                
+                // 显示错题集
+                if (wrongQuestionsArray.length > 0) {
+                    wrongQuestionsList.innerHTML = '';
+                    wrongQuestionsArray.forEach((q, i) => {
+                        const wrongItem = document.createElement('div');
+                        wrongItem.className = 'question';
+                        wrongItem.innerHTML = `
+                            <div class="question-number">错题 ${i + 1}</div>
+                            <div class="question-text">${q.question} ${q.answer}</div>
+                        `;
+                        wrongQuestionsList.appendChild(wrongItem);
+                    });
+                    wrongQuestions.style.display = 'block';
+                }
+                
+                // 锁定所有输入
+                document.querySelectorAll('.answer').forEach(input => {
+                    input.disabled = true;
+                });
+                
+                // 锁定控制面板
+                controlPanel.classList.add('locked');
+                submitBtn.disabled = true;
+                
+                // 保存到历史记录
+                saveToHistory(correctCount);
+            }
+            
+            function saveToHistory(correctCount) {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+                const scorePercentage = Math.round((correctCount / questions.length) * 100);
+                const elapsed = timerDisplay.textContent.replace('用时: ', '');
+                
+                const historyItem = {
+                    date: dateStr,
+                    type: document.getElementById('questionType').value,
+                    count: questions.length,
+                    correct: correctCount,
+                    percentage: scorePercentage,
+                    time: elapsed,
+                    difficulty: document.getElementById('difficulty').value
+                };
+                
+                history.unshift(historyItem);
+                if (history.length > 10) history = history.slice(0, 10);
+                
+                localStorage.setItem('mathHistory', JSON.stringify(history));
+                renderHistory();
+            }
+            
+            function renderHistory() {
+                historyList.innerHTML = '';
+                
+                if (history.length === 0) {
+                    historyList.innerHTML = '<p>暂无历史记录</p>';
+                    return;
+                }
+                
+                history.forEach((item, index) => {
+                    const historyElement = document.createElement('div');
+                    historyElement.className = 'history-item';
+                    historyElement.innerHTML = `
+                        <div><strong>${item.date}</strong></div>
+                        <div>题型: ${getTypeName(item.type)} | 难度: ${getDifficultyName(item.difficulty)}</div>
+                        <div>得分: ${item.correct}/${item.count} (${item.percentage}%) | ${item.time}</div>
+                    `;
+                    historyList.appendChild(historyElement);
+                });
+                
+                historyPanel.style.display = 'block';
+            }
+            
+            function getTypeName(type) {
+                const types = {
+                    'addition': '加法',
+                    'subtraction': '减法',
+                    'multiplication': '乘法',
+                    'division': '除法',
+                    'mixed': '混合运算',
+                    'parentheses': '括号运算'
+                };
+                return types[type] || type;
+            }
+            
+            function getDifficultyName(difficulty) {
+                const difficulties = {
+                    'easy': '简单',
+                    'medium': '中等',
+                    'hard': '困难',
+                    'custom': '自定义'
+                };
+                return difficulties[difficulty] || difficulty;
+            }
+            
+            function restart() {
+                // 重置所有状态
+                questionsContainer.style.display = 'none';
+                scoreDisplay.style.display = 'none';
+                wrongQuestions.style.display = 'none';
+                timerDisplay.style.display = 'none';
+                clearInterval(timerInterval);
+                
+                // 解锁控制面板
+                controlPanel.classList.remove('locked');
+                
+                // 隐藏按钮
+                printBtn.classList.add('hidden');
+                exportPdfBtn.classList.add('hidden');
+                restartBtn.classList.add('hidden');
+                
+                // 显示历史记录
+                historyPanel.style.display = 'block';
+            }
+            
+            function printQuestions() {
+                window.print();
+            }
+            
+            async function exportToPdf() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // 添加标题
+                doc.setFontSize(20);
+                doc.text('数学练习题', 105, 15, { align: 'center' });
+                
+                // 添加信息
+                doc.setFontSize(12);
+                const date = new Date().toLocaleString();
+                doc.text(`生成时间: ${date}`, 14, 25);
+                doc.text(`题型: ${getTypeName(document.getElementById('questionType').value}`, 14, 30);
+                doc.text(`难度: ${getDifficultyName(document.getElementById('difficulty').value)}`, 14, 35);
+                
+                // 添加题目
+                doc.setFontSize(14);
+                let y = 45;
+                questions.forEach((q, i) => {
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    doc.text(`${i + 1}. ${q.question}`, 14, y);
+                    y += 10;
+                });
+                
+                // 保存PDF
+                doc.save('数学练习题.pdf');
+            }
+        });
+    </script>
+</body>
+</html>
