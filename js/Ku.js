@@ -442,7 +442,7 @@ async function createHTMLContent(scriptsHTML, scripts) {
 </html>`;
 };
 
-module.exports = { showMRTLines, showLoadingAndFetchData };
+
 
 async function showMRTLines(readCache) {
   const raw = readCache("mrtMap");
@@ -980,6 +980,8 @@ async function showLoadingAndFetchData(
           height: 100vh;
           flex-direction: column;
           background-color: var(--bg-color);
+          overflow: hidden; /* 禁止滚动 */
+          margin: 0;
         }
         .spinner {
           border: 8px solid var(--spinner-border);
