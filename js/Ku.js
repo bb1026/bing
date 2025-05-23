@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.6";
+this.version = "v3.7";
 
 function getUrls() {
   const BASE_URL = "https://raw.githubusercontent.com/bb1026/bing/main/js/"
@@ -442,6 +442,645 @@ async function createHTMLContent(scriptsHTML, scripts) {
 </html>`;
 };
 
+module.exports = { showMRTLines, showLoadingAndFetchData };
+
+async function showMRTLines(readCache) {
+  const raw = readCache("mrtMap");
+
+  const lineMap = {};
+  const lineList = [];
+
+  for (const line of raw) {
+    if (!lineMap[line.name]) {
+      lineMap[line.name] = {
+        name: line.name,
+        short: line.line_short_name,
+        code: line.code,
+        color: line.color,
+        stations: []
+      };
+      lineList.push(line.name);
+    }
+
+    const seen = new Set();
+    for (const station of line.stations) {
+      if (!seen.has(station.id)) {
+        seen.add(station.id);
+        lineMap[line.name].stations.push(station);
+      }
+    }
+  }
+
+  async function fetchTimetable(stationId) {
+    let timetableCache = {};
+    try {
+      timetableCache = readCache("timeTable");
+    } catch (e) {
+      console.warn("读取缓存失败，未找到时刻表数据");
+      return { firstTrainTimes: [], lastTrainTimes: [] };
+    }
+
+    if (!timetableCache[stationId]) {
+      console.warn(`站点 ${stationId} 无缓存数据`);
+      return { firstTrainTimes: [], lastTrainTimes: [] };
+    }
+
+    const { firstTrainTimes, lastTrainTimes } = timetableCache[stationId];
+    const result = { firstTrainTimes, lastTrainTimes };
+    return result;
+  }
+
+  const lineListHtml = [
+    `<div class="line" onclick="showMap()" id="map-line">
+    <span class="dot" style="background-color: #007AFF;"></span>
+    <span class="line-name" id="map-line-name">查看地图 🗺️</span>
+  </div>`,
+    ...lineList.map((name, index) => {
+      const line = lineMap[name];
+      return `
+      <div class="line" onclick="toggleStations(${index})" id="line-${index}">
+        <span class="dot" style="background-color: ${line.color}"></span>
+        <span class="line-name" id="line-name-${index}">${line.name}</span>
+        <span class="toggle-btn" id="toggle-btn-${index}">＋</span>
+      </div>
+    `;
+    })
+  ].join("\n");
+
+  const allStationHtmlArray = await Promise.all(
+    lineList.map(async (name, index) => {
+      const line = lineMap[name];
+      const stationHtml = await Promise.all(
+        line.stations.map(async station => {
+          const timetable = await fetchTimetable(station.id);
+
+          const firstTrainDetails =
+            timetable.firstTrainTimes.length > 0
+              ? `
+    <div class="train-header">
+      <div class="train-title">首班车</div>
+      <div class="train-columns-container">
+        <div class="train-columns">
+          <div class="train-column train-time-column">时间</div>
+          <div class="train-column train-direction-column">方向</div>
+          <div class="train-column train-destination-column">终点站</div>
+        </div>
+      </div>
+      <div class="train-rows-container">
+        ${timetable.firstTrainTimes
+          .map(train => {
+            const directionParts = train.direction.split("(");
+            const formattedDirection =
+              directionParts.length > 1
+                ? `${directionParts[0]}<br>(${directionParts
+                    .slice(1)
+                    .join("(")}`
+                : train.direction;
+            return `
+          <div class="train-row">
+            <div class="train-cell train-time-cell">${train.time}</div>
+            <div class="train-cell train-direction-cell">${formattedDirection}</div>
+            <div class="train-cell train-destination-cell">${train.to}</div>
+          </div>
+          `;
+          })
+          .join("")}
+      </div>
+    </div>
+  `
+              : `<div class="train-header no-train-info">无首班车信息</div>`;
+
+          const lastTrainDetails =
+            timetable.lastTrainTimes.length > 0
+              ? `
+    <div class="train-header">
+      <div class="train-title">末班车</div>
+      <div class="train-columns-container">
+        <div class="train-columns">
+          <div class="train-column train-time-column">时间</div>
+          <div class="train-column train-direction-column">方向</div>
+          <div class="train-column train-destination-column">终点站</div>
+        </div>
+      </div>
+      <div class="train-rows-container">
+        ${timetable.lastTrainTimes
+          .map(train => {
+            const directionParts = train.direction.split("(");
+            const formattedDirection =
+              directionParts.length > 1
+                ? `${directionParts[0]}<br>(${directionParts
+                    .slice(1)
+                    .join("(")}`
+                : train.direction;
+            return `
+          <div class="train-row">
+            <div class="train-cell train-time-cell">${train.time}</div>
+            <div class="train-cell train-direction-cell">${formattedDirection}</div>
+            <div class="train-cell train-destination-cell">${train.to}</div>
+          </div>
+          `;
+          })
+          .join("")}
+      </div>
+    </div>
+  `
+              : `<div class="train-header no-train-info">无末班车信息</div>`;
+
+          const primaryCode = station.line_codes.find(
+            c => c.name === line.name
+          );
+          const otherCodes = station.line_codes.filter(
+            c => c.name !== line.name
+          );
+
+          const dotsWithCodes = [
+            `<span class="dot" style="background-color: ${primaryCode.color}"></span><span class="dot-code">${primaryCode.code}</span>`,
+            ...otherCodes.map(
+              code =>
+                `<span class="dot" style="background-color: ${code.color}"></span><span class="dot-code">${code.code}</span>`
+            )
+          ].join("");
+
+          return `
+      <div class="station" onclick="toggleStationTime('${station.id}', this)">
+        ${dotsWithCodes}
+        <span class="station-name">${station.name}</span>
+        ${firstTrainDetails}
+        ${lastTrainDetails}
+      </div>`;
+        })
+      );
+      return `<div class="station-list" id="station-list-${index}" style="display: none">${stationHtml.join(
+        "\n"
+      )}</div>`;
+    })
+  );
+
+  const allStationHtml = allStationHtmlArray.join("\n");
+
+  const mainHtml = `
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style>
+    :root {
+      --bg-color: white;
+      --text-color: black;
+      --line-bg: white;
+      --station-bg: white;
+      --border-color: #eee;
+      --secondary-text: #555;
+      --progress-bg: #f3f3f3;
+      --header-bg: white;
+      --train-row-bg: white;
+      --train-row-border: #f5f5f5;
+      --toggle-btn-bg: green;
+      --toggle-btn-active-bg: red;
+      --map-bg: rgba(0, 0, 0, 0.5);
+    }
+    
+    .dark-mode {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --line-bg: #1e1e1e;
+      --station-bg: #1e1e1e;
+      --border-color: #333;
+      --secondary-text: #aaa;
+      --progress-bg: #333;
+      --header-bg: #1e1e1e;
+      --train-row-bg: #2d2d2d;
+      --train-row-border: #333;
+      --toggle-btn-bg: #2e7d32;
+      --toggle-btn-active-bg: #c62828;
+      --map-bg: rgba(0, 0, 0, 0.8);
+    }
+    
+    body {
+      font-family: -apple-system;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 10px;
+    }
+    .train-direction-cell {
+    white-space: pre-line;
+    }
+    #lines {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: var(--header-bg);
+      padding-bottom: 10px;
+    }
+    .line, .station {
+      padding: 10px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      background-color: var(--line-bg);
+    }
+    .dot {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 7px;
+      margin-right: 4px;
+    }
+    .dot-code {
+      font-size: 13px;
+      margin-right: 8px;
+      color: var(--secondary-text);
+    }
+    .station-name {
+      margin-left: auto;
+      color: var(--text-color);
+    }
+    .train-time {
+      font-size: 14px;
+      color: var(--secondary-text);
+      width: 100%;
+      margin-top: 4px;
+    }
+    .line-name.bold {
+      font-weight: bold;
+    }
+    .toggle-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 12px;
+      background-color: var(--toggle-btn-bg);
+      color: white !important;
+      font-size: 24px;
+      line-height: 24px;
+      text-align: center;
+      font-weight: bold;
+      display: inline-block;
+      margin-left: auto;
+      user-select: none;
+    }
+    .toggle-btn.active {
+      background-color: var(--toggle-btn-active-bg);
+    }
+    .train-header {
+      display: none;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 10px;
+      font-size: 14px;
+      background-color: var(--station-bg);
+    }
+    .train-title {
+      text-align: center;
+      font-weight: bold;
+      margin: 8px 0;
+      width: 100%;
+      font-size: 14px;
+      color: var(--text-color);
+    }
+    .train-columns-container {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+    .train-columns {
+      display: table-row;
+    }
+    .train-column {
+      display: table-cell;
+      text-align: left;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-color);
+    }
+    .train-time-column {
+      width: 15%;
+    }
+    .train-direction-column {
+      width: 45%;
+    }
+    .train-destination-column {
+      width: 40%;
+    }
+    .train-rows-container {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+    .train-row {
+      display: table-row;
+      background-color: var(--train-row-bg);
+    }
+    .train-cell {
+      display: table-cell;
+      text-align: left;
+      padding: 4px 8px;
+      border-bottom: 1px solid var(--train-row-border);
+      font-size: 12px;
+      color: var(--text-color);
+    }
+    .train-time-cell {
+      width: 15%;
+    }
+    .train-direction-cell {
+      width: 45%;
+    }
+    .train-destination-cell {
+      width: 40%;
+    }
+    .no-train-info {
+      text-align: center;
+      color: var(--secondary-text);
+      padding: 8px 0;
+      font-style: italic;
+      font-size: 12px;
+    }
+    .theme-switch {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 25px;
+      background-color: var(--toggle-btn-bg);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 1001;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #map-container {
+      background-color: var(--map-bg);
+    }
+  </style>
+</head>
+<body>
+  <h2>选择地铁线路</h2>
+  <div id="lines">
+    ${lineListHtml}
+  </div>
+  <div id="stations">
+    ${allStationHtml}
+  </div>
+  <div class="theme-switch" onclick="toggleTheme()" id="theme-switch">🌙</div>
+
+  <script>
+    let activeIndex = null;
+    let isDarkMode = false;
+    
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      document.body.classList.toggle('dark-mode', isDarkMode);
+      document.getElementById('theme-switch').textContent = isDarkMode ? '☀️' : '🌙';
+    }
+    
+    // 初始化时检查保存的主题偏好
+    function initTheme() {
+      if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-switch').textContent = '☀️';
+      }
+    }
+    
+    initTheme();
+
+    function toggleStations(index) {
+  const total = ${lineList.length}
+  for (let i = 0; i < total; i++) {
+    const lineElem = document.getElementById("line-" + i)
+    const nameElem = document.getElementById("line-name-" + i)
+    const stationElem = document.getElementById("station-list-" + i)
+    const toggleBtn = document.getElementById("toggle-btn-" + i)
+    if (activeIndex === index) {
+      lineElem.style.display = "flex"
+      stationElem.style.display = "none"
+      nameElem.classList.remove("bold")
+      toggleBtn.classList.remove("active")
+      toggleBtn.textContent = "＋"
+    } else if (i === index) {
+      lineElem.style.display = "flex"
+      stationElem.style.display = "block"
+      nameElem.classList.add("bold")
+      toggleBtn.classList.add("active")
+      toggleBtn.textContent = "－"
+    } else {
+      lineElem.style.display = "none"
+      stationElem.style.display = "none"
+      nameElem.classList.remove("bold")
+      toggleBtn.classList.remove("active")
+      toggleBtn.textContent = "＋"
+    }
+  }
+  activeIndex = (activeIndex === index) ? null : index
+}
+
+    function toggleStationTime(stationId, element) {
+  const headers = element.querySelectorAll('.train-header');
+  if (headers.length === 0) return;
+
+  const isVisible = headers[0].style.display === 'block';
+  headers.forEach(h => {
+    h.style.display = isVisible ? 'none' : 'block';
+  });
+}
+
+  function showMap() {
+  const metaTag = document.querySelector('meta[name="viewport"]');
+  const originalMetaContent = metaTag.getAttribute('content');
+  metaTag.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes');
+
+    const mapContainer = document.createElement('div');
+    mapContainer.id = 'map-container';
+    mapContainer.style.position = 'fixed';
+    mapContainer.style.top = '0';
+    mapContainer.style.left = '0';
+    mapContainer.style.width = '100%';
+    mapContainer.style.height = '100%';
+    mapContainer.style.backgroundColor = 'var(--map-bg)';
+    mapContainer.style.zIndex = '9999';
+
+    mapContainer.style.backgroundImage = 'url("https://raw.githubusercontent.com/bb1026/bing/main/imgs/mrt-map.png")';
+    mapContainer.style.backgroundSize = 'contain';
+    mapContainer.style.backgroundPosition = 'center';
+    mapContainer.style.backgroundRepeat = 'no-repeat';
+
+    const closeButton = document.createElement('button');
+    closeButton.innerText = '关闭';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '20px';
+    closeButton.style.right = '20px';
+    closeButton.style.fontSize = '16px';
+    closeButton.style.padding = '10px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.backgroundColor = '#fff';
+closeButton.style.border = '1px solid #ccc';
+closeButton.style.borderRadius = '6px';
+    closeButton.onclick = function() {
+    document.body.removeChild(mapContainer);
+    metaTag.setAttribute('content', originalMetaContent);
+  };
+
+    mapContainer.appendChild(closeButton);
+    document.body.appendChild(mapContainer);
+  };
+  </script>
+</body>
+</html>
+`;
+
+  const wv = new WebView();
+  await wv.loadHTML(mainHtml);
+  await wv.present(true);
+}
+
+async function showLoadingAndFetchData(
+  tasksToUpdate,
+  afterSuccess,
+  fetchAllData,
+  fm,
+  updateTimeCachePath
+) {
+  const loadingView = new WebView();
+  await loadingView.loadHTML(`
+    <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+      <style>
+      :root {
+          --bg-color: white;
+          --text-color: #555;
+          --spinner-border: #f3f3f3;
+          --spinner-top: #3498db;
+          --progress-bg: #f3f3f3;
+          --progress-bar: #4CAF50;
+          --error-color: red;
+        }
+        
+        .dark-mode {
+          --bg-color: #121212;
+          --text-color: #e0e0e0;
+          --spinner-border: #333;
+          --spinner-top: #3498db;
+          --progress-bg: #333;
+          --progress-bar: #4CAF50;
+          --error-color: #ff5252;
+        }
+        
+        body {
+          font-family: -apple-system;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          flex-direction: column;
+          background-color: var(--bg-color);
+        }
+        .spinner {
+          border: 8px solid var(--spinner-border);
+          border-top: 8px solid var(--spinner-top);
+          border-radius: 50%;
+          width: 60px;
+          height: 60px;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        .text {
+          margin-top: 20px;
+          font-size: 18px;
+          color: var(--text-color);
+          text-align: center;
+          padding: 0 20px;
+        }
+        .progress {
+          width: 80%;
+          margin-top: 20px;
+          background-color: var(--progress-bg);
+          border-radius: 5px;
+          overflow: hidden;
+        }
+        .progress-bar {
+          height: 10px;
+          background-color: var(--progress-bar);
+          width: 0%;
+          transition: width 0.3s;
+        }
+        .error {
+          color: var(--error-color);
+          margin-top: 20px;
+          display: none;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="spinner"></div>
+      <div class="text" id="loading-text">正在准备下载数据...</div>
+      <div class="progress">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="error" id="error-message"></div>
+    </body>
+    </html>
+  `);
+
+  const presentPromise = loadingView.present(true);
+
+  try {
+    await loadingView.evaluateJavaScript(`
+      document.getElementById('loading-text').textContent = '正在下载数据...';
+      document.getElementById('progress-bar').style.width = '0%';
+      document.getElementById('error-message').style.display = 'none';
+    `);
+
+    await fetchAllData(tasksToUpdate, async (current, total, name) => {
+      const progress = Math.round((current / total) * 100);
+      const text = `正在下载 ${name} (${current}/${total})`;
+
+      await loadingView.evaluateJavaScript(`
+        document.getElementById('loading-text').textContent = ${JSON.stringify(
+          text
+        )};
+        document.getElementById('progress-bar').style.width = '${progress}%';
+      `);
+    });
+
+    await loadingView.evaluateJavaScript(`
+      document.querySelector('.spinner').outerHTML = '<div style="font-size: 60px; color: #4CAF50;">✓</div>';
+      document.getElementById('loading-text').textContent = '数据下载成功！请关闭此界面...';
+      document.getElementById('progress-bar').style.width = '100%';
+      document.getElementById('progress-bar').style.backgroundColor = '#4CAF50';
+    `);
+
+    const now = new Date().toISOString();
+    fm.writeString(updateTimeCachePath, JSON.stringify({ lastUpdate: now }));
+  } catch (error) {
+    console.error("下载过程中出错:", error);
+    await loadingView.evaluateJavaScript(`
+      document.querySelector('.spinner').outerHTML = '<div style="font-size: 60px; color: red;">✗</div>';
+      document.getElementById('loading-text').textContent = '数据下载失败';
+      document.getElementById('progress-bar').style.backgroundColor = 'red';
+      document.getElementById('error-message').textContent = ${JSON.stringify(
+        error.message
+      )};
+      document.getElementById('error-message').style.display = 'block';
+    `);
+    throw error;
+  }
+
+  await presentPromise;
+
+  if (typeof afterSuccess === "function") {
+    await afterSuccess();
+  }
+}
 
 
 // 日历库
@@ -2904,7 +3543,7 @@ function searchCurrency(input) {
     return searchResults;
 }
 
-module.exports = { generateScriptsHTML, createHTMLContent, installation, currencyData, searchCurrency, calendar, getUrls };
+module.exports = { generateScriptsHTML, createHTMLContent, installation, currencyData, searchCurrency, calendar, getUrls,showMRTLines, showLoadingAndFetchData };
 
 /* 示例查询，使用方法
 const { currencyData, searchCurrency } = importModule('Money Code Exchange')
