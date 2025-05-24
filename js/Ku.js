@@ -29,14 +29,14 @@ async function installation(scriptID, thisVersion) {
 
     if (REMOTE_VER && LOCAL_VER !== REMOTE_VER) {
       console.log("发现新版本数据库");
-      console.log(`✅ 数据库已更新: ${REMOTE_VER}`);
+      console.log(`✔️ 数据库已更新: ${REMOTE_VER}`);
 
       const kuScriptPath = localFm.joinPath(
         localFm.documentsDirectory(),
         "Ku.js"
       );
       await localFm.writeString(kuScriptPath, remoteKuCode);
-      console.log("✅ 数据库更新成功");
+      console.log("✔️ 数据库更新成功");
     } else {
       console.log(`🗃️数据库版本: ${this.version}`);
     }
@@ -79,7 +79,7 @@ console.log(
 
     const isUpdate = thisVersion !== undefined;
     const successAlert = new Notification();
-    successAlert.title = `✅ ${isUpdate ? "更新成功" : "安装成功"}`;
+    successAlert.title = `✔️ ${isUpdate ? "更新成功" : "安装成功"}`;
     successAlert.body = `点击运行 ${scriptName}\n版本 ${remoteVersion}`;
     successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`;
     await successAlert.schedule();
@@ -88,8 +88,6 @@ console.log(
         Script.complete();
       }
       return;
-    } else {
-      console.log("✅ 已是最新版本（iCloud）");
     }
   } catch (error) {
     if (error.message.includes("Could not connect")) {
