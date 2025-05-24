@@ -236,16 +236,22 @@ function replaceStringsInLine(line) {
       parts.push("ChrW(" + ch.charCodeAt(0) + ")");
     }
 
-    // 每 5 个拼接一次，并在末尾加续行 _
+    // 每 5 个拼接一次，方便换行
     let groups = [];
     for (let i = 0; i < parts.length; i += 5) {
       groups.push(parts.slice(i, i + 5).join(" & "));
     }
 
-    // 拼接多行，行尾加续行符 _
+    // 拼接多行，行尾加 " & _"，最后一行无续行符
     return groups.map((g, idx) => {
-      return idx < groups.length - 1 ? g + " & _\n" : g;
-    }).join(" & ");
+      if (idx < groups.length - 1) {
+        // 非最后一行末尾加 & _
+        return g + " & _\n";
+      } else {
+        // 最后一行不加续行符
+        return g;
+      }
+    }).join("");
   });
 }
 
