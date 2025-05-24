@@ -1,376 +1,480 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>高级 VBA 代码混淆器 / 还原器</title>
-<style>
-textarea {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>高级 VBA 代码混淆器 / 还原器</title>
+    <style>
+        textarea {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
 
-  body { font-family: 'Courier New', monospace; margin: 20px; background: #f0f0f8; color: #222; }
-  textarea { width: 100%; height: 240px; font-family: 'Courier New', monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; resize: vertical;}
-  button {
-    padding: 10px 20px;
-    margin: 12px 10px 24px 0;
-    cursor: pointer;
-    border: none;
-    border-radius: 6px;
-    font-weight: 700;
-    font-family: 'Courier New', monospace;
-    color: white;
-    transition: background-color 0.25s ease;
-    user-select: none;
-  }
-  #btnObfuscate { background-color: #007bff; }
-  #btnObfuscate:hover { background-color: #0056b3; }
-  #btnDeobfuscate { background-color: #28a745; }
-  #btnDeobfuscate:hover { background-color: #1e7e34; }
-  #btnCopy { background-color: #ffc107; color: #212529; }
-  #btnCopy:hover { background-color: #d39e00; }
-  #btnClear { background-color: #dc3545; }
-  #btnClear:hover { background-color: #a71d2a; }
-  #btnUpload { background-color: #6f42c1; }
-  #btnUpload:hover { background-color: #4b2e91; }
-  #btnDownload { background-color: #17a2b8; }
-  #btnDownload:hover { background-color: #117a8b; }
-  pre {
-    background: #fff;
-    padding: 12px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    border: 1px solid #ccc;
-    min-height: 160px;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    border-radius: 6px;
-  }
-  input[type=file] { display:none; }
-  @media (max-width: 768px) {
-    textarea {
-      height: 180px;
-      font-size: 13px;
-    }
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 20px;
+            background: #f0f0f8;
+            color: #222;
+        }
 
-    button {
-      width: 100%;
-      margin: 6px 0;
-    }
+        textarea {
+            width: 100%;
+            height: 240px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            resize: vertical;
+        }
 
-    pre {
-      font-size: 13px;
-      min-height: 120px;
-    }
-  }
+        button {
+            padding: 10px 20px;
+            margin: 12px 10px 24px 0;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: white;
+            transition: background-color 0.25s ease;
+            user-select: none;
+        }
 
-.buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin: 16px 0;
-}
+        #btnObfuscate {
+            background-color: #007bff;
+        }
 
-@media (max-width: 768px) {
-  textarea {
-    height: 180px;
-    font-size: 13px;
-  }
-  button {
-    flex: 1 1 100%;
-    font-size: 13px;
-    margin: 6px 0;
-  }
-  pre {
-    font-size: 13px;
-    min-height: 120px;
-  }
-  .buttons {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-</style>
+        #btnObfuscate:hover {
+            background-color: #0056b3;
+        }
+
+        #btnDeobfuscate {
+            background-color: #28a745;
+        }
+
+        #btnDeobfuscate:hover {
+            background-color: #1e7e34;
+        }
+
+        #btnCopy {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        #btnCopy:hover {
+            background-color: #d39e00;
+        }
+
+        #btnClear {
+            background-color: #dc3545;
+        }
+
+        #btnClear:hover {
+            background-color: #a71d2a;
+        }
+
+        #btnUpload {
+            background-color: #6f42c1;
+        }
+
+        #btnUpload:hover {
+            background-color: #4b2e91;
+        }
+
+        #btnDownload {
+            background-color: #17a2b8;
+        }
+
+        #btnDownload:hover {
+            background-color: #117a8b;
+        }
+
+        pre {
+            background: #fff;
+            padding: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid #ccc;
+            min-height: 160px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+
+        input[type=file] {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            textarea {
+                height: 180px;
+                font-size: 13px;
+            }
+
+            button {
+                width: 100%;
+                margin: 6px 0;
+            }
+
+            pre {
+                font-size: 13px;
+                min-height: 120px;
+            }
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 16px 0;
+        }
+
+        @media (max-width: 768px) {
+            textarea {
+                height: 180px;
+                font-size: 13px;
+            }
+
+            button {
+                flex: 1 1 100%;
+                font-size: 13px;
+                margin: 6px 0;
+            }
+
+            pre {
+                font-size: 13px;
+                min-height: 120px;
+            }
+
+            .buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<h2>高级 VBA 代码混淆器 / 还原器</h2>
+    <h2>高级 VBA 代码混淆器 / 还原器</h2>
 
-<label for="inputCode">请输入或导入 VBA 代码：</label><br/>
-<textarea id="inputCode" placeholder="粘贴你的 VBA 代码..."></textarea><br/>
+    <label for="inputCode">请输入或导入 VBA 代码：</label><br />
+    <textarea id="inputCode" placeholder="粘贴你的 VBA 代码..."></textarea><br />
 
-<div class="buttons">
-<button id="btnObfuscate" onclick="obfuscateVBA()">开始混淆</button>
-<button id="btnDeobfuscate" onclick="deobfuscateVBA()">还原混淆代码</button>
-<button id="btnCopy" onclick="copyOutput()">复制结果</button>
-<button id="btnClear" onclick="clearAll()">清空</button>
-<button id="btnUpload" onclick="document.getElementById('fileInput').click()">上传文件</button>
-<button id="btnDownload" onclick="downloadOutput()">导出结果</button>
-</div>
-<input type="file" id="fileInput" accept=".txt,.bas,.vba,.cls" />
+    <div class="buttons">
+        <button id="btnObfuscate" onclick="obfuscateVBA()">开始混淆</button>
+        <button id="btnDeobfuscate" onclick="deobfuscateVBA()">还原混淆代码</button>
+        <button id="btnCopy" onclick="copyOutput()">复制结果</button>
+        <button id="btnClear" onclick="clearAll()">清空</button>
+        <button id="btnUpload" onclick="document.getElementById('fileInput').click()">上传文件</button>
+        <button id="btnDownload" onclick="downloadOutput()">导出结果</button>
+    </div>
+    <input type="file" id="fileInput" accept=".txt,.bas,.vba,.cls" />
 
-<h3>输出结果：</h3>
-<pre id="outputCode"></pre>
+    <h3>输出结果：</h3>
+    <pre id="outputCode"></pre>
 
-<script>
-  const keywords = new Set([
-    "Sub","Function","Dim","As","If","Then","Else","End","For","Next","While","Wend",
-    "Do","Loop","Select","Case","With","Set","Let","Call","Option","Explicit","Private",
-    "Public","On","Error","Resume","Exit","True","False","Nothing","ByVal",
-    "ByRef","And","Or","Not","Xor","Mod","Is","In","Like","ReDim","Erase","Const","Stop",
-    "GoTo","Class","Property","Get","Let","Set","Static","Declare","Friend","Type",
-    "New","Me","Nothing","Empty","Variant","Integer","Long","Double","Single","String",
-    "Boolean","Object","Variant","Date","Currency","Byte","Chr","MsgBox","InputBox","Debug",
-    "Application","Range","Cells","Rows","Columns","Worksheet","Workbook","ActiveSheet","ActiveWorkbook",
-    "ThisWorkbook","OnErrorResumeNext","CallByName","Print","Err","Load","Unload","RGB",
-    "Len","Mid","Left","Right","Trim","LCase","UCase","Replace","Instr","Split","Join","CStr",
-    "CInt","CLng","CDbl","CSng","CDate","IsEmpty","IsNumeric","IsArray","TypeName","VarType"
-  ]);
+    <script>
+        const keywords = new Set([
+            "Sub", "Function", "Dim", "As", "If", "Then", "Else", "End", "For", "Next", "While", "Wend",
+            "Do", "Loop", "Select", "Case", "With", "Set", "Let", "Call", "Option", "Explicit", "Private",
+            "Public", "On", "Error", "Resume", "Exit", "True", "False", "Nothing", "ByVal",
+            "ByRef", "And", "Or", "Not", "Xor", "Mod", "Is", "In", "Like", "ReDim", "Erase", "Const", "Stop",
+            "GoTo", "Class", "Property", "Get", "Let", "Set", "Static", "Declare", "Friend", "Type",
+            "New", "Me", "Nothing", "Empty", "Variant", "Integer", "Long", "Double", "Single", "String",
+            "Boolean", "Object", "Variant", "Date", "Currency", "Byte", "Chr", "MsgBox", "InputBox", "Debug",
+            "Application", "Range", "Cells", "Rows", "Columns", "Worksheet", "Workbook", "ActiveSheet", "ActiveWorkbook",
+            "ThisWorkbook", "OnErrorResumeNext", "CallByName", "Print", "Err", "Load", "Unload", "RGB",
+            "Len", "Mid", "Left", "Right", "Trim", "LCase", "UCase", "Replace", "Instr", "Split", "Join", "CStr",
+            "CInt", "CLng", "CDbl", "CSng", "CDate", "IsEmpty", "IsNumeric", "IsArray", "TypeName", "VarType"
+        ]);
 
-  // 生成随机变量名，长度3~6字母，不和关键字冲突
-  function generateRandomVarName(existingNames) {
-    const chars = "abcdefghijklmnopqrstuvwxyz";
-    let name;
-    do {
-      let len = Math.floor(Math.random() * 4) + 3;
-      name = "";
-      for(let i=0; i<len; i++){
-        name += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-    } while(existingNames.has(name) || keywords.has(name));
-    return name;
-  }
-
-  // 从代码中提取变量名（包括注释中），兼容多变量声明、多行变量声明
-  function extractVariables(code) {
-    let vars = new Set();
-    // 匹配Dim声明及变量名，支持多变量，支持类型声明和符号
-    const dimRegex = /Dim\s+([^:\n\r]+)/gi;
-    let match;
-    while ((match = dimRegex.exec(code)) !== null) {
-      let decl = match[1];
-      let parts = decl.split(",");
-      parts.forEach(p=>{
-        p = p.trim();
-        // 去掉类型声明，比如 As String, 也去掉 $ % # 等符号
-        let name = p.split(/\s+As\s+/i)[0].trim();
-        name = name.replace(/[\$\%\#\!\@]$/,"");
-        if (name.length > 0 && !keywords.has(name)) {
-          vars.add(name);
+        // 生成随机变量名，长度3~6字母，不和关键字冲突
+        function generateRandomVarName(existingNames) {
+            const chars = "abcdefghijklmnopqrstuvwxyz";
+            let name;
+            do {
+                let len = Math.floor(Math.random() * 4) + 3;
+                name = "";
+                for (let i = 0; i < len; i++) {
+                    name += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+            } while (existingNames.has(name) || keywords.has(name));
+            return name;
         }
-      });
-    }
-    // 注释内简单匹配变量名（以单词边界为界）
-    // 这里只简单扫描注释的单词，且必须变量存在于代码中才混淆
-    // 所以不额外添加变量，只混淆已提取的变量名
-    return Array.from(vars);
-  }
 
-  // 随机替换变量名，包括注释中的变量名
-  function replaceVarNames(code, vars) {
-    let replacedCode = code;
-    let map = {};
-    let existingNames = new Set();
-    vars.forEach(v=>{
-      let newName = generateRandomVarName(existingNames);
-      existingNames.add(newName);
-      map[v] = newName;
-    });
-
-    // 按变量长度倒序替换，防止子串误替换
-    vars.sort((a,b) => b.length - a.length);
-
-    // 变量名替换包括注释（'开头）
-    // 使用正则：\bvarname\b 来精确匹配完整单词
-    for(let v of vars){
-      let r = new RegExp("\\b"+v+"\\b","g");
-      replacedCode = replacedCode.replace(r, map[v]);
-    }
-
-    return {code: replacedCode, map: map};
-  }
-
-  // 支持多行字符串拼接的字符串替换（字符串内替换成 ChrW()拼接形式）
-  function replaceStrings(code) {
-    // 先用行数组，支持续行 _
-    let lines = code.split(/\r?\n/);
-    let newLines = [];
-    let buffer = "";
-    let buffering = false;
-
-    for(let i=0; i<lines.length; i++){
-      let line = lines[i];
-      if(buffering){
-        buffer += "\n" + line;
-        if(!line.trim().endsWith("_")){
-          // 续行结束，替换buffer内字符串
-          newLines.push(replaceStringsInLine(buffer));
-          buffer = "";
-          buffering = false;
+        // 从代码中提取变量名（包括注释中），兼容多变量声明、多行变量声明
+        function extractVariables(code) {
+            let vars = new Set();
+            // 匹配Dim声明及变量名，支持多变量，支持类型声明和符号
+            const dimRegex = /Dim\s+([^:\n\r]+)/gi;
+            let match;
+            while ((match = dimRegex.exec(code)) !== null) {
+                let decl = match[1];
+                let parts = decl.split(",");
+                parts.forEach(p => {
+                    p = p.trim();
+                    // 去掉类型声明，比如 As String, 也去掉 $ % # 等符号
+                    let name = p.split(/\s+As\s+/i)[0].trim();
+                    name = name.replace(/[\$\%\#\!\@]$/, "");
+                    if (name.length > 0 && !keywords.has(name)) {
+                        vars.add(name);
+                    }
+                });
+            }
+            // 注释内简单匹配变量名（以单词边界为界）
+            // 这里只简单扫描注释的单词，且必须变量存在于代码中才混淆
+            // 所以不额外添加变量，只混淆已提取的变量名
+            return Array.from(vars);
         }
-      } else {
-        if(line.trim().endsWith("_")){
-          buffering = true;
-          buffer = line;
-        } else {
-          newLines.push(replaceStringsInLine(line));
+
+        // 随机替换变量名，包括注释中的变量名
+        function replaceVarNames(code, vars) {
+            let replacedCode = code;
+            let map = {};
+            let existingNames = new Set();
+            vars.forEach(v => {
+                let newName = generateRandomVarName(existingNames);
+                existingNames.add(newName);
+                map[v] = newName;
+            });
+
+            // 按变量长度倒序替换，防止子串误替换
+            vars.sort((a, b) => b.length - a.length);
+
+            // 变量名替换包括注释（'开头）
+            // 使用正则：\bvarname\b 来精确匹配完整单词
+            for (let v of vars) {
+                let r = new RegExp("\\b" + v + "\\b", "g");
+                replacedCode = replacedCode.replace(r, map[v]);
+            }
+
+            return {
+                code: replacedCode,
+                map: map
+            };
         }
-      }
-    }
-    if(buffering && buffer){
-      // 最后还没结束续行的处理
-      newLines.push(replaceStringsInLine(buffer));
-    }
-    return newLines.join("\n");
-  }
 
-function replaceStringsInLine(line) {
-  // 找字符串(包括空字符串"")
-  return line.replace(/"([^"]*)"/g, (match, p1) => {
-    if (p1.length === 0) return '""'; // 空字符串不替换
+        // 支持多行字符串拼接的字符串替换（字符串内替换成 ChrW()拼接形式）
+        function replaceStrings(code) {
+            // 先用行数组，支持续行 _
+            let lines = code.split(/\r?\n/);
+            let newLines = [];
+            let buffer = "";
+            let buffering = false;
 
-    let parts = [];
-    for (let ch of p1) {
-      parts.push("ChrW(" + ch.charCodeAt(0) + ")");
-    }
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                if (buffering) {
+                    buffer += "\n" + line;
+                    if (!line.trim().endsWith("_")) {
+                        // 续行结束，替换buffer内字符串
+                        newLines.push(replaceStringsInLine(buffer));
+                        buffer = "";
+                        buffering = false;
+                    }
+                } else {
+                    if (line.trim().endsWith("_")) {
+                        buffering = true;
+                        buffer = line;
+                    } else {
+                        newLines.push(replaceStringsInLine(line));
+                    }
+                }
+            }
+            if (buffering && buffer) {
+                // 最后还没结束续行的处理
+                newLines.push(replaceStringsInLine(buffer));
+            }
+            return newLines.join("\n");
+        }
 
-    // 每 5 个拼接一次，方便换行
-    let groups = [];
-    for (let i = 0; i < parts.length; i += 5) {
-      groups.push(parts.slice(i, i + 5).join(" & "));
-    }
+        function replaceStringsInLine(line) {
+            // 先提取所有三重双引号字符串，替换成占位符
+            const tripleQuotes = [];
+            line = line.replace(/("""(?:[^"]|"{1,2})*""")/g, (match) => {
+                tripleQuotes.push(match);
+                return `__TRIPLE_QUOTE_${tripleQuotes.length - 1}__`;
+            });
 
-    // 拼接多行，行尾加 " & _"，最后一行无续行符
-    return groups.map((g, idx) => {
-      if (idx < groups.length - 1) {
-        // 非最后一行末尾加 & _
-        return g + " & _\n";
-      } else {
-        // 最后一行不加续行符
-        return g;
-      }
-    }).join("");
-  });
-}
+            // 替换普通双引号字符串
+            line = line.replace(/"([^"]*)"/g, (match, content) => {
+                if (content.length === 0) return '""';
+
+                let parts = [];
+                for (let ch of content) {
+                    parts.push(`ChrW(${ch.charCodeAt(0)})`);
+                }
+
+                let groups = [];
+                for (let i = 0; i < parts.length; i += 5) {
+                    groups.push(parts.slice(i, i + 5).join(" & "));
+                }
+
+                let joined = groups.map((grp, idx) => {
+                    if (idx < groups.length - 1) return grp + " & _\n";
+                    else return grp;
+                }).join("");
+
+                return joined;
+            });
+
+            // 还原三重双引号字符串
+            for (let i = 0; i < tripleQuotes.length; i++) {
+                line = line.replace(`__TRIPLE_QUOTE_${i}__`, tripleQuotes[i]);
+            }
+
+            return line;
+        }
 
 
-  // 清理代码格式，保持换行和缩进
-  function cleanCode(code) {
-    // 去除多余空行，末尾空白
-    return code.replace(/\s+$/gm, "");
-  }
+        // 清理代码格式，保持换行和缩进
+        function cleanCode(code) {
+            // 去除多余空行，末尾空白
+            return code.replace(/\s+$/gm, "");
+        }
 
-  // 入口混淆函数
-  function obfuscateVBA() {
-    let code = document.getElementById("inputCode").value;
-    if(!code.trim()){
-      alert("请先输入 VBA 代码！");
-      return;
-    }
-    code = cleanCode(code);
+        // 入口混淆函数
+        function obfuscateVBA() {
+            let code = document.getElementById("inputCode").value;
+            if (!code.trim()) {
+                alert("请先输入 VBA 代码！");
+                return;
+            }
+            code = cleanCode(code);
 
-    // 1.提取变量
-    let vars = extractVariables(code);
+            // 1.提取变量
+            let vars = extractVariables(code);
 
-    // 2.变量名随机替换（含注释）
-    let {code: replacedCode, map} = replaceVarNames(code, vars);
+            // 2.变量名随机替换（含注释）
+            let {
+                code: replacedCode,
+                map
+            } = replaceVarNames(code, vars);
 
-    // 3.字符串替换成 ChrW() 拼接
-    let finalCode = replaceStrings(replacedCode);
+            // 3.字符串替换成 ChrW() 拼接
+            let finalCode = replaceStrings(replacedCode);
 
-    document.getElementById("outputCode").textContent = finalCode;
-  }
+            document.getElementById("outputCode").textContent = finalCode;
+        }
 
-  // 简单还原：替换变量名（根据映射还原，但此处不保存映射，只做示例）
-  // 这里的还原只能针对原始映射预先知道的情况，实际需保存映射才能完美还原
-  // 简单演示去除 ChrW() 拼接转为字符串
-  function deobfuscateVBA() {
-  let code = document.getElementById("inputCode").value;
-  if (!code.trim()) {
-    alert("请先输入混淆后的 VBA 代码！");
-    return;
-  }
+        // 这里的还原只能针对原始映射预先知道的情况，实际需保存映射才能完美还原
+        function deobfuscateVBA() {
+            let code = document.getElementById("inputCode").value;
+            if (!code.trim()) {
+                alert("请先输入混淆后的 VBA 代码！");
+                return;
+            }
 
-    // 把所有 Chr() 或 ChrW() 片段合成字符串，且去掉 & 和多余的引号
-    function chrToString(str) {
-      return str.replace(/((?:ChrW?\(\d+\)\s*&\s*)*ChrW?\(\d+\))/g, (match) => {
-        // 找到所有单个 Chr/ChrW 调用
-        let parts = match.match(/ChrW?\((\d+)\)/g);
-        if (!parts) return match;
+            // 1. 首先处理明确的续行符情况："abc" & _ \n "def"
+            code = code.replace(/"([^"\n]*)"\s*&\s*_\s*\n\s*"([^"\n]*)"/g, '"$1$2"');
 
-        // 转换成字符，拼接成一个整体字符串
-        let chars = parts.map(p => {
-          let num = p.match(/\d+/)[0];
-          return String.fromCharCode(parseInt(num, 10));
+            // 2. 处理连续的字符串字面量（仅在逻辑行内）
+            // 我们需要识别逻辑行（非续行符结尾的行）
+            let lines = code.split('\n');
+            let newLines = [];
+            let currentLine = '';
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+
+                // 如果是续行符结尾，合并到当前行
+                if (line.endsWith('_')) {
+                    currentLine += line.slice(0, -1).trim(); // 去掉续行符
+                    continue;
+                }
+
+                // 不是续行符结尾，完成当前行
+                if (currentLine) {
+                    currentLine += line;
+                    line = currentLine;
+                    currentLine = '';
+                }
+
+                // 处理合并后的行中的连续字符串
+                line = line.replace(/"([^"]+)"\s*&\s*"([^"]+)"/g, '"$1$2"');
+
+                // 处理没有&但连续的字符串（仅在同一逻辑行内）
+                while (true) {
+                    let newLine = line.replace(/"([^"\n]*)"\s*"([^"\n]*)"/g, '"$1$2"');
+                    if (newLine === line) break;
+                    line = newLine;
+                }
+
+                newLines.push(line);
+            }
+
+            code = newLines.join('\n');
+
+            // 3. 还原 Chr()/ChrW() → 字符
+            code = code.replace(/((?:ChrW?\(\d+\)\s*&\s*)*ChrW?\(\d+\))/g, match => {
+                let parts = match.match(/ChrW?\((\d+)\)/g);
+                if (!parts) return match;
+                let chars = parts.map(p => String.fromCharCode(parseInt(p.match(/\d+/)[0])));
+                return '"' + chars.join('') + '"';
+            });
+
+            // 4. 再次合并 "xxx" & "yyy"（处理可能由Chr转换产生的）
+            while (/"[^"]+"\s*&\s*"[^"]+"/.test(code)) {
+                code = code.replace(/"([^"]+)"\s*&\s*"([^"]+)"/g, '"$1$2"');
+            }
+
+            // 5. 输出
+            document.getElementById("outputCode").textContent = code;
+        }
+
+        // 复制输出内容到剪贴板
+        function copyOutput() {
+            let text = document.getElementById("outputCode").textContent;
+            if (!text) {
+                alert("输出内容为空，无法复制！");
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                alert("结果已复制到剪贴板！");
+            }, () => {
+                alert("复制失败，请手动复制！");
+            });
+        }
+
+        // 清空输入和输出
+        function clearAll() {
+            document.getElementById("inputCode").value = "";
+            document.getElementById("outputCode").textContent = "";
+        }
+
+        // 上传本地文件，读取内容填入输入框
+        document.getElementById("fileInput").addEventListener("change", (e) => {
+            let file = e.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById("inputCode").value = evt.target.result;
+            };
+            reader.readAsText(file);
         });
-        return '"' + chars.join('') + '"'; // 返回一个完整字符串
-      });
-    }
 
-    let decoded = chrToString(code);
-
-    // 再去掉连续多个字符串字面量间的 & 连接符，合并成一个整体字符串
-    decoded = decoded.replace(/"([^"]+)"\s*&\s*"([^"]+)"/g, (m, g1, g2) => {
-      return '"' + g1 + g2 + '"';
-    });
-
-    // 这个替换要做多次，直到不能再合并为止
-    while (/"[^"]+"\s*&\s*"[^"]+"/.test(decoded)) {
-      decoded = decoded.replace(/"([^"]+)"\s*&\s*"([^"]+)"/g, (m, g1, g2) => {
-        return '"' + g1 + g2 + '"';
-      });
-    }
-
-    document.getElementById("outputCode").textContent = decoded;
-  }
-
-  // 复制输出内容到剪贴板
-  function copyOutput(){
-    let text = document.getElementById("outputCode").textContent;
-    if(!text){
-      alert("输出内容为空，无法复制！");
-      return;
-    }
-    navigator.clipboard.writeText(text).then(() => {
-      alert("结果已复制到剪贴板！");
-    }, () => {
-      alert("复制失败，请手动复制！");
-    });
-  }
-
-  // 清空输入和输出
-  function clearAll(){
-    document.getElementById("inputCode").value = "";
-    document.getElementById("outputCode").textContent = "";
-  }
-
-  // 上传本地文件，读取内容填入输入框
-  document.getElementById("fileInput").addEventListener("change", (e)=>{
-    let file = e.target.files[0];
-    if(!file) return;
-    let reader = new FileReader();
-    reader.onload = function(evt){
-      document.getElementById("inputCode").value = evt.target.result;
-    };
-    reader.readAsText(file);
-  });
-
-  // 导出输出结果为文本文件
-  function downloadOutput(){
-    let text = document.getElementById("outputCode").textContent;
-    if(!text){
-      alert("输出内容为空，无法导出！");
-      return;
-    }
-    let blob = new Blob([text], {type:"text/plain;charset=utf-8"});
-    let a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "vba_obfuscated.bas";
-    a.click();
-    URL.revokeObjectURL(a.href);
-  }
-</script>
+        // 导出输出结果为文本文件
+        function downloadOutput() {
+            let text = document.getElementById("outputCode").textContent;
+            if (!text) {
+                alert("输出内容为空，无法导出！");
+                return;
+            }
+            let blob = new Blob([text], {
+                type: "text/plain;charset=utf-8"
+            });
+            let a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "vba_obfuscated.bas";
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+    </script>
 </body>
+
 </html>
