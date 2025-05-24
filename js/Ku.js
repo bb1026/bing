@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.7";
+this.version = "v3.8";
 
 function getUrls() {
   const BASE_URL = "https://raw.githubusercontent.com/bb1026/bing/main/js/"
@@ -1036,6 +1036,14 @@ async function showLoadingAndFetchData(
   const presentPromise = loadingView.present(true);
 
   try {
+    const delayFinished = new Promise(resolve => {
+      const timer = new Timer();
+      timer.repeats = false;
+      timer.timeInterval = 3000;
+      timer.schedule(resolve);
+    });
+    await delayFinished;
+    
     await loadingView.evaluateJavaScript(`
       document.getElementById('loading-text').textContent = '正在下载数据...';
       document.getElementById('progress-bar').style.width = '0%';
