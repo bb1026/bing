@@ -226,18 +226,29 @@ textarea {
     return newLines.join("\n");
   }
 
-  // 行内字符串替换：用ChrW(XX)&拼接代替纯字符串
-  function replaceStringsInLine(line) {
-    // 找字符串(包括空字符串"")
-    return line.replace(/"([^"]*)"/g, (m, p1)=>{
-      if(p1.length === 0) return '""'; // 空字符串不替换
-      let parts = [];
-      for(let ch of p1){
-        parts.push("ChrW(" + ch.charCodeAt(0) + ")");
-      }
-      return parts.join("&");
-    });
-  }
+function replaceStringsInLine(line) {
+  // 找字符串(包括空字符串"")
+  return line.replace(/"([^"]*)"/g, (match, p1) => {
+    if (p1.length === 0) return '""'; // 空字符串不替换
+
+    let parts = [];
+    for (let ch of p1) {
+      parts.push("ChrW(" + ch.charCodeAt(0) + ")");
+    }
+
+    // 每 5 个拼接一次，并在末尾加续行 _
+    let groups = [];
+    for (let i = 0; i < parts.length; i += 5) {
+      groups.push(parts.slice(i, i + 5).join(" & "));
+    }
+
+    // 拼接多行，行尾加续行符 _
+    return groups.map((g, idx) => {
+      return idx < groups.length - 1 ? g + " & _\n" : g;
+    }).join(" & ");
+  });
+}
+
 
   // 清理代码格式，保持换行和缩进
   function cleanCode(code) {
