@@ -311,8 +311,8 @@
                 }
 
                 let groups = [];
-                for (let i = 0; i < parts.length; i += 5) {
-                    groups.push(parts.slice(i, i + 5).join(" & "));
+                for (let i = 0; i < parts.length; i += 15) {
+                    groups.push(parts.slice(i, i + 15).join(" & "));
                 }
 
                 let joined = groups.map((grp, idx) => {
