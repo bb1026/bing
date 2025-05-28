@@ -3,10 +3,11 @@
 // icon-color: deep-brown; icon-glyph: sync;
 this.name = "Panda Remit";
 this.widget_ID = "js-102";
-this.version = "v2.81";
+this.version = "v2.85";
 
 // 检查更新
-const { installation, searchCurrency, currencyData, getUrls } = importModule("Ku");
+let installation, searchCurrency, currencyData, getUrls;
+await CheckKu();
 await installation(this.widget_ID, this.version);
 
 /* 
@@ -231,4 +232,39 @@ if (config.runsInAccessoryWidget) {
 } else {
   const { widget, result } = await createWidget();
   Script.setShortcutOutput(result);
+}
+
+async function CheckKu() {
+  const fm = FileManager.local();
+  const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
+  const url = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
+  let needDownload = false;
+
+  try {
+    ({
+      installation
+    } = importModule("Ku"));
+    
+    if (typeof installation !== "function") {
+      console.log("数据库模块无效，准备重新下载");
+      needDownload = true;
+    }
+  } catch {
+    console.log("数据库异常，准备重新下载");
+    needDownload = true;
+  }
+
+  if (needDownload) {
+        const req = new Request(url);
+      try {
+        fm.writeString(path, await req.loadString());
+        if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+    console.log("数据库下载完成");
+
+  ({ installation, searchCurrency, currencyData, getUrls } = importModule("Ku"));
+  if (typeof installation !== "function") throw new Error("数据库模块无效");
+  } catch (error) {
+    console.error("请求失败:" + error.message);
+    }
+  }
 }
