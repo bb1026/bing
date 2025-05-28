@@ -242,7 +242,7 @@ async function CheckKu() {
 
   try {
     ({
-      installation
+      installation, searchCurrency, currencyData, getUrls
     } = importModule("Ku"));
     
     if (typeof installation !== "function") {
