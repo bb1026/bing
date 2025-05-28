@@ -5,7 +5,7 @@ this.name = "Simba";
 this.widget_ID = "js-111";
 this.version = "v1.1";
 
-let installation, getUrls;
+let installation;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 
