@@ -3,22 +3,24 @@
 // icon-color: deep-brown; icon-glyph: sync;
 this.name = "Panda Remit";
 this.widget_ID = "js-102";
-this.version = "v2.8";
+this.version = "v2.81";
 
 // 检查更新
-let installation;
-let currencyData;
-let searchCurrency;
-await CheckKu();
+const { installation, searchCurrency, currencyData, getUrls } = importModule("Ku");
 await installation(this.widget_ID, this.version);
+
 /* 
 以上为获取更新代码
 以下开始运行代码
 */
 
-const Moneycode = args.widgetParameter ? args.widgetParameter.includes(';') ? args.widgetParameter.split(';')[1]?.trim() || "CNY" : args.widgetParameter : "CNY";
+const Moneycode = args.widgetParameter
+  ? args.widgetParameter.includes(";")
+    ? args.widgetParameter.split(";")[1]?.trim() || "CNY"
+    : args.widgetParameter.toUpperCase()
+  : "CNY";
 const rateurl = "https://prod.pandaremit.com/pricing/rate/SGD/" + Moneycode;
-const picurl = "https://bb1026.github.io/bing/imgs/Panda_Remit.JPG";
+const picurl = getUrls().BASE_URL + "imgs/Panda_Remit.JPG";
 const feeurl = "https://prod.pandaremit.com/web/ratefee/fee";
 
 async function fetchRateData() {
@@ -86,6 +88,7 @@ function getTodayKey(fee) {
 async function createWidget() {
   const widget = new ListWidget();
   let gradient = new LinearGradient();
+  let result = {};
   gradient.locations = [0, 1];
   gradient.colors = [new Color("#6CC6CB"), new Color("#0090FF")];
   widget.backgroundGradient = gradient;
@@ -111,11 +114,19 @@ async function createWidget() {
     const compareRate = rateResponse.model.compareRate;
     const code = rateResponse.model.code;
 
+    console.log(JSON.stringify(huiOut, null, 2));
+
     const fromCurrency = await Code_Change(code);
     const toCurrency = await Code_Change(targetCurrency);
 
+    result.rate = huiOut;
+    result.code = code;
+    result.target = targetCurrency;
+    result.compareRate = compareRate;
+    result.fromCurrency = fromCurrency;
+    result.toCurrency = toCurrency;
+
     const feeResponse = await fetchFeeData(targetCurrency, code);
-    console.log(JSON.stringify(feeResponse, null, 2));
     if (feeResponse.suc) {
       const fee = (feeResponse.model.fee * 1).toString();
       const defaultFee = (feeResponse.model.defaultFee * 1).toString();
@@ -155,7 +166,7 @@ async function createWidget() {
       }
     }
   }
-  return widget;
+  return { widget, result };
 }
 
 async function createAccessoryCircular() {
@@ -202,57 +213,22 @@ async function createAccessoryCircular() {
 
 async function showwebview() {
   const webview = new WebView();
-  await webview.loadURL("https://bb1026.github.io/bing/panda.html");
+  const html = await new Request(getUrls().BASE_URL + "panda.html").loadString();
+  await webview.loadHTML(html);
   return webview.present(true);
-}
-
-async function CheckKu() {
-  const fm = FileManager.local();
-  const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-  const url = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
-  let needDownload = false;
-
-  try {
-    ({
-      installation,
-      getUrls,
-      generateScriptsHTML,
-      createHTMLContent
-    } = importModule("Ku"));
-    
-    if (typeof installation !== "function") {
-      console.log("数据库模块无效，准备重新下载");
-      needDownload = true;
-    }
-  } catch {
-    console.log("数据库异常，准备重新下载");
-    needDownload = true;
-  }
-
-  if (needDownload) {
-      const req = new Request(url);
-      req.req.timeoutInterval = 5;
-    try {
-      fm.writeString(path, await req.loadString());
-      if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
-    console.log("数据库下载完成");
-
-  ({ installation, searchCurrency, currencyData } = importModule("Ku"));
-  if (typeof installation !== "function") throw new Error("数据库模块无效");
-  } catch (error) {
-    console.error("请求失败:" + error.message);
-    }
-  }
 }
 
 if (config.runsInAccessoryWidget) {
   const Accwidget = await createAccessoryCircular();
   Script.setWidget(Accwidget);
 } else if (config.runsInWidget) {
-  const widget = await createWidget();
+  const { widget, result } = await createWidget();
   Script.setWidget(widget);
-} else {
-  const widget = await createWidget();
-  //   widget.presentSmall();
+} else if (config.runsInApp) {
+  const { widget, result } = await createWidget();
+//   widget.presentSmall();
   await showwebview();
+} else {
+  const { widget, result } = await createWidget();
+  Script.setShortcutOutput(result);
 }
