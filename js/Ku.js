@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.94";
+this.version = "v3.95";
 
 function getUrls() {
   const BASE_URL = "https://raw.githubusercontent.com/bb1026/bing/main/"
@@ -16,20 +16,23 @@ function getUrls() {
 }
 
 async function checkSelfUpdate(widgetID, currentVersion) {
-  const fm = FileManager.iCloud();
-  const kuPath = fm.joinPath(fm.documentsDirectory(), "Ku.js");
+  const url = "https://raw.githubusercontent.com/bb1026/bing/refs/heads/main/js/Master.json";
+  const req = new Request(url);
+  req.timeoutInterval = 5;
 
-  if (fm.fileExists(kuPath)) {
-    await fm.downloadFileFromiCloud(kuPath);
-    const kuCode = fm.readString(kuPath);
-    const re = new RegExp(`"${widgetID}"\\s*:\\s*{[^}]*version\\s*:\\s*["']([^"']+)["']`, 'i');
-    const match = kuCode.match(re);
-    const remoteVer = match?.[1];
+  try {
+    const scriptList = await req.loadJSON();
+    const info = scriptList[widgetID];
+    const remoteVer = info?.version;
 
     if (remoteVer && remoteVer !== currentVersion) {
       console.log(`🛑 当前版本 ${currentVersion}，远程版本 ${remoteVer}，退出旧脚本`);
       Script.complete();
+    } else {
+      console.log(`🟢 当前已是最新版本: ${currentVersion}`);
     }
+  } catch (e) {
+    console.log("❌ 检查更新失败: " + e);
   }
 }
 
