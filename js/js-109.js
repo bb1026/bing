@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v2.6";
+this.version = "v2.61";
 
 let installation, showMRTLines, showLoadingAndFetchData;
 await CheckKu();
@@ -23,8 +23,8 @@ const myBusCodes = [
     stopCode: "21491",
     busCodes: ["246"]
   },
-  { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] },
-  { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: ["858"] }
+  { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] }
+  //   { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: ["858"] }
 ];
 
 const fm = FileManager.local();
@@ -901,7 +901,7 @@ async function promptUserForInput(type) {
 async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-  const url = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
+  const url = "https://bb1026.github.io/bing/js/Ku.js";
   let needDownload = false;
 
   try {
@@ -945,7 +945,13 @@ if (config.runsInWidget) {
 
   await createTable();
   await checkAndFetchData(false);
-  await createTable(currentStopCode, currentBusCode, currentUseLocation);
-  await table.present(true);
+  table.present(true);
+
+  const timer = new Timer();
+  timer.repeats = true;
+  timer.timeInterval = 10000; //10秒刷新
+  timer.schedule(() => {
+    createTable(currentStopCode, currentBusCode, currentUseLocation);
+  });
 }
 Script.complete();
