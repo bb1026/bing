@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.91";
+this.version = "v3.92";
 
 function getUrls() {
   const BASE_URL = "https://raw.githubusercontent.com/bb1026/bing/main/"
@@ -64,7 +64,7 @@ console.log(
 );
 
     if (thisVersion !== remoteVersion) {
-    const SCRIPT_DOWNLOAD_URL = scriptList[scriptID].url;
+    const SCRIPT_DOWNLOAD_URL = getUrls().BASE_URL + scriptList[scriptID].url;
     const LOCAL_SCRIPT_PATH = iCloudFm.joinPath(
         iCloudFm.documentsDirectory(),
         `${scriptName}.js`
