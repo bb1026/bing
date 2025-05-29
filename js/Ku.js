@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.95";
+this.version = "v3.96";
 
 function getUrls() {
   const BASE_URL = "https://raw.githubusercontent.com/bb1026/bing/main/"
@@ -15,33 +15,25 @@ function getUrls() {
   };
 }
 
-async function checkSelfUpdate(widgetID, currentVersion) {
+async function checkSelfUpdate(widget_ID, version) {
   const url = "https://raw.githubusercontent.com/bb1026/bing/refs/heads/main/js/Master.json";
   const req = new Request(url);
-  req.timeoutInterval = 5;
 
   try {
     const scriptList = await req.loadJSON();
-    const info = scriptList[widgetID];
-    const remoteVer = info?.version;
+    const remote = scriptList[widget_ID];
+    const remoteVer = remote?.version;
 
-    if (remoteVer && remoteVer !== currentVersion) {
-      console.log(`🛑 当前版本 ${currentVersion}，远程版本 ${remoteVer}，退出旧脚本`);
+    if (remoteVer && remoteVer !== version) {
+      
+      await installation(widget_ID, version);
+
       Script.complete();
-    } else {
-      console.log(`🟢 当前已是最新版本: ${currentVersion}`);
     }
   } catch (e) {
     console.log("❌ 检查更新失败: " + e);
   }
 }
-
-// ✅ 自动触发检查
-(async () => {
-  if (typeof this?.widget_ID === "string" && typeof this?.version === "string") {
-    await checkSelfUpdate(this.widget_ID, this.version);
-  }
-})();
 
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
