@@ -8,7 +8,7 @@
     "medium": false,
     "large": false,
     "update": "无法更新的问题",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-100.js"
+    "url": "js/js-100.js"
   },
   "js-101": {
     "name": "汉生汇率",
@@ -19,7 +19,7 @@
     "medium": true,
     "large": false,
     "update": "上传代码",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-101.js"
+    "url": "js/js-101.js"
   },
   "js-102": {
     "name": "Panda Remit",
@@ -30,7 +30,7 @@
     "medium": false,
     "large": false,
     "update": "修复代码",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-102.js"
+    "url": "js/js-102.js"
   },
   "js-103": {
     "name": "Singapore Bus",
@@ -41,7 +41,7 @@
     "medium": false,
     "large": false,
     "update": "查询巴士显示序号",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-103.js"
+    "url": "js/js-103.js"
   },
   "js-104": {
     "name": "日历📆Calendar",
@@ -52,7 +52,7 @@
     "medium": true,
     "large": false,
     "update": "缩减代码",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-104.js"
+    "url": "js/js-104.js"
   },
   "js-105": {
     "name": "Master List",
@@ -63,7 +63,7 @@
     "medium": false,
     "large": false,
     "update": "更新代码",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-105.js"
+    "url": "js/js-105.js"
   },
   "js-106": {
     "name": "音乐下载",
@@ -74,7 +74,7 @@
     "medium": false,
     "large": false,
     "update": "修复无法使用",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-106.js"
+    "url": "js/js-106.js"
   },
   "js-107": {
     "name": "附近的Bus SG",
@@ -85,7 +85,7 @@
     "medium": false,
     "large": false,
     "update": "修改部分代码",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-107.js"
+    "url": "js/js-107.js"
   },
   "js-108": {
     "name": "Birthday",
@@ -96,7 +96,7 @@
     "medium": false,
     "large": true,
     "update": "更新代码",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-108.js"
+    "url": "js/js-108.js"
   },
   "js-109": {
     "name": "BusGo",
@@ -107,7 +107,7 @@
     "medium": false,
     "large": true,
     "update": "优化代码，修复自动刷新功能",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-109.js"
+    "url": "js/js-109.js"
   },
   "js-110": {
     "name": "农历",
@@ -118,7 +118,7 @@
     "medium": true,
     "large": true,
     "update": "增加软件内运行界面",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-110.js"
+    "url": "js/js-110.js"
   },
   "js-111": {
     "name": "Simba",
@@ -129,7 +129,7 @@
     "medium": false,
     "large": true,
     "update": "首次使用需要填入手机号码，后续也可以更换手机号码。",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-111.js"
+    "url": "js/js-111.js"
   },
   "js-112": {
     "name": "缓存清理工具",
@@ -140,7 +140,7 @@
     "medium": false,
     "large": false,
     "update": "增加清除所有缓存功能",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-112.js"
+    "url": "js/js-112.js"
   },
   "js-113": {
     "name": "今年百分比",
@@ -151,6 +151,6 @@
     "medium": true,
     "large": true,
     "update": "上传代码",
-    "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-113.js"
+    "url": "js/js-113.js"
   }
 }
