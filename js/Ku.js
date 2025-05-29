@@ -15,6 +15,31 @@ function getUrls() {
   };
 }
 
+async function checkSelfUpdate(widgetID, currentVersion) {
+  const fm = FileManager.iCloud();
+  const kuPath = fm.joinPath(fm.documentsDirectory(), "Ku.js");
+
+  if (fm.fileExists(kuPath)) {
+    await fm.downloadFileFromiCloud(kuPath);
+    const kuCode = fm.readString(kuPath);
+    const re = new RegExp(`"${widgetID}"\\s*:\\s*{[^}]*version\\s*:\\s*["']([^"']+)["']`, 'i');
+    const match = kuCode.match(re);
+    const remoteVer = match?.[1];
+
+    if (remoteVer && remoteVer !== currentVersion) {
+      console.log(`🛑 当前版本 ${currentVersion}，远程版本 ${remoteVer}，退出旧脚本`);
+      Script.complete();
+    }
+  }
+}
+
+// ✅ 自动触发检查
+(async () => {
+  if (typeof this?.widget_ID === "string" && typeof this?.version === "string") {
+    await checkSelfUpdate(this.widget_ID, this.version);
+  }
+})();
+
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
   const localFm = FileManager.local();
@@ -3552,7 +3577,7 @@ function searchCurrency(input) {
     return searchResults;
 }
 
-module.exports = { generateScriptsHTML, createHTMLContent, installation, currencyData, searchCurrency, calendar, getUrls,showMRTLines, showLoadingAndFetchData };
+module.exports = { generateScriptsHTML, createHTMLContent, installation, checkSelfUpdate, currencyData, searchCurrency, calendar, getUrls,showMRTLines, showLoadingAndFetchData };
 
 /* 示例查询，使用方法
 const { currencyData, searchCurrency } = importModule('Money Code Exchange')
