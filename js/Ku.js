@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.92";
+this.version = "v3.93";
 
 function getUrls() {
   const BASE_URL = "https://raw.githubusercontent.com/bb1026/bing/main/"
@@ -84,7 +84,7 @@ console.log(
     successAlert.body = `点击运行 ${scriptName}\n版本 ${remoteVersion}`;
     successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`;
     await successAlert.schedule();
-
+      Safari.open(`scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`);
       if (typeof Script !== "undefined") {
         Script.complete();
       }
