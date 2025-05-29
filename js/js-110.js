@@ -3,11 +3,35 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v2.5";
+this.version = "v2.6";
 
 let installation, calendar;
 await CheckKu();
 await installation(this.widget_ID, this.version);
+
+// 公共工具函数
+function getDateKey(date) {
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+}
+
+function isBirthdayEvent(ev) {
+  return ev.title.includes("生日");
+}
+
+function isValidEvent(ev) {
+  return !isBirthdayEvent(ev);
+}
+
+function getTitlePrefix(title, length = 4) {
+  return title
+    .replace(/（.*?）|\(.*?\)/g, "")
+    .trim()
+    .slice(0, length);
+}
+
+function formatDate(date) {
+  return `${date.getMonth() + 1}月${date.getDate()}日`;
+}
 
 const WEEK_DAYS = ["日", "一", "二", "三", "四", "五", "六"];
 const WEEK_DAYS_FULL = [
@@ -676,13 +700,237 @@ async function createCalendarWidget() {
     widget.url = "calshow://";
   }
 
+  let table = new UITable();
+  table.showSeparators = true;
+
+  let currentYear = today.getFullYear();
+  let currentMonth = today.getMonth();
+
+  // 当前视图年月
+  let viewYear = currentYear;
+  let viewMonth = currentMonth;
+
+  async function renderCalendar() {
+    table.removeAllRows();
+
+    let monthStart = new Date(viewYear, viewMonth, 1);
+    let monthEnd = new Date(viewYear, viewMonth + 1, 0, 23, 59, 59);
+    let events = await CalendarEvent.between(monthStart, monthEnd);
+    // 构建 eventMap
+    let eventMap = {};
+    for (let ev of events) {
+      if (ev.title.includes("生日")) continue; // 排除生日，仅用于日历格子显示
+
+      let d = ev.startDate;
+      let key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+      if (!eventMap[key]) eventMap[key] = [];
+      eventMap[key].push(ev);
+    }
+
+    // 顶部标题
+    let headerRow = new UITableRow();
+    let formattedDate = new DateFormatter();
+    formattedDate.dateFormat =
+      viewYear === currentYear && viewMonth === currentMonth
+        ? "yyyy年M月d日"
+        : "yyyy年M月";
+    let headerCell = UITableCell.text(
+      formattedDate.string(
+        viewYear === currentYear && viewMonth === currentMonth
+          ? today
+          : new Date(viewYear, viewMonth, 1)
+      )
+    );
+    headerCell.centerAligned();
+    headerCell.titleFont = Font.boldSystemFont(28);
+    headerRow.addCell(headerCell);
+    table.addRow(headerRow);
+
+    // 星期行
+    let weekRow = new UITableRow();
+    let weekDays = ["日", "一", "二", "三", "四", "五", "六"];
+    for (let i = 0; i < 7; i++) {
+      let cell = UITableCell.text(weekDays[i]);
+      cell.centerAligned();
+      cell.titleFont = Font.boldSystemFont(28);
+      if (i === 0 || i === 6) cell.titleColor = Color.red();
+      weekRow.addCell(cell);
+    }
+    table.addRow(weekRow);
+
+    // 生成网格数据
+    function getCalendarGrid(year, month) {
+      let firstDay = new Date(year, month, 1);
+      let startWeekday = firstDay.getDay();
+      let daysInMonth = new Date(year, month + 1, 0).getDate();
+      let daysInPrevMonth = new Date(year, month, 0).getDate();
+      let grid = [];
+
+      for (let i = startWeekday - 1; i >= 0; i--) {
+        let d = daysInPrevMonth - i;
+        grid.push({
+          day: d,
+          inCurrentMonth: false,
+          date: new Date(year, month - 1, d)
+        });
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        grid.push({
+          day: d,
+          inCurrentMonth: true,
+          date: new Date(year, month, d)
+        });
+      }
+      while (grid.length < 42) {
+        let d = grid.length - (startWeekday + daysInMonth - 1);
+        grid.push({
+          day: d,
+          inCurrentMonth: false,
+          date: new Date(year, month + 1, d)
+        });
+      }
+      return grid;
+    }
+
+    // 渲染网格
+    let calendarData = getCalendarGrid(viewYear, viewMonth);
+    for (let week = 0; week < 6; week++) {
+      let row = new UITableRow();
+      row.height = 75;
+      for (let i = 0; i < 7; i++) {
+        let item = calendarData[week * 7 + i];
+        let date = item.date;
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+        let key = `${year}-${month}-${day}`;
+
+        let lunar = calendar.solar2lunar(year, month, day);
+        let event = eventMap[key]?.[0];
+        let lunarText = event
+          ? event.title
+          : lunar.IDayCn === "初一"
+          ? lunar.IMonthCn
+          : lunar.IDayCn;
+
+        let cell = UITableCell.text(item.day.toString(), lunarText);
+        cell.centerAligned();
+        cell.titleFont = Font.systemFont(28);
+        cell.subtitleFont = Font.systemFont(16);
+
+        let isWeekend = i === 0 || i === 6;
+        let isToday =
+          year === currentYear &&
+          month === currentMonth + 1 &&
+          day === today.getDate();
+
+        if (event) {
+          cell.subtitleColor = Color.red();
+        } else if (!item.inCurrentMonth) {
+          cell.titleColor = Color.gray();
+          cell.subtitleColor = Color.lightGray();
+        } else if (isToday) {
+          cell.titleColor = Color.blue();
+          cell.subtitleColor = Color.blue();
+        } else if (isWeekend) {
+          cell.titleColor = Color.red();
+          cell.subtitleColor = Color.red();
+        } else {
+          cell.subtitleColor = Color.gray();
+        }
+
+        row.addCell(cell);
+      }
+      table.addRow(row);
+    }
+
+    // 按钮
+    let controlRow = new UITableRow();
+    let prevCell = UITableCell.button("⬅️ 上一月");
+    prevCell.centerAligned();
+    controlRow.addCell(prevCell);
+
+    let todayCell = UITableCell.button("📅 回到今天");
+    todayCell.centerAligned();
+    controlRow.addCell(todayCell);
+
+    let nextCell = UITableCell.button("➡️ 下一月");
+    nextCell.centerAligned();
+    controlRow.addCell(nextCell);
+
+    table.addRow(controlRow);
+
+    // 简要事件列表
+    if (events.length > 0) {
+      let titleSet = new Set();
+      for (let ev of events) {
+        let start = ev.startDate;
+        let y = start.getFullYear();
+        let m = start.getMonth();
+
+        // 只显示当前视图的月份
+        if (y !== viewYear || m !== viewMonth) continue;
+
+        let d = start.getDate();
+        let dateKey = `${y}-${m + 1}-${d}`;
+
+        // 去除括号内容并保留前4个字用于比较
+        let cleanTitle = ev.title
+          .replace(/（.*?）|\(.*?\)/g, "")
+          .trim()
+          .slice(0, 4);
+
+        // 构造唯一键：日期 + 标题前4字
+        let uniqueKey = `${dateKey}::${cleanTitle}`;
+        if (titleSet.has(uniqueKey)) continue;
+        titleSet.add(uniqueKey);
+
+        // 添加事件行
+        let row = new UITableRow();
+        row.height = 25;
+        let datePrefix = `${m + 1}月${d}日 `;
+        row.addText(datePrefix + ev.title).titleFont = Font.systemFont(16);
+        table.addRow(row);
+      }
+    }
+
+    prevCell.onTap = async () => {
+      viewMonth -= 1;
+      if (viewMonth < 0) {
+        viewMonth = 11;
+        viewYear -= 1;
+      }
+      await renderCalendar();
+      table.reload();
+    };
+
+    nextCell.onTap = async () => {
+      viewMonth += 1;
+      if (viewMonth > 11) {
+        viewMonth = 0;
+        viewYear += 1;
+      }
+      await renderCalendar();
+      table.reload();
+    };
+
+    todayCell.onTap = async () => {
+      viewYear = currentYear;
+      viewMonth = currentMonth;
+      await renderCalendar();
+      table.reload();
+    };
+  }
+
+  await renderCalendar();
+
   return config.runsInWidget
     ? Script.setWidget(widget)
     : widgetFamily === "small"
     ? widget.presentSmall()
     : widgetFamily === "medium"
     ? widget.presentMedium()
-    : widget.presentLarge();
+    : await table.present(true);
 }
 
 await createCalendarWidget();
