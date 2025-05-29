@@ -15,26 +15,6 @@ function getUrls() {
   };
 }
 
-async function checkSelfUpdate(widget_ID, version) {
-  const url = "https://raw.githubusercontent.com/bb1026/bing/refs/heads/main/js/Master.json";
-  const req = new Request(url);
-
-  try {
-    const scriptList = await req.loadJSON();
-    const remote = scriptList[widget_ID];
-    const remoteVer = remote?.version;
-
-    if (remoteVer && remoteVer !== version) {
-      
-      await installation(widget_ID, version);
-
-      Script.complete();
-    }
-  } catch (e) {
-    console.log("❌ 检查更新失败: " + e);
-  }
-}
-
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
   const localFm = FileManager.local();
@@ -3572,7 +3552,7 @@ function searchCurrency(input) {
     return searchResults;
 }
 
-module.exports = { generateScriptsHTML, createHTMLContent, installation, checkSelfUpdate, currencyData, searchCurrency, calendar, getUrls,showMRTLines, showLoadingAndFetchData };
+module.exports = { generateScriptsHTML, createHTMLContent, installation, currencyData, searchCurrency, calendar, getUrls,showMRTLines, showLoadingAndFetchData };
 
 /* 示例查询，使用方法
 const { currencyData, searchCurrency } = importModule('Money Code Exchange')
