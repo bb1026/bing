@@ -111,13 +111,13 @@
   },
   "js-110": {
     "name": "农历",
-    "version": "v2.5",
+    "version": "v2.6",
     "ID": "js-110",
     "argsID": "110",
     "small": true,
     "medium": true,
     "large": true,
-    "update": "增加事件通知",
+    "update": "增加软件内运行界面",
     "url": "https://raw.githubusercontent.com/bb1026/bing/main/js/js-110.js"
   },
   "js-111": {
