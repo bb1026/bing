@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.97";
+this.version = "v3.98";
 
 function getUrls() {
   const BASE_URL = "https://raw.githubusercontent.com/bb1026/bing/main/"
@@ -1067,8 +1067,6 @@ async function showLoadingAndFetchData(
       document.getElementById('progress-bar').style.width = '100%';
       document.getElementById('progress-bar').style.backgroundColor = '#4CAF50';
     `);
-    
-    Safari.open("scriptable:///run?scriptName=Busgo");
 
     const now = new Date().toISOString();
     fm.writeString(updateTimeCachePath, JSON.stringify({ lastUpdate: now }));
