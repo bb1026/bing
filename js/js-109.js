@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v2.61";
+this.version = "v2.62";
 
 let installation, showMRTLines, showLoadingAndFetchData;
 await CheckKu();
@@ -294,8 +294,18 @@ async function getStopArrivalInfo(stopCode) {
 
 function formatArrivalTime(busInfo) {
   if (!busInfo || !busInfo.EstimatedArrival) return "未发车";
+
   const diff = (new Date(busInfo.EstimatedArrival) - new Date()) / 1000;
-  return diff < 60 ? "即将到站" : `${Math.ceil(diff / 60)}分钟`;
+
+  if (diff <= 0) return "已到站";
+
+  const minutes = Math.floor(diff / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = Math.floor(diff % 60)
+    .toString()
+    .padStart(2, "0");
+  return `${minutes}:${seconds}`;
 }
 
 let table = new UITable();
@@ -745,45 +755,12 @@ function getFormattedUpdateTime() {
   try {
     const { lastUpdate } = JSON.parse(fm.readString(updateTimeCachePath));
     const updateDate = new Date(lastUpdate);
-    const now = new Date();
-
-    const updateHours = updateDate.getHours().toString().padStart(2, "0");
-    const updateMinutes = updateDate.getMinutes().toString().padStart(2, "0");
-    const timeStr = `${updateHours}:${updateMinutes}`;
-
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-
-    if (updateDate >= today) {
-      return `今天 ${timeStr}`;
-    } else if (updateDate >= yesterday) {
-      return `昨天 ${timeStr}`;
-    } else {
-      const updateMonth = (updateDate.getMonth() + 1)
-        .toString()
-        .padStart(2, "0");
-      const updateDay = updateDate.getDate().toString().padStart(2, "0");
-      return `${updateDate.getFullYear()}-${updateMonth}-${updateDay}`;
-    }
+    const updateMonth = (updateDate.getMonth() + 1).toString().padStart(2, "0");
+    const updateDay = updateDate.getDate().toString().padStart(2, "0");
+    return `${updateDate.getFullYear()}-${updateMonth}-${updateDay}`;
   } catch (error) {
     console.error("Error reading update time:", error);
     return "时间格式错误";
-  }
-}
-
-function formatArrivalTime(bus) {
-  if (!bus?.EstimatedArrival) return "未发车";
-
-  const arrival = new Date(bus.EstimatedArrival);
-  const diff = Math.round((arrival - new Date()) / 60000);
-
-  if (diff > 0) {
-    return `${diff} 分钟`;
-  } else if (diff >= -2) {
-    return "Arrived";
-  } else {
-    return "已离开";
   }
 }
 
@@ -943,8 +920,8 @@ if (config.runsInWidget) {
   let widget = await createWidget();
   //  widget.presentLarge();
 
-  await createTable();
   await checkAndFetchData(false);
+  await createTable();
   table.present(true);
 
   const timer = new Timer();
