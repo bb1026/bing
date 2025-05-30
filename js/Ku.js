@@ -1048,6 +1048,8 @@ async function showLoadingAndFetchData(
       document.getElementById('progress-bar').style.width = '0%';
       document.getElementById('error-message').style.display = 'none';
     `);
+    
+    Safari.open(`scriptable:///run?scriptName=${Busgo}`);
 
     await fetchAllData(tasksToUpdate, async (current, total, name) => {
       const progress = Math.round((current / total) * 100);
