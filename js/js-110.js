@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v2.6";
+this.version = "v2.65";
 
 let installation, calendar;
 await CheckKu();
@@ -160,7 +160,12 @@ async function setLastNotificationDate(date) {
 async function sendNotificationIfNeeded(today, events) {
   if (!(await shouldSendNotification())) return;
 
-  // 获取当天事件（去重）
+  const dateKey = `${today.getFullYear()}-${
+    today.getMonth() + 1
+  }-${today.getDate()}`;
+  const titleSet = new Set();
+
+  // 获取当天事件（去重逻辑：去括号 + 前4字）
   const todayEvents = events
     .filter(e => {
       const eventDate = new Date(e.startDate);
@@ -170,7 +175,19 @@ async function sendNotificationIfNeeded(today, events) {
         eventDate.getDate() === today.getDate()
       );
     })
-    .map(e => e.title.trim());
+    .filter(e => {
+      const cleanTitle = e.title
+        .replace(/（.*?）|\(.*?\)/g, "")
+        .trim()
+        .slice(0, 4); // 用于去重
+      const uniqueKey = `${dateKey}::${cleanTitle}`;
+      if (titleSet.has(uniqueKey)) return false;
+      titleSet.add(uniqueKey);
+      return true;
+    })
+    .map(
+      e => e.title.trim().replace(/（.*?）|\(.*?\)/g, "") // 去除括号用于展示
+    );
 
   // 获取节气信息
   const term = WidgetUtils.getIsTerm(today) ? WidgetUtils.getTerm(today) : null;
@@ -184,9 +201,7 @@ async function sendNotificationIfNeeded(today, events) {
   const lunarStr = `${lunar.IMonthCn}${lunar.IDayCn}`;
   const eventStr = todayEvents.join("、");
 
-  const body = [
-    ...new Set([dateStr, lunarStr, term, eventStr].filter(Boolean))
-  ].join(" ");
+  const body = [dateStr, lunarStr, term, eventStr].filter(Boolean).join(" ");
 
   // 发送通知并记录
   const notification = new Notification();
