@@ -111,13 +111,13 @@
   },
   "js-110": {
     "name": "农历",
-    "version": "v2.6",
+    "version": "v2.65",
     "ID": "js-110",
     "argsID": "110",
     "small": true,
     "medium": true,
     "large": true,
-    "update": "增加软件内运行界面",
+    "update": "修复代码",
     "url": "js/js-110.js"
   },
   "js-111": {
