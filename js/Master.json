@@ -7,7 +7,7 @@
     "small": false,
     "medium": false,
     "large": false,
-    "update": "无法更新的问题",
+    "update": "没有多大用处",
     "url": "js/js-100.js"
   },
   "js-101": {
@@ -18,7 +18,7 @@
     "small": false,
     "medium": true,
     "large": false,
-    "update": "上传代码",
+    "update": "查询汉生汇率",
     "url": "js/js-101.js"
   },
   "js-102": {
@@ -29,7 +29,7 @@
     "small": true,
     "medium": false,
     "large": false,
-    "update": "修复代码",
+    "update": "查询熊猫汇款汇率",
     "url": "js/js-102.js"
   },
   "js-103": {
@@ -40,7 +40,7 @@
     "small": false,
     "medium": false,
     "large": false,
-    "update": "查询巴士显示序号",
+    "update": "查询巴士新加坡巴士时间，没有Busgo好用",
     "url": "js/js-103.js"
   },
   "js-104": {
@@ -51,7 +51,7 @@
     "small": false,
     "medium": true,
     "large": false,
-    "update": "缩减代码",
+    "update": "显示农历日历",
     "url": "js/js-104.js"
   },
   "js-105": {
@@ -62,7 +62,7 @@
     "small": false,
     "medium": false,
     "large": false,
-    "update": "更新代码",
+    "update": "可以下载代码",
     "url": "js/js-105.js"
   },
   "js-106": {
@@ -73,7 +73,7 @@
     "small": false,
     "medium": false,
     "large": false,
-    "update": "修复无法使用",
+    "update": "可以去下载音乐",
     "url": "js/js-106.js"
   },
   "js-107": {
@@ -84,7 +84,7 @@
     "small": false,
     "medium": false,
     "large": false,
-    "update": "修改部分代码",
+    "update": "新加坡定位查看附近巴士时间",
     "url": "js/js-107.js"
   },
   "js-108": {
@@ -95,18 +95,18 @@
     "small": false,
     "medium": false,
     "large": true,
-    "update": "更新代码",
+    "update": "可以展示距离生日多久",
     "url": "js/js-108.js"
   },
   "js-109": {
     "name": "BusGo",
-    "version": "v2.61",
+    "version": "v2.62",
     "ID": "js-109",
     "argsID": "109",
     "small": false,
     "medium": false,
     "large": true,
-    "update": "优化代码，修复自动刷新功能",
+    "update": "可以查询新加坡巴士时间",
     "url": "js/js-109.js"
   },
   "js-110": {
@@ -117,7 +117,7 @@
     "small": true,
     "medium": true,
     "large": true,
-    "update": "修复代码",
+    "update": "可以展示农历日历",
     "url": "js/js-110.js"
   },
   "js-111": {
@@ -128,7 +128,7 @@
     "small": false,
     "medium": false,
     "large": true,
-    "update": "首次使用需要填入手机号码，后续也可以更换手机号码。",
+    "update": "可以快速显示Simba的话费，流量等用量",
     "url": "js/js-111.js"
   },
   "js-112": {
@@ -139,7 +139,7 @@
     "small": false,
     "medium": false,
     "large": false,
-    "update": "增加清除所有缓存功能",
+    "update": "可以清除这个软件产生的缓存",
     "url": "js/js-112.js"
   },
   "js-113": {
@@ -150,7 +150,7 @@
     "small": true,
     "medium": true,
     "large": true,
-    "update": "上传代码",
+    "update": "查看今年百分比",
     "url": "js/js-113.js"
   }
 }
