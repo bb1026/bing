@@ -3,7 +3,7 @@
 // icon-color: purple; icon-glyph: mobile-alt;
 this.name = "Simba";
 this.widget_ID = "js-111";
-this.version = "v1.1";
+this.version = "v1.2";
 
 let installation;
 await CheckKu();
@@ -311,8 +311,11 @@ if (Dashboard?.success !== undefined && Dashboard.success) {
     await getNewAuthorization();
   };
   button2 = buttonRow1.addButton("充值");
-  button2.onTap = () => {
-    Safari.open("https://topup.simba.sg");
+  button2.onTap = async () => {
+    const SimbaUrl = "https://topup.simba.sg";
+    const Vw = new WebView();
+    await Vw.loadURL(SimbaUrl);
+    await Vw.present(true);
   };
   table.addRow(buttonRow1);
 
@@ -368,7 +371,7 @@ if (Dashboard?.success !== undefined && Dashboard.success) {
     `总共短信: ${Local_textallowance}条\n已用短信: ${Local_textused}条\n剩余短信: ${Local_textremain}条`
   );
 
-  table.present();
+  table.present(true);
 } else {
   const notice = `请更新Authorization.`;
   gettextwidget(notice);
@@ -385,7 +388,7 @@ if (Dashboard?.success !== undefined && Dashboard.success) {
     await getNewAuthorization();
   };
   table.addRow(buttonRow);
-  table.present();
+  table.present(true);
 }
 
 Script.setWidget(w);
@@ -485,10 +488,8 @@ async function CheckKu() {
   let needDownload = false;
 
   try {
-    ({
-      installation
-    } = importModule("Ku"));
-    
+    ({ installation } = importModule("Ku"));
+
     if (typeof installation !== "function") {
       console.log("数据库模块无效，准备重新下载");
       needDownload = true;
@@ -499,16 +500,16 @@ async function CheckKu() {
   }
 
   if (needDownload) {
-        const req = new Request(url);
-      try {
-        fm.writeString(path, await req.loadString());
-        if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
-    console.log("数据库下载完成");
+    const req = new Request(url);
+    try {
+      fm.writeString(path, await req.loadString());
+      if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+      console.log("数据库下载完成");
 
-  ({ installation } = importModule("Ku"));
-  if (typeof installation !== "function") throw new Error("数据库模块无效");
-  } catch (error) {
-    console.error("请求失败:" + error.message);
+      ({ installation } = importModule("Ku"));
+      if (typeof installation !== "function") throw new Error("数据库模块无效");
+    } catch (error) {
+      console.error("请求失败:" + error.message);
     }
   }
 }
