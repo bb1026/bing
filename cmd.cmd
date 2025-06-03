@@ -6,7 +6,7 @@ color 0A
 for /f "tokens=*" %%i in ('wmic os get locale ^| findstr /r "^[0-9]"') do set locale=%%i
 
 :: 判断语言
-if "!locale!"=="2052" (
+if "!locale!"=="0804" (
   set lang=zh
 ) else (
   set lang=en
