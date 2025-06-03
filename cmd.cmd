@@ -2,15 +2,10 @@
 setlocal enabledelayedexpansion
 color 0A
 
-:: 获取系统语言编号
-for /f "skip=1 tokens=*" %%i in ('wmic os get locale') do (
-  set "locale=%%i"
-  goto :langDetect
-)
+:: 获取系统语言
+for /f "tokens=*" %%i in ('wmic os get locale ^| findstr /r "^[0-9]"') do set locale=%%i
 
-:langDetect
-:: 清理空格
-set "locale=!locale: =!"
+:: 判断语言
 if "!locale!"=="2052" (
   set lang=zh
 ) else (
