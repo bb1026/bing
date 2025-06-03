@@ -14,7 +14,7 @@ if "!locale!"=="2052" (
 
 :menu
 cls
-if "%lang%"=="zh" (
+if "!lang!"=="zh" (
   echo ===============================
   echo        远程 CMD 工具菜单
   echo ===============================
@@ -46,6 +46,7 @@ if "%lang%"=="zh" (
   set /p choice=Enter choice number:
 )
 
+:: 注意这里保持使用 %choice%（不用加感叹号）
 if "%choice%"=="1" goto ip
 if "%choice%"=="2" goto clean
 if "%choice%"=="3" goto reboot
@@ -58,11 +59,13 @@ if "%choice%"=="0" exit
 goto menu
 
 :ip
+cls
 ipconfig
 pause
 goto menu
 
 :clean
+cls
 PowerShell -Command "Clear-RecycleBin -Force"
 del /f /s /q %temp%\* > nul
 del /f /s /q %windir%\Temp\* > nul
@@ -71,30 +74,36 @@ pause
 goto menu
 
 :reboot
+cls
 shutdown -r -t 0
 
 :share
+cls
 net share
 pause
 goto menu
 
 :userinfo
+cls
 net user
 net user Administrator
 pause
 goto menu
 
 :sysinfo
+cls
 systeminfo
 pause
 goto menu
 
 :disk
+cls
 wmic logicaldisk get size,freespace,caption
 pause
 goto menu
 
 :port
+cls
 netstat -ano
 pause
 goto menu
