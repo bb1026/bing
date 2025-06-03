@@ -3,13 +3,15 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v2.65";
+this.version = "v2.7";
 
 let installation, calendar;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 
 // 公共工具函数
+const widgetFamily = config.widgetFamily || "large"; /*small, medium, large*/
+
 function getDateKey(date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }
@@ -46,26 +48,13 @@ const WEEK_DAYS_FULL = [
 
 const COLORS = {
   weekend: Color.red(),
-  weekday: Color.black(),
-  todayBorder: Color.blue(),
-  lunarText: new Color("#666666"),
-  monthBgText: new Color("#D3D3D3"),
-  eventText: Color.black(),
-  widgetBg: new Color("#FFFFFF")
+  todayBorder: Color.blue()
 };
 
 const lunarCache = {};
 const NOTIFICATION_KEY = "lastNotificationDate";
 
 const WidgetUtils = {
-  createBackgroundImage(size = 200) {
-    return Object.assign(new DrawContext(), {
-      opaque: false,
-      respectScreenScale: true,
-      size: new Size(size, size)
-    });
-  },
-
   isWeekend(day) {
     return day === 0 || day === 6;
   },
@@ -118,7 +107,9 @@ const WidgetUtils = {
   createDateText(parent, text, isWeekend = false, isToday = false) {
     const textElement = parent.addText(text);
     textElement.font = Font.boldSystemFont(20);
-    textElement.textColor = isWeekend ? COLORS.weekend : COLORS.weekday;
+    if (isWeekend) {
+      textElement.textColor = COLORS.weekend;
+    }
     textElement.centerAlignText();
     return textElement;
   }
@@ -197,7 +188,7 @@ async function sendNotificationIfNeeded(today, events) {
 
   // 构建通知内容
   const lunar = WidgetUtils.getLunarData(today);
-  const dateStr = `${today.getMonth() + 1}月${today.getDate()}日`;
+  const dateStr = formatDate(today);
   const lunarStr = `${lunar.IMonthCn}${lunar.IDayCn}`;
   const eventStr = todayEvents.join("、");
 
@@ -215,16 +206,14 @@ async function sendNotificationIfNeeded(today, events) {
 
 async function createCalendarWidget() {
   const widget = new ListWidget();
-  widget.backgroundColor = COLORS.widgetBg;
   const widgetWidth = 350;
   const today = new Date();
-  //   const today = new Date(2025, 04, 01);
+  //   const today = new Date(2025, 4, 1);
   const year = today.getFullYear();
   const month = today.getMonth();
   const dayOfWeek = today.getDay();
   const isWeekend = WidgetUtils.isWeekend(dayOfWeek);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const widgetFamily = config.widgetFamily || "large"; /*small, medium, large*/
 
   const monthStart = new Date(year, month, 1);
   monthStart.setHours(0, 0, 0, 0);
@@ -243,14 +232,6 @@ async function createCalendarWidget() {
   await sendNotificationIfNeeded(today, allEvents, widgetFamily);
 
   if (widgetFamily === "small") {
-    const bgImg = WidgetUtils.createBackgroundImage();
-    bgImg.setFont(Font.boldSystemFont(180));
-    bgImg.setTextColor(COLORS.monthBgText);
-    const monthNumber = month + 1;
-    const x = monthNumber.toString().length === 1 ? 40 : 0;
-    bgImg.drawTextInRect(monthNumber.toString(), new Rect(x, -20, 200, 200));
-    widget.backgroundImage = await bgImg.getImage();
-
     const contentStack = widget.addStack();
     contentStack.layoutVertically();
 
@@ -258,16 +239,20 @@ async function createCalendarWidget() {
     const weekRow = WidgetUtils.createCenteredRow(contentStack);
     weekRow.addSpacer();
     const weekText = weekRow.addText(WEEK_DAYS_FULL[dayOfWeek]);
-    weekText.font = Font.boldSystemFont(30);
-    weekText.textColor = isWeekend ? COLORS.weekend : COLORS.weekday;
+    weekText.font = Font.boldSystemFont(25);
+    if (isWeekend) {
+      weekText.textColor = COLORS.weekend;
+    }
     weekRow.addSpacer();
 
     // 日期行
     const dateRow = WidgetUtils.createCenteredRow(contentStack);
     dateRow.addSpacer();
-    const dateText = dateRow.addText(today.getDate().toString());
-    dateText.font = Font.boldSystemFont(60);
-    dateText.textColor = isWeekend ? COLORS.weekend : COLORS.weekday;
+    const dateText = dateRow.addText(formatDate(today));
+    dateText.font = Font.boldSystemFont(25);
+    if (isWeekend) {
+      dateText.textColor = COLORS.weekend;
+    }
     dateRow.addSpacer();
 
     // 农历 + 节气行
@@ -280,7 +265,9 @@ async function createCalendarWidget() {
     }
 
     const lunarText = lunarRow.addText(lunarTextContent);
-    lunarText.textColor = isWeekend ? COLORS.weekend : COLORS.weekday;
+    if (isWeekend) {
+      lunarText.textColor = COLORS.weekend;
+    }
 
     lunarRow.addSpacer();
     widget.addSpacer();
@@ -308,7 +295,7 @@ async function createCalendarWidget() {
 
     lunarText.font =
       WidgetUtils.getIsTerm(today) || upcoming.length > 0
-        ? Font.boldSystemFont(15)
+        ? Font.boldSystemFont(25)
         : Font.boldSystemFont(30);
 
     if (upcoming.length > 0) {
@@ -322,7 +309,7 @@ async function createCalendarWidget() {
 
       for (const event of upcoming) {
         const eventText = eventStack.addText("● " + event.title);
-        eventText.font = Font.systemFont(12);
+        eventText.font = Font.systemFont(20);
         eventText.textColor = new Color("#" + event.color);
         eventText.lineLimit = 1;
       }
@@ -335,13 +322,23 @@ async function createCalendarWidget() {
     const firstDayOfWeek = new Date(today);
     firstDayOfWeek.setDate(currentDay - currentDayOfWeek);
 
-    const bgImg = WidgetUtils.createBackgroundImage();
-    bgImg.setFont(Font.boldSystemFont(80));
-    bgImg.setTextColor(COLORS.monthBgText);
-    const monthNumber = month + 1;
-    const x = monthNumber.toString().length === 1 ? 40 : 20;
-    bgImg.drawTextInRect(`${monthNumber}月`, new Rect(x, 50, 200, 200));
-    widget.backgroundImage = await bgImg.getImage();
+    const eventMap = new Map();
+    for (const e of allEvents) {
+      const date = new Date(e.startDate);
+      date.setHours(0, 0, 0, 0);
+      const key = date.toISOString().slice(0, 10);
+      if (!eventMap.has(key)) eventMap.set(key, []);
+      eventMap.get(key).push(e);
+    }
+
+    const dayRow = widget.addStack();
+    dayRow.layoutHorizontally();
+    dayRow.centerAlignContent();
+    dayRow.addSpacer();
+    const dText = dayRow.addText(formatDate(today));
+    dText.font = Font.boldSystemFont(25);
+    dText.centerAlignText();
+    dayRow.addSpacer();
 
     const weekRow = WidgetUtils.createCenteredRow(widget);
     WEEK_DAYS.forEach((day, i) => {
@@ -351,7 +348,6 @@ async function createCalendarWidget() {
       WidgetUtils.createDateText(dayCell, day, WidgetUtils.isWeekend(i));
       if (i < 6) weekRow.addSpacer(5);
     });
-    widget.addSpacer(5);
 
     const dateRow = WidgetUtils.createCenteredRow(widget);
     const dotRow = WidgetUtils.createCenteredRow(widget);
@@ -364,6 +360,9 @@ async function createCalendarWidget() {
       const isToday =
         dayDate.getDate() === today.getDate() &&
         dayDate.getMonth() === today.getMonth();
+
+      const dateKey = dayDate.toISOString().slice(0, 10);
+      const dayEvents = eventMap.get(dateKey) || [];
 
       // 日期单元格
       const dayCell = dateRow.addStack();
@@ -381,14 +380,6 @@ async function createCalendarWidget() {
       const dotCell = dotRow.addStack();
       dotCell.size = new Size(45, 6);
       dotCell.centerAlignContent();
-
-      const dayStart = new Date(dayDate);
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(dayDate);
-      dayEnd.setHours(23, 59, 59, 999);
-      const dayEvents = allEvents.filter(
-        e => e.startDate >= dayStart && e.startDate <= dayEnd
-      );
 
       if (dayEvents.length > 0) {
         const shownColors = new Set();
@@ -414,23 +405,19 @@ async function createCalendarWidget() {
         widgetFamily
       );
 
-      const daysEvents = allEvents.filter(
-        e => e.startDate >= dayStart && e.startDate <= dayEnd
-      );
-
       let eventOutput = "";
       if (
-        daysEvents.length > 0 &&
-        !daysEvents[0].calendar.title.includes("生日") &&
-        !daysEvents[0].calendar.title.toLowerCase().includes("birthday")
+        dayEvents.length > 0 &&
+        !dayEvents[0].calendar.title.includes("生日") &&
+        !dayEvents[0].calendar.title.toLowerCase().includes("birthday")
       ) {
-        eventOutput += daysEvents[0].title;
+        eventOutput += dayEvents[0].title;
       } else if (
-        daysEvents.length > 1 &&
-        !daysEvents[1].calendar.title.includes("生日") &&
-        !daysEvents[1].calendar.title.toLowerCase().includes("birthday")
+        dayEvents.length > 1 &&
+        !dayEvents[1].calendar.title.includes("生日") &&
+        !dayEvents[1].calendar.title.toLowerCase().includes("birthday")
       ) {
-        eventOutput += `\n${daysEvents[1].title}`;
+        eventOutput += `\n${dayEvents[1].title}`;
       }
 
       let displayContent = "";
@@ -443,10 +430,10 @@ async function createCalendarWidget() {
       }
 
       const lunarText = lunarCell.addText(displayContent);
-
       lunarText.font = Font.mediumSystemFont(14);
-      lunarText.textColor =
-        isTerm || eventOutput ? COLORS.weekend : COLORS.lunarText;
+      if (isTerm || eventOutput) {
+        lunarText.textColor = COLORS.weekend;
+      }
       lunarText.lineLimit = 2;
       lunarText.minimumScaleFactor = 0.5;
 
@@ -457,8 +444,6 @@ async function createCalendarWidget() {
       }
     }
 
-    widget.addSpacer(8);
-
     const weekStart = new Date(firstDayOfWeek);
     weekStart.setHours(0, 0, 0, 0);
     const weekEnd = new Date(weekStart);
@@ -466,10 +451,7 @@ async function createCalendarWidget() {
     weekEnd.setHours(23, 59, 59, 999);
 
     const thisWeekEvents = allEvents.filter(
-      e =>
-        (e.startDate >= weekStart && e.startDate <= weekEnd) ||
-        (e.endDate >= weekStart && e.endDate <= weekEnd) ||
-        (e.startDate <= weekStart && e.endDate >= weekEnd)
+      e => e.startDate >= weekStart && e.startDate <= weekEnd
     );
 
     const prefixSet = new Set();
@@ -495,26 +477,26 @@ async function createCalendarWidget() {
       bullet.font = Font.systemFont(12);
 
       const eventDate = event.startDate;
-      let datePrefix = `${eventDate.getMonth() + 1}月${eventDate.getDate()}日 `;
+      let datePrefix = `${formatDate(eventDate)} `;
 
       const title = eventStack.addText(datePrefix + event.title);
       title.font = Font.systemFont(12);
-      title.textColor = COLORS.eventText;
     }
 
     widget.addSpacer();
   } else {
     // 大尺寸 - 完整月历
-    const monthNumber = month + 1;
-    if (config.runsInApp) {
-      const bgImg = WidgetUtils.createBackgroundImage(400);
-      bgImg.setFont(Font.boldSystemFont(200));
-      bgImg.setTextColor(COLORS.monthBgText);
-      const x = monthNumber.toString().length === 1 ? 40 : 10;
-      bgImg.drawTextInRect(`${monthNumber}月`, new Rect(x, 55, 800, 400));
-      widget.backgroundImage = await bgImg.getImage();
-    }
-    widget.addSpacer(4);
+
+    const dayRow = widget.addStack();
+    dayRow.layoutHorizontally();
+    dayRow.centerAlignContent();
+    dayRow.addSpacer();
+    const dText = dayRow.addText(formatDate(today));
+    dText.font = Font.boldSystemFont(25);
+    dText.centerAlignText();
+    dayRow.addSpacer();
+    widget.addSpacer();
+
     const weekRow = WidgetUtils.createCenteredRow(widget);
     WEEK_DAYS.forEach((day, i) => {
       const dayCell = weekRow.addStack();
@@ -573,7 +555,11 @@ async function createCalendarWidget() {
         const dayEnd = new Date(date);
         dayEnd.setHours(23, 59, 59, 999);
         const dayEvents = allEvents.filter(
-          e => e.startDate >= dayStart && e.startDate <= dayEnd
+          e =>
+            e.startDate >= dayStart &&
+            e.startDate <= dayEnd &&
+            e.startDate.getMonth() === month &&
+            e.startDate.getFullYear() === year
         );
 
         if (dayEvents.length > 0) {
@@ -586,7 +572,7 @@ async function createCalendarWidget() {
             }
           }
 
-          // 添加前置 spacer
+        // 添加前置 spacer
           const totalWidth =
             shownColors.length * 6 + (shownColors.length - 1) * 2;
           const remainingSpace = 12 - totalWidth;
@@ -614,21 +600,17 @@ async function createCalendarWidget() {
           widgetFamily
         );
 
-        const daysEvents = allEvents.filter(
-          e => e.startDate >= dayStart && e.startDate <= dayEnd
-        );
-
         let eventOutput = "";
         if (
-          daysEvents.length > 0 &&
-          !daysEvents[0].calendar.title.includes("生日") &&
-          !daysEvents[0].calendar.title.toLowerCase().includes("birthday")
+          dayEvents.length > 0 &&
+          !dayEvents[0].calendar.title.includes("生日") &&
+          !dayEvents[0].calendar.title.toLowerCase().includes("birthday")
         ) {
-          eventOutput += daysEvents[0].title;
+          eventOutput += dayEvents[0].title;
         } else if (
-          daysEvents.length > 1 &&
-          !daysEvents[1].calendar.title.includes("生日") &&
-          !daysEvents[1].calendar.title.toLowerCase().includes("birthday")
+          dayEvents.length > 1 &&
+          !dayEvents[1].calendar.title.includes("生日") &&
+          !dayEvents[1].calendar.title.toLowerCase().includes("birthday")
         ) {
           eventOutput += `\n${daysEvents[1].title}`;
         }
@@ -645,8 +627,9 @@ async function createCalendarWidget() {
         const lunarText = lunarStack.addText(displayContent);
 
         lunarText.font = Font.mediumSystemFont(14);
-        lunarText.textColor =
-          isTerm || eventOutput ? COLORS.weekend : COLORS.lunarText;
+        if (isTerm || eventOutput) {
+          lunarText.textColor = COLORS.weekend;
+        }
         lunarText.lineLimit = 2;
         lunarText.minimumScaleFactor = 0.5;
 
@@ -662,6 +645,11 @@ async function createCalendarWidget() {
       const title = e.title.trim();
       const prefix = title.slice(0, 3);
 
+      const eventDate = e.startDate;
+      const isSameMonth =
+        eventDate.getFullYear() === year && eventDate.getMonth() === month;
+
+      if (!isSameMonth) continue;
       if (prefixSet.has(prefix)) continue;
 
       prefixSet.add(prefix);
@@ -699,22 +687,20 @@ async function createCalendarWidget() {
 
       const titleText = eventStack.addText(title);
       titleText.font = Font.systemFont(12);
-      titleText.textColor = COLORS.eventText;
       titleText.lineLimit = 1;
       titleText.minimumScaleFactor = 0.8;
     }
 
     function formatTitle(event) {
       const eventDate = event.startDate;
-      const datePrefix = `${
-        eventDate.getMonth() + 1
-      }月${eventDate.getDate()}日 `;
+      const datePrefix = `${formatDate(eventDate)} `;
       return datePrefix + event.title;
     }
     widget.addSpacer();
     widget.url = "calshow://";
   }
 
+  // UItable展示
   let table = new UITable();
   table.showSeparators = true;
 
@@ -734,7 +720,7 @@ async function createCalendarWidget() {
     // 构建 eventMap
     let eventMap = {};
     for (let ev of events) {
-      if (ev.title.includes("生日")) continue; // 排除生日，仅用于日历格子显示
+      if (ev.title.includes("生日")) continue;
 
       let d = ev.startDate;
       let key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
@@ -945,6 +931,7 @@ async function createCalendarWidget() {
     ? widget.presentSmall()
     : widgetFamily === "medium"
     ? widget.presentMedium()
+    // : widget.presentLarge();
     : await table.present(true);
 }
 
