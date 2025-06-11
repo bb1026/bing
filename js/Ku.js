@@ -6,7 +6,7 @@ this.widget_ID = "js-999";
 this.version = "v3.98";
 
 function getUrls() {
-  const BASE_URL = "https://raw.githubusercontent.com/bb1026/bing/main/"
+  const BASE_URL = "https://bing.0515364.xyz/"
   return {
     BASE_URL,
     KU_SCRIPT_URL : `${BASE_URL}js/Ku.js`,
@@ -904,7 +904,7 @@ async function showMRTLines(readCache) {
     mapContainer.style.backgroundColor = 'var(--map-bg)';
     mapContainer.style.zIndex = '9999';
 
-    mapContainer.style.backgroundImage = 'url("https://raw.githubusercontent.com/bb1026/bing/main/imgs/mrt-map.png")';
+    mapContainer.style.backgroundImage = 'url("https://bing.0515364.xyz/imgs/mrt-map.png")';
     mapContainer.style.backgroundSize = 'contain';
     mapContainer.style.backgroundPosition = 'center';
     mapContainer.style.backgroundRepeat = 'no-repeat';
