@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.98";
+this.version = "v3.99";
 
 function getUrls() {
   const BASE_URL = "https://bing.0515364.xyz/"
