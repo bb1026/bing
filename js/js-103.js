@@ -616,7 +616,7 @@ function handleArrivalInfo(stationInfo) {
 async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-  const url = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
+  const url = "https://bing.0515364.xyz/js/Ku.js";
   let needDownload = false;
 
   try {
