@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v2.62";
+this.version = "v2.7";
 
 let installation, showMRTLines, showLoadingAndFetchData;
 await CheckKu();
@@ -669,16 +669,16 @@ async function showBusFirstLastTimes(busstop, stopCode, busCode) {
     return;
   }
 
-  let table = new UITable();
-  table.showSeparators = true;
+  let tableFLT = new UITable();
+  tableFLT.showSeparators = true;
 
   const stopRow = new UITableRow();
   stopRow.addText(`站点: ${busstop} (${stopCode})`).widthWeight = 50;
-  table.addRow(stopRow);
+  tableFLT.addRow(stopRow);
 
   const busRow = new UITableRow();
   busRow.addText(`巴士: ${busTimes.serviceNo}`).widthWeight = 50;
-  table.addRow(busRow);
+  tableFLT.addRow(busRow);
 
   [
     ["🗓️ 工作日", busTimes.weekday],
@@ -687,24 +687,25 @@ async function showBusFirstLastTimes(busstop, stopCode, busCode) {
   ].forEach(([label, time]) => {
     const row = new UITableRow();
     row.addText(`${label}: ${time}`);
-    table.addRow(row);
+    tableFLT.addRow(row);
   });
 
   const separatorRow = new UITableRow();
   separatorRow.isHeader = true;
   separatorRow.addText("—— 巴士完整路线 ——").centerAligned();
-  table.addRow(separatorRow);
+  tableFLT.addRow(separatorRow);
 
   const headerRow = new UITableRow();
   headerRow.addText("站点代码").widthWeight = 30;
   headerRow.addText("站点名称").widthWeight = 70;
-  table.addRow(headerRow);
+  tableFLT.addRow(headerRow);
 
   for (const route of busRoute) {
     const row = new UITableRow();
 
     row.onSelect = async () => {
       await createTable(route.busStopCode);
+      table.present(true);
     };
 
     let stopCodeCell = row.addText(route.busStopCode);
@@ -719,10 +720,10 @@ async function showBusFirstLastTimes(busstop, stopCode, busCode) {
       stopCodeCell.titleColor = Color.blue();
       stopNameCell.titleColor = Color.blue();
     }
-    table.addRow(row);
+    tableFLT.addRow(row);
   }
-  table.addRow(backRow);
-  table.present(true);
+  tableFLT.addRow(backRow);
+  tableFLT.present(true);
 }
 
 async function getArrivalInfoForStop(stopCode, busCodes) {
