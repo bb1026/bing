@@ -1,131 +1,129 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJGT6TL1SB"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJGT6TL1SB"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', 'G-DJGT6TL1SB');
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>Bing的网站</title>
+  <link rel="icon" href="imgs/logo.ico" type="image/x-icon">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #keyInputContainer {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2px;
+      padding-top: 10px;
+    }
+
+    #keyInput {
+      border: 2px solid #ccc;
+      font-size: 16px;
+      padding: 8px;
+      width: 80%;
+      max-width: 400px;
+    }
+
+    #pageFrame {
+      width: 100%;
+      border: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="keyInputContainer">
+    <input type="text" autocomplete="off" id="keyInput" onkeydown="checkKey(event)" placeholder="请输入访问密钥" />
+  </div>
+  <iframe id="pageFrame"></iframe>
+
+  <script>
+    const AUTH_KEY = 'tX3$9mGz@7vLq#F!b2R';
+
+    function checkKey(event) {
+      if (event.keyCode === 13) {
+        submitForm();
       }
-      gtag('js', new Date());
-      gtag('config', 'G-DJGT6TL1SB');
-    </script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <title>Bing的网站</title>
-    <link rel="icon" href="imgs/logo.ico" type="image/x-icon">
-    <style>
-      body {
-        /*background-color: #f2f2f2;*/
-        /*color: #333;*/
-        margin: 0;
-        padding: 0;
-      }
+    }
 
-      #keyInputContainer {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 2px;
-        padding-top: 10px;
-      }
+    function getDeviceType() {
+      const ua = navigator.userAgent;
+      const width = window.innerWidth;
+      if (/Mobi|Android|iPhone/i.test(ua)) return 'mobile';
+      if (/iPad|Tablet/i.test(ua) || (width >= 600 && width <= 1024)) return 'tablet';
+      return 'desktop';
+    }
 
-      #keyInput {
-        justify-content: center;
-        border: 2px solid #ccc;
-        font-size: 16px;
-        padding: 8px;
-        width: 80%;
-        max-width: 400px;
-      }
+    function adjustIframeSize() {
+      const frame = document.getElementById("pageFrame");
+      frame.style.height = window.innerHeight + "px";
+    }
 
-      #pageFrame {
-        width: 100%;
-        border: none;
-        display: block;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="keyInputContainer">
-      <input type="text" autocomplete="off" id="keyInput" onkeydown="checkKey(event)">
-    </div>
-    <iframe id="pageFrame"></iframe>
+    function submitForm() {
+      const key = document.getElementById("keyInput").value.trim();
+      const pageFrame = document.getElementById("pageFrame");
 
-    <script>
-      function checkKey(event) {
-        if (event.keyCode === 13) {
-          submitForm();
-        }
-      }
+      fetch('js/multiple_content.json?v=' + Date.now(), {
+        headers: { 'X-Auth-Key': AUTH_KEY }
+      })
+        .then(response => {
+          if (!response.ok) throw new Error('无法加载 JSON');
+          return response.json();
+        })
+        .then(data => {
+          console.log('输入的 key:', key);
+          if (data.hasOwnProperty(key)) {
+            document.getElementById("keyInput").value = "";
+            fetchWithAuthAndInjectIframe(data[key]);
+          } else {
+            pageFrame.srcdoc = '<div style="text-align:center;margin-top:40px;font-size:18px;">❌ 暗号不对</div>';
+          }
+        })
+        .catch(error => {
+          console.error('加载 JSON 出错:', error.message || error);
+        });
+    }
 
-      function getDeviceType() {
-        const ua = navigator.userAgent;
-        const width = window.innerWidth;
+    function fetchWithAuthAndInjectIframe(url) {
+      fetch(url, {
+        headers: { 'X-Auth-Key': AUTH_KEY }
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('页面加载失败');
+          return res.text();
+        })
+        .then(html => {
+          const iframe = document.getElementById("pageFrame");
+          iframe.srcdoc = html;
+          adjustIframeSize();
+        })
+        .catch(err => {
+          console.error("加载 iframe 页面失败：", err);
+          document.getElementById("pageFrame").srcdoc = '<div style="text-align:center;margin-top:40px;font-size:18px;">🚫 页面加载失败</div>';
+        });
+    }
 
-        if (/Mobi|Android|iPhone/i.test(ua)) {
-          return 'mobile';
-        } else if (/iPad|Tablet/i.test(ua) || (width >= 600 && width <= 1024)) {
-          return 'tablet';
-        } else {
-          return 'desktop';
-        }
-      }
+    // 初始化大小调整
+    window.addEventListener('load', adjustIframeSize);
+    window.addEventListener('resize', adjustIframeSize);
 
-      function adjustIframeSize() {
-        const frame = document.getElementById("pageFrame");
-        const device = getDeviceType();
-        const vh = window.innerHeight + "px";
-
-        if (device === 'mobile') {
-          frame.style.height = vh;
-        } else if (device === 'tablet') {
-          frame.style.height = vh;
-        } else {
-          frame.style.height = vh;
-        }
-      }
-
-      function submitForm() {
-        const key = document.getElementById("keyInput").value.trim();
-        const pageFrame = document.getElementById("pageFrame");
-
-        fetch('js/multiple_content.json', {
-      headers: {
-        'X-Auth-Key': 'tX3$9mGz@7vLq#F!b2R' 
-      }
-    })
-          .then(response => {
-            if (!response.ok) throw new Error('网络响应不正确');
-            return response.json();
-          })
-          .then(data => {
-            if (data.hasOwnProperty(key)) {
-              document.getElementById("keyInput").value = "";
-              pageFrame.src = data[key];
-              adjustIframeSize();
-            } else {
-              pageFrame.src = "";
-
-document.getElementById("keyInput").value = "";
-               pageFrame.contentWindow.document.write('<div style="text-align:center">暗号不对</div>');
-            }
-          })
-          .catch(error => {
-            console.error('获取数据时发生错误:', error);
-          });
-      }
-
-      window.addEventListener('load', adjustIframeSize);
-      window.addEventListener('resize', adjustIframeSize);
-      
-      document.addEventListener('gesturestart', function(e) {
-        e.preventDefault();
-      });
-      
-      document.addEventListener('dblclick', function(e) {
-        e.preventDefault();
-      }, { passive: false });
-    </script>
-  </body>
+    // 禁止双击和缩放
+    document.addEventListener('gesturestart', e => e.preventDefault());
+    document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
+  </script>
+</body>
 </html>
