@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v3.99";
+this.version = "v4.00";
 
 function getUrls() {
   const BASE_URL = "https://bing.0515364.xyz/"
@@ -20,8 +20,10 @@ async function installation(scriptID, thisVersion) {
   const localFm = FileManager.local();
   const iCloudFm = FileManager.iCloud();
   
-  const req = new Request(getUrls().KU_SCRIPT_URL);
-  req.timeoutInterval = 5;
+const req = new Request(getUrls().KU_SCRIPT_URL);
+  req.headers = {
+  "X-Auth-Key": "scriptable-key"
+};
   try {
     const remoteKuCode = await req.loadString();
     const REMOTE_VER = remoteKuCode.match(
@@ -43,7 +45,11 @@ async function installation(scriptID, thisVersion) {
     }
 
     // 2. 检查脚本更新（存 iCloud）
-    const scriptList = await new Request(getUrls().MASTER_JSON_URL).loadJSON();
+    const req = new Request(getUrls().MASTER_JSON_URL);
+    req.headers = {
+  "X-Auth-Key": "scriptable-key"
+};
+    const scriptList = await req.loadJSON();
     console.log("✔️ 连接成功，检查更新");
 
     const remoteScriptInfo = scriptList[scriptID];
@@ -71,7 +77,11 @@ console.log(
     );
 
     console.log("[*] 开始下载脚本...");
-    const scriptContent = await new Request(SCRIPT_DOWNLOAD_URL).loadString();
+    const req = new Request(SCRIPT_DOWNLOAD_URL);
+req.headers = {
+  "X-Auth-Key": "scriptable-key"
+};
+    const scriptContent = await req.loadString();
     console.log("[+] 脚本下载完成");
 
     console.log("[#] 开始写入脚本...");
