@@ -90,7 +90,11 @@
         const key = document.getElementById("keyInput").value.trim();
         const pageFrame = document.getElementById("pageFrame");
 
-        fetch('js/multiple_content.json')
+        fetch('js/multiple_content.json', {
+      headers: {
+        'X-Auth-Key': 'tX3$9mGz@7vLq#F!b2R' 
+      }
+    })
           .then(response => {
             if (!response.ok) throw new Error('网络响应不正确');
             return response.json();
