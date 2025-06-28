@@ -876,41 +876,42 @@ async function promptUserForInput(type) {
   return (await alert.present()) === 0 ? alert.textFieldValue(0) : null;
 }
 
-async function CheckKu() {
+  async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
   const url = "https://bing.0515364.xyz/js/Ku.js";
   let needDownload = false;
 
   try {
-    if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
-      console.log("数据库异常，准备重新下载");
-      notify("数据库异常", "本地数据库无效，准备重新下载");
+    ({
+      installation, calendar
+    } = importModule("Ku"));
+    
+    if (typeof installation !== "function") {
+      console.log("数据库模块无效，准备重新下载");
       needDownload = true;
     }
   } catch {
     console.log("数据库异常，准备重新下载");
-    notify("数据库异常", "读取数据库出错，准备重新下载");
     needDownload = true;
   }
 
-  async function notify(title, body) {
-    const n = new Notification();
-    n.title = title;
-    n.body = body;
-    await n.schedule();
-  }
+    if (needDownload) {
+      const req = new Request(url);
+       req.headers = {
+            "X-Auth-Key": "scriptable-key"
+            };
+      try {
+        fm.writeString(path, await req.loadString());;
+        if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+      console.log("数据库下载完成");
 
-  if (needDownload) {
-    fm.writeString(path, await new Request(url).loadString());
-    if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
-    console.log("数据库下载完成");
+    ({ installation, showMRTLines, showLoadingAndFetchData } = importModule("Ku"));
+    if (typeof installation !== "function") throw new Error("数据库模块无效");
+  } catch (error) {
+    console.error("请求失败:" + error.message);
+    }
   }
-
-  ({ installation, showMRTLines, showLoadingAndFetchData } = importModule(
-    "Ku"
-  ));
-  if (typeof installation !== "function") throw new Error("数据库模块无效");
 }
 
 if (config.runsInWidget) {
