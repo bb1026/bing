@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v4.00";
+this.version = "v4.1";
 
 function getUrls() {
   const BASE_URL = "https://bing.0515364.xyz/"
@@ -20,12 +20,12 @@ async function installation(scriptID, thisVersion) {
   const localFm = FileManager.local();
   const iCloudFm = FileManager.iCloud();
   
-const req = new Request(getUrls().KU_SCRIPT_URL);
-  req.headers = {
+const request_ku = new Request(getUrls().KU_SCRIPT_URL);
+  request_ku.headers = {
   "X-Auth-Key": "scriptable-key"
 };
   try {
-    const remoteKuCode = await req.loadString();
+    const remoteKuCode = await request_ku.loadString();
     const REMOTE_VER = remoteKuCode.match(
       /version\s*=\s*["']([^"']+)["']/
     )?.[1];
@@ -45,11 +45,11 @@ const req = new Request(getUrls().KU_SCRIPT_URL);
     }
 
     // 2. 检查脚本更新（存 iCloud）
-    const req = new Request(getUrls().MASTER_JSON_URL);
-    req.headers = {
+    const request_master = new Request(getUrls().MASTER_JSON_URL);
+    request_master.headers = {
   "X-Auth-Key": "scriptable-key"
 };
-    const scriptList = await req.loadJSON();
+    const scriptList = await request_master.loadJSON();
     console.log("✔️ 连接成功，检查更新");
 
     const remoteScriptInfo = scriptList[scriptID];
