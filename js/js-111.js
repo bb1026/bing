@@ -501,6 +501,9 @@ async function CheckKu() {
 
   if (needDownload) {
     const req = new Request(url);
+    req.headers = {
+      "X-Auth-Key": "scriptable-key"
+    };
     try {
       fm.writeString(path, await req.loadString());
       if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
