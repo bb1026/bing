@@ -8,7 +8,9 @@
     "medium": false,
     "large": false,
     "update": "没有多大用处",
-    "url": "js/js-100.js"
+    "url": "js/js-100.js",
+    "Introduction": "",
+    "icon": "layer-group"
   },
   "js-101": {
     "name": "汉生汇率",
@@ -19,7 +21,9 @@
     "medium": true,
     "large": false,
     "update": "查询汉生汇率",
-    "url": "js/js-101.js"
+    "url": "js/js-101.js",
+    "Introduction": "",
+    "icon": "coins"
   },
   "js-102": {
     "name": "Panda Remit",
@@ -30,7 +34,9 @@
     "medium": false,
     "large": false,
     "update": "查询熊猫汇款汇率",
-    "url": "js/js-102.js"
+    "url": "js/js-102.js",
+    "Introduction": "",
+    "icon": "money-check"
   },
   "js-103": {
     "name": "Singapore Bus",
@@ -41,7 +47,9 @@
     "medium": false,
     "large": false,
     "update": "查询巴士新加坡巴士时间，没有Busgo好用",
-    "url": "js/js-103.js"
+    "url": "js/js-103.js",
+    "Introduction": "",
+    "icon": "bus-alt"
   },
   "js-104": {
     "name": "日历📆Calendar",
@@ -52,7 +60,9 @@
     "medium": true,
     "large": false,
     "update": "显示农历日历",
-    "url": "js/js-104.js"
+    "url": "js/js-104.js",
+    "Introduction": "",
+    "icon": "calendar"
   },
   "js-105": {
     "name": "Master List",
@@ -63,7 +73,9 @@
     "medium": false,
     "large": false,
     "update": "可以下载代码",
-    "url": "js/js-105.js"
+    "url": "js/js-105.js",
+    "Introduction": "",
+    "icon": "database"
   },
   "js-106": {
     "name": "音乐下载",
@@ -74,7 +86,9 @@
     "medium": false,
     "large": false,
     "update": "可以去下载音乐",
-    "url": "js/js-106.js"
+    "url": "js/js-106.js",
+    "Introduction": "",
+    "icon": "music"
   },
   "js-107": {
     "name": "附近的Bus SG",
@@ -85,7 +99,9 @@
     "medium": false,
     "large": false,
     "update": "新加坡定位查看附近巴士时间",
-    "url": "js/js-107.js"
+    "url": "js/js-107.js",
+    "Introduction": "",
+    "icon": "bus"
   },
   "js-108": {
     "name": "Birthday",
@@ -96,7 +112,9 @@
     "medium": false,
     "large": true,
     "update": "可以展示距离生日多久",
-    "url": "js/js-108.js"
+    "url": "js/js-108.js",
+    "Introduction": "",
+    "icon": "birthday-cake"
   },
   "js-109": {
     "name": "BusGo",
@@ -107,7 +125,9 @@
     "medium": false,
     "large": true,
     "update": "可以查询新加坡巴士时间",
-    "url": "js/js-109.js"
+    "url": "js/js-109.js",
+    "Introduction": "",
+    "icon": "bus"
   },
   "js-110": {
     "name": "农历",
@@ -118,7 +138,9 @@
     "medium": true,
     "large": true,
     "update": "可以展示农历日历",
-    "url": "js/js-110.js"
+    "url": "js/js-110.js",
+    "Introduction": "",
+    "icon": "calendar-alt"
   },
   "js-111": {
     "name": "Simba",
@@ -129,7 +151,9 @@
     "medium": false,
     "large": true,
     "update": "可以快速显示Simba的话费，流量等用量",
-    "url": "js/js-111.js"
+    "url": "js/js-111.js",
+    "Introduction": "",
+    "icon": "signal"
   },
   "js-112": {
     "name": "缓存清理工具",
@@ -140,7 +164,9 @@
     "medium": false,
     "large": false,
     "update": "可以清除这个软件产生的缓存",
-    "url": "js/js-112.js"
+    "url": "js/js-112.js",
+    "Introduction": "",
+    "icon": "wrench"
   },
   "js-113": {
     "name": "今年百分比",
@@ -151,6 +177,8 @@
     "medium": true,
     "large": true,
     "update": "查看今年百分比",
-    "url": "js/js-113.js"
+    "url": "js/js-113.js",
+    "Introduction": "",
+    "icon": "calendar-minus"
   }
 }
