@@ -6,7 +6,11 @@
 
     try {
       console.log("[$] 正在检查链接可用性...");
-      const testRequest = await new Request(urlBase).loadString();
+      const test = new Request(urlBase);
+      test.headers = {
+        "X-Auth-Key": "scriptable-key"
+      };
+      const testRequest = await test.loadString();
       console.log("[✓] 链接可用");
     } catch (error) {
       console.log("[!] 链接不可用: " + error);
@@ -17,7 +21,11 @@
     let configContentResponse;
 
     try {
-      configContentResponse = await new Request(urlBase).loadString();
+      Response = new Request(urlBase);
+      Response.headers = {
+      "X-Auth-Key": "scriptable-key"
+    };
+    configContentResponse = await Response.loadString();
       console.log("[✓] 代码下载完成...");
     } catch (error) {
       console.log("[!] 下载失败: " + error);
