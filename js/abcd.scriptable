@@ -1,0 +1,12 @@
+{
+  "always_run_in_app" : false,
+  "icon" : {
+    "color" : "light-brown",
+    "glyph" : "magic"
+  },
+  "name" : "Key",
+  "script" : "const key1 = 'tX3$9mGz@7vLq#F!b2R';\nconst key2 = 'dev-key-1';\nconst key3 = 'scriptable-key';\nconst key = \"\";\n\nconst url = \"https:\/\/www.0515364.xyz\/json\/menu.json\";\nconst req = new Request(url);\nreq.headers = { \"X-Auth-Key\": key1 };\n\nconst view = await req.loadJSON();\nconsole.log(view);",
+  "share_sheet_inputs" : [
+
+  ]
+}
