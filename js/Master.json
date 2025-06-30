@@ -1,7 +1,7 @@
 {
   "js-100": {
     "name": "安装小助手",
-    "version": "v1.2",
+    "version": "v1.3",
     "ID": "js-100",
     "argsID": "100",
     "small": false,
@@ -9,7 +9,7 @@
     "large": false,
     "update": "没有多大用处",
     "url": "js/js-100.js",
-    "introduction": "",
+    "introduction": "快捷安装Scriptable",
     "icon": "layer-group"
   },
   "js-101": {
@@ -22,7 +22,7 @@
     "large": false,
     "update": "查询汉生汇率",
     "url": "js/js-101.js",
-    "introduction": "",
+    "introduction": "查看汉生汇率",
     "icon": "coins"
   },
   "js-102": {
@@ -35,7 +35,7 @@
     "large": false,
     "update": "查询熊猫汇款汇率",
     "url": "js/js-102.js",
-    "introduction": "",
+    "introduction": "查看熊猫汇率",
     "icon": "money-check"
   },
   "js-103": {
@@ -48,7 +48,7 @@
     "large": false,
     "update": "查询巴士新加坡巴士时间，没有Busgo好用",
     "url": "js/js-103.js",
-    "introduction": "",
+    "introduction": "查看巴士时间",
     "icon": "bus-alt"
   },
   "js-104": {
@@ -61,7 +61,7 @@
     "large": false,
     "update": "显示农历日历",
     "url": "js/js-104.js",
-    "introduction": "",
+    "introduction": "查看日历",
     "icon": "calendar"
   },
   "js-105": {
@@ -74,7 +74,7 @@
     "large": false,
     "update": "可以下载代码",
     "url": "js/js-105.js",
-    "introduction": "",
+    "introduction": "所有的代码都在这里",
     "icon": "database"
   },
   "js-106": {
@@ -87,7 +87,7 @@
     "large": false,
     "update": "可以去下载音乐",
     "url": "js/js-106.js",
-    "introduction": "",
+    "introduction": "下载音乐",
     "icon": "music"
   },
   "js-107": {
@@ -100,7 +100,7 @@
     "large": false,
     "update": "新加坡定位查看附近巴士时间",
     "url": "js/js-107.js",
-    "introduction": "",
+    "introduction": "查看附近的巴士",
     "icon": "bus"
   },
   "js-108": {
@@ -113,7 +113,7 @@
     "large": true,
     "update": "可以展示距离生日多久",
     "url": "js/js-108.js",
-    "introduction": "",
+    "introduction": "可以记录生日还有多久",
     "icon": "birthday-cake"
   },
   "js-109": {
@@ -126,7 +126,7 @@
     "large": true,
     "update": "可以查询新加坡巴士时间",
     "url": "js/js-109.js",
-    "introduction": "",
+    "introduction": "查看巴士时间",
     "icon": "bus"
   },
   "js-110": {
@@ -139,7 +139,7 @@
     "large": true,
     "update": "可以展示农历日历",
     "url": "js/js-110.js",
-    "introduction": "",
+    "introduction": "有农历的日历",
     "icon": "calendar-alt"
   },
   "js-111": {
@@ -152,7 +152,7 @@
     "large": true,
     "update": "可以快速显示Simba的话费，流量等用量",
     "url": "js/js-111.js",
-    "introduction": "",
+    "introduction": "查看Simba的使用情况",
     "icon": "signal"
   },
   "js-112": {
@@ -165,7 +165,7 @@
     "large": false,
     "update": "可以清除这个软件产生的缓存",
     "url": "js/js-112.js",
-    "introduction": "",
+    "introduction": "可以清理Scriptable运行时的缓存",
     "icon": "broom"
   },
   "js-113": {
@@ -178,7 +178,7 @@
     "large": true,
     "update": "查看今年百分比",
     "url": "js/js-113.js",
-    "introduction": "",
+    "introduction": "今年还剩多少",
     "icon": "calendar-minus"
   }
 }
