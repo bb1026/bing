@@ -66,13 +66,13 @@
   },
   "js-105": {
     "name": "Master List",
-    "version": "v1.6",
+    "version": "v1.7",
     "ID": "js-105",
     "argsID": "105",
     "small": false,
     "medium": false,
     "large": false,
-    "update": "可以下载代码",
+    "update": "修复错误",
     "url": "js/js-105.js",
     "introduction": "所有的代码都在这里",
     "icon": "database"
