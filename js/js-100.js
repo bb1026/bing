@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: hands-helping;
 this.name = "安装小助手";
 this.widget_ID = "js-100";
-this.version = "v1.2";
+this.version = "v1.3";
 
 // 检查更新
 let installation, getUrls;
@@ -14,7 +14,9 @@ await installation(this.widget_ID, this.version);
 以下开始运行代码
 */
 
-let scriptList = await new Request(getUrls().MASTER_JSON_URL).loadJSON();
+let request = new Request(getUrls().MASTER_JSON_URL);
+request.headers = {'X-Auth-Key': 'scriptable-key'};
+let scriptList = await request.loadJSON();
 if (scriptList[this.widget_ID]) {
   let scriptversion = scriptList[this.widget_ID].version;
   if (this.version !== scriptversion) {
@@ -67,6 +69,7 @@ console.log(scriptID);
 
 // 发起网络请求获取网页内容
 const req = new Request(getUrls().MASTER_JSON_URL);
+req.headers = {'X-Auth-Key': 'scriptable-key'};
 const responseBody = await req.loadJSON();
 
 // 获取用户输入的脚本信息
