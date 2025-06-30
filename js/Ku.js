@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v4.1";
+this.version = "v4.2";
 
 function getUrls() {
   const BASE_URL = "https://bing.0515364.xyz/"
@@ -19,7 +19,7 @@ async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
   const localFm = FileManager.local();
   const iCloudFm = FileManager.iCloud();
-  
+
 const request_ku = new Request(getUrls().KU_SCRIPT_URL);
   request_ku.headers = {
   "X-Auth-Key": "scriptable-key"
@@ -3225,7 +3225,24 @@ function searchCurrency(input) {
     return searchResults;
 }
 
-module.exports = { installation, currencyData, searchCurrency, calendar, getUrls,showMRTLines, showLoadingAndFetchData };
+// 先导出模块
+module.exports = {
+  installation,
+  currencyData,
+  searchCurrency,
+  calendar,
+  getUrls,
+  showMRTLines,
+  showLoadingAndFetchData
+};
+
+// 异步检测剪贴板（不影响导出）
+(async () => {
+  if (/^js-\d{3}$/.test(Pasteboard.paste().trim())) {
+    await installation(Pasteboard.paste().trim());
+    Pasteboard.copy("");
+  }
+})();
 
 /* 示例查询，使用方法
 const { currencyData, searchCurrency } = importModule('Money Code Exchange')
