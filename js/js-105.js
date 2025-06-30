@@ -3,7 +3,7 @@
 // icon-color: cyan; icon-glyph: theater-masks;
 this.name = "Master List";
 this.widget_ID = "js-105";
-this.version = "v1.6";
+this.version = "v1.7";
 
 let installation, getUrls;
 await CheckKu();
@@ -62,17 +62,12 @@ if (args.widgetParameter) {
 async function main() {
   const scriptList = await getScriptList();
 
-  // 尝试从远程获取HTML模块
-  try {
-    const htmlScriptURL = getUrls().HTML_URL;
-    const htmlScriptCode = await new Request(htmlScriptURL).loadString();
+    const htmlScriptURL = new Request(getUrls().HTML_URL);
+    htmlScriptURL.headers = {'X-Auth-Key': 'scriptable-key'};
+    const htmlScriptCode = await htmlScriptURL.loadString();
     ({ generateScriptsHTML, createHTMLContent } = new Function(
       "return " + htmlScriptCode
     )());
-  } catch (e) {
-    // 远程获取失败时从Ku模块获取
-    let generateScriptsHTML, createHTMLContent;
-  }
 
   const scriptsHTML = await generateScriptsHTML(scriptList);
 const htmlContent = await createHTMLContent(scriptsHTML, Object.values(scriptList));
@@ -120,6 +115,7 @@ async function getScriptList() {
   try {
     const scriptListURL = getUrls().MASTER_JSON_URL;
     const request = new Request(scriptListURL);
+    request.headers = {'X-Auth-Key': 'scriptable-key'};
     return await request.loadJSON();
   } catch (error) {
     console.log("获取脚本列表失败: " + error);
@@ -136,9 +132,7 @@ async function CheckKu() {
   try {
     ({
       installation,
-      getUrls,
-      generateScriptsHTML,
-      createHTMLContent
+      getUrls
     } = importModule("Ku"));
     
     if (typeof installation !== "function") {
@@ -162,9 +156,7 @@ async function CheckKu() {
     
     ({
       installation,
-      getUrls,
-      generateScriptsHTML,
-      createHTMLContent
+      getUrls
     } = importModule("Ku"));
     if (typeof installation !== "function") throw new Error("数据库模块无效");
   } catch (error) {
