@@ -165,7 +165,7 @@
     "large": false,
     "update": "可以清除这个软件产生的缓存",
     "url": "js/js-112.js",
-    "introduction": "可以清理Scriptable运行时的缓存",
+    "introduction": "清理Scriptable的缓存文件",
     "icon": "broom"
   },
   "js-113": {
