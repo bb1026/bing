@@ -3,12 +3,16 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v4.2";
+this.version = "v4.3";
 
 function getUrls() {
-  const BASE_URL = "https://bing.0515364.xyz/"
+  const Home_URL = "https://www.0515364.xyz/"
+  const BASE_URL = "https://bing.0515364.xyz/";
+  const Auth_key = "scriptable-key"
   return {
+    Home_URL,
     BASE_URL,
+    Auth_key,
     KU_SCRIPT_URL : `${BASE_URL}js/Ku.js`,
     MASTER_JSON_URL : `${BASE_URL}js/Master.json`,
     HTML_URL : `${BASE_URL}js/html.js`
@@ -22,7 +26,7 @@ async function installation(scriptID, thisVersion) {
 
 const request_ku = new Request(getUrls().KU_SCRIPT_URL);
   request_ku.headers = {
-  "X-Auth-Key": "scriptable-key"
+  "X-Auth-Key": getUrls().Auth_key
 };
   try {
     const remoteKuCode = await request_ku.loadString();
@@ -47,7 +51,7 @@ const request_ku = new Request(getUrls().KU_SCRIPT_URL);
     // 2. 检查脚本更新（存 iCloud）
     const request_master = new Request(getUrls().MASTER_JSON_URL);
     request_master.headers = {
-  "X-Auth-Key": "scriptable-key"
+  "X-Auth-Key": getUrls().Auth_key
 };
     const scriptList = await request_master.loadJSON();
     console.log("✔️ 连接成功，检查更新");
@@ -79,7 +83,7 @@ console.log(
     console.log("[*] 开始下载脚本...");
     const req = new Request(SCRIPT_DOWNLOAD_URL);
 req.headers = {
-  "X-Auth-Key": "scriptable-key"
+  "X-Auth-Key": getUrls().Auth_key
 };
     const scriptContent = await req.loadString();
     console.log("[+] 脚本下载完成");
