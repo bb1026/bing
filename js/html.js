@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -498,3 +498,5 @@
   </script>
 </body>
 </html>
+`;
+module.exports = html;
