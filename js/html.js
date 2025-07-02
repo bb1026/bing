@@ -1,5 +1,3 @@
-// 注入工具数据到 HTML 模板
-const html = `
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -500,5 +498,3 @@ const html = `
   </script>
 </body>
 </html>
-`;
-module.exports = { html };
