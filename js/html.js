@@ -472,11 +472,11 @@ const html = `
     function showInstallModal(scriptId) {
       document.getElementById("installModal").style.display = "flex";
       document.getElementById("addScriptBtn").onclick = () => {
-      handleAction({
+      handleAction([{
         name: currentTool.name,
         ID: currentTool.ID,
         version: currentTool.version
-      });
+      }]);
     };
   }
 
