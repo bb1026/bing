@@ -1,4 +1,6 @@
-const html = `<!DOCTYPE html>
+// 注入工具数据到 HTML 模板
+const html = `
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -462,7 +464,7 @@ const html = `<!DOCTYPE html>
 
     document.getElementById("modalInstallBtn").onclick = () => {
       if (currentTool) {
-        showInstallModal(currentTool.ID);
+        showInstallModal(currentTool);
         closeModal();
       }
     };
@@ -470,9 +472,13 @@ const html = `<!DOCTYPE html>
     function showInstallModal(scriptId) {
       document.getElementById("installModal").style.display = "flex";
       document.getElementById("addScriptBtn").onclick = () => {
-        handleAction(scriptId);
-      };
-    }
+      handleAction({
+        name: currentTool.name,
+        ID: currentTool.ID,
+        version: currentTool.version
+      });
+    };
+  }
 
     function closeInstallModal() {
       document.getElementById("installModal").style.display = "none";
