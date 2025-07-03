@@ -1,7 +1,7 @@
 {
   "js-100": {
     "name": "安装小助手",
-    "version": "v1.3",
+    "version": "v1.4",
     "ID": "js-100",
     "argsID": "100",
     "small": false,
