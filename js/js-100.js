@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: hands-helping;
 this.name = "安装小助手";
 this.widget_ID = "js-100";
-this.version = "v1.3";
+this.version = "v1.4";
 
 // 检查更新
 let installation, getUrls;
@@ -96,7 +96,8 @@ if (scriptInfo) {
       // 用户选择覆盖安装，继续安装脚本
       console.log(`<${scriptName}>已经存在相同名称的脚本，覆盖安装中...`);
       // 下载脚本
-      const req = new Request(responseBody[scriptID].url);
+      const req = new Request(getUrls().BASE_URL + responseBody[scriptID].url);
+
       console.log("[*] 开始下载脚本...");
       const scriptContent = await req.loadString();
       console.log("[+] 脚本下载完成...");
@@ -123,7 +124,7 @@ if (scriptInfo) {
         );
       }
       console.log(
-        `<${scriptName}>脚本已成功覆盖安装！\n更新日期：${scriptUpdate}\n版本号：${scriptVersion}`
+        `<${scriptName}>脚本已成功覆盖安装！\n更新内容：${scriptUpdate}\n版本号：${scriptVersion}`
       );
     } else {
       // 用户选择取消安装，退出脚本
