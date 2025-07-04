@@ -395,42 +395,51 @@ const html = `
     let currentTool = null;
 
     async function loadTools() {
-      try {
-        const container = document.getElementById("tool-list");
-        container.innerHTML = "";
+  try {
+    const container = document.getElementById("tool-list");
+    container.innerHTML = "";
 
-        for (const key in tools) {
-          const tool = tools[key];
-          const iconClass = tool.icon ? \`fa-solid fa-\${tool.icon}\` : "fa-solid fa-toolbox";
-          const [bgColor, iconColor] = getRandomColorPair();
+    for (const key in tools) {
+      const tool = tools[key];
+      const iconClass = tool.icon ? \`fa-solid fa-\${tool.icon}\` : "fa-solid fa-toolbox";
+      const [bgColor, iconColor] = getRandomColorPair();
 
-          const box = document.createElement("div");
-          box.className = "tool-box";
-          box.style.backgroundColor = bgColor;
+      const box = document.createElement("div");
+      box.className = "tool-box";
+      box.style.backgroundColor = bgColor;
 
-          box.onclick = () => showModal(tool, iconClass);
+      // 点击整个 box 显示详情
+      box.onclick = () => showModal(tool, iconClass);
 
-          box.innerHTML = \`
-            <div class="tool-header">
-              <i class="tool-icon \${iconClass}" style="color:\${iconColor}"></i>
-              <div class="tool-name">\${tool.name}</div>
-            </div>
-            <div class="tool-info">
-              <div><strong>版本:</strong> \${tool.version}</div>
-              <div class="tool-intro"><strong>简介：</strong>\${tool.introduction || ""}</div>
-            </div>
-            <div class="add-btn" onclick="event.stopPropagation(); showInstallModal('\${tool.ID}')">
-              <i class="fa-solid fa-plus-circle"></i>安装
-            </div>
-          \`;
+      // 设置 box 内部结构（不含安装按钮）
+      box.innerHTML = \`
+        <div class="tool-header">
+          <i class="tool-icon \${iconClass}" style="color:\${iconColor}"></i>
+          <div class="tool-name">\${tool.name}</div>
+        </div>
+        <div class="tool-info">
+          <div><strong>版本:</strong> \${tool.version}</div>
+          <div class="tool-intro"><strong>简介：</strong>\${tool.introduction || ""}</div>
+        </div>
+      \`;
 
-          container.appendChild(box);
-        }
-      } catch (e) {
-        document.getElementById("tool-list").innerText = "加载失败，请检查网络或数据格式。";
-        console.error(e);
-      }
+      // 创建安装按钮并添加事件
+      const installBtn = document.createElement("div");
+      installBtn.className = "add-btn";
+      installBtn.innerHTML = \`<i class="fa-solid fa-plus-circle"></i>安装\`;
+      installBtn.onclick = (e) => {
+        e.stopPropagation(); // 阻止点击事件冒泡，避免触发详情
+        showInstallModal(tool);
+      };
+      box.appendChild(installBtn);
+
+      container.appendChild(box);
     }
+  } catch (e) {
+    document.getElementById("tool-list").innerText = "加载失败，请检查网络或数据格式。";
+    console.error(e);
+  }
+}
 
     function showModal(tool, iconClass) {
       currentTool = tool;
@@ -469,14 +478,15 @@ const html = `
       }
     };
 
-    function showInstallModal(scriptId) {
+    function showInstallModal(tool) {
       document.getElementById("installModal").style.display = "flex";
       document.getElementById("addScriptBtn").onclick = () => {
-      handleAction([{
-        name: currentTool.name,
-        ID: currentTool.ID,
-        version: currentTool.version
-      }]);
+      const data = JSON.stringify([{
+      name: tool.name,
+      ID: tool.ID,
+      version: tool.version
+    }]); 
+    handleAction(data);
     };
   }
 
