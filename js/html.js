@@ -484,7 +484,8 @@ const html = `
       const data = JSON.stringify([{
       name: tool.name,
       ID: tool.ID,
-      version: tool.version
+      version: tool.version,
+      url: tool.url
     }]); 
     handleAction(data);
     };
