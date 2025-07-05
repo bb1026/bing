@@ -325,7 +325,7 @@ const html = `
 
   <script>
     // 统一的操作处理函数
-    function handleAction(content, redirectUrl = "scriptable:///run/master") {
+    function handleAction(content, redirectUrl = "scriptable:///run/Master") {
       copyToClipboard(content);
       window.location.href = redirectUrl;
     }
