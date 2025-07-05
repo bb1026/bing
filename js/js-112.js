@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: dove;
 this.name = "缓存清理工具";
 this.widget_ID = "js-112";
-this.version = "v1.1";
+this.version = "v1.2";
 
 let installation;
 await CheckKu();
@@ -111,6 +111,7 @@ async function showFileList() {
         if (index === 0) {
           if (!file.isDir) {
             const content = fm.readString(file.path);
+            QuickLook.present(content);
             console.log(`=== ${file.name} ===\n${content}`);
           } else {
             console.log(`=== ${file.name} 是文件夹，无法显示内容 ===`);
