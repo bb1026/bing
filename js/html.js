@@ -324,12 +324,6 @@ const html = `
   </div>
 
   <script>
-    // 统一的操作处理函数
-    function handleAction(content, redirectUrl = "scriptable:///run/Master") {
-      copyToClipboard(content);
-      window.location.href = redirectUrl;
-    }
-
     // 使用现有的 getRandomColorPair 函数设置龙图标颜色
     function setRandomDragonColor() {
       const dragonIcon = document.querySelector('.dragon-icon i');
@@ -363,18 +357,24 @@ const html = `
     });
     
     // 首页链接处理
-    document.getElementById('homeLink').addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      handleAction('SG9tZUxpbms');
-    });
-    
-    // 清除库文件功能
-    document.getElementById('clearLibrary').addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      handleAction('Q2xlYW5LdQ');
-    });
+document.getElementById('homeLink').addEventListener('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  window._result = JSON.stringify({
+    type: 'home-link',
+    Data: 'SG9tZUxpbms'
+  });
+});
+
+// 清除库文件功能
+document.getElementById('clearLibrary').addEventListener('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  window._result = JSON.stringify({
+    type: 'clear-library',
+    Data: 'Q2xlYW5LdQ'
+  });
+});
     
     // 回到顶部功能
     backToTop.addEventListener('click', function(e) {
@@ -478,18 +478,20 @@ const html = `
       }
     };
 
-    function showInstallModal(tool) {
-      document.getElementById("installModal").style.display = "flex";
-      document.getElementById("addScriptBtn").onclick = () => {
-      const data = JSON.stringify([{
+function showInstallModal(tool) {
+  document.getElementById("installModal").style.display = "flex";
+  document.getElementById("addScriptBtn").onclick = () => {
+    window._result = JSON.stringify({
+      type: 'install-tool',
+      Data: {
       name: tool.name,
       ID: tool.ID,
       version: tool.version,
       url: tool.url
-    }]); 
-    handleAction(data);
-    };
-  }
+      }
+    });
+  };
+}
 
     function closeInstallModal() {
       document.getElementById("installModal").style.display = "none";
@@ -498,19 +500,11 @@ const html = `
     document.getElementById("closeInstallModalBtn").onclick = closeInstallModal;
 
     document.getElementById("addLibraryBtn").onclick = () => {
-      const libraryCode = \`const obtain = new Request('https://bing.0515364.xyz/js/package.json');obtain.headers = {'X-Auth-Key': 'scriptable-key'};eval(await obtain.loadString());await Script.Installer();\`;
-      handleAction(libraryCode, "scriptable:///add");
-    };
-
-    function copyToClipboard(text) {
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-    }
-
+    window._result = JSON.stringify({
+      type: 'add-library',
+      Data: \`const obtain = new Request('https://bing.0515364.xyz/js/package.json');obtain.headers = {'X-Auth-Key': 'scriptable-key'};eval(await obtain.loadString());await Script.Installer();\`
+  });
+};
     loadTools();
   </script>
 </body>
