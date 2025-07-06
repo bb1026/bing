@@ -33,10 +33,10 @@
     }
 
     console.log("[*] 开发环境配置...");
-    const fileManager = FileManager.local();
+    const fileManager = FileManager.iCloud();
     const tempPath = fileManager.joinPath(
       fileManager.documentsDirectory(),
-      "Ku.js"
+      "Master.js"
     );
 
     console.log("[*] 写入模块...");
@@ -46,24 +46,6 @@
       console.log("[✓] 模块写入成功: " + tempPath);
     } catch (error) {
       console.log("[!] 写入失败: " + error);
-      return;
-    }
-
-    console.log("[✓] 开发环境配置完成...");
-
-    try {
-      const kuModule = importModule("Ku");
-      if (kuModule && kuModule.installation) {
-        await kuModule.installation("js-105");
-        console.log("[✓] 小组件写入完成...");
-      } else {
-        console.log("[!] 小组件写入失败...");
-        console.log("[!] 模块格式不正确...");
-        return;
-      }
-    } catch (error) {
-      console.log("[!] 小组件写入失败...");
-      console.log("[!] 模块加载失败...");
       return;
     }
 
