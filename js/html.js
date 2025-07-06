@@ -288,6 +288,7 @@ const html = `
     <a href="#" id="homeLink"><i class="fas fa-home"></i>首页</a>
     <a href="#" id="clearLibrary"><i class="fas fa-trash"></i><span class="clear-library">清除库文件</span></a>
     <a href="#" id="backToTop"><i class="fas fa-arrow-alt-circle-up"></i>回到顶部</a>
+    <span style="display: block; text-align: center; color: blue; margin-bottom: 10px;">在线(online)</span>
   </div>
 
   <div id="tool-list">加载中...</div>
