@@ -402,7 +402,7 @@ document.getElementById('clearLibrary').addEventListener('click', function(e) {
 
     for (const key in tools) {
       const tool = tools[key];
-      const iconClass = tool.icon ? \`fa-solid fa-\${tool.icon}\` : "fa-solid fa-toolbox";
+      const iconClass = tool.icon ? \`fa-solid \${tool.icon}\` : "fa-solid fa-toolbox";
       const [bgColor, iconColor] = getRandomColorPair();
 
       const box = document.createElement("div");
