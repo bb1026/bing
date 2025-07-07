@@ -1,9 +1,11 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: cyan; icon-glyph: theater-masks;
-this.name = "Master";
-this.widget_ID = "js-105";
-this.version = "v1.8";
+const currentModule = {
+  name: "Master",
+  widget_ID: "js-105",
+  version: "v1.8"
+};
 
 const Local_remote_mode = 0; //0远程;1本地
 
@@ -12,6 +14,8 @@ const iCloudFm = FileManager.iCloud();
 const webView = new WebView()
 const getUrls = await Ku.getUrls();
 let html;
+
+await Ku.installation(currentModule.widget_ID, currentModule.version);
 
 async function loadHTML() {
   if (Local_remote_mode) {
