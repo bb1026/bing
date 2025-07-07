@@ -96,7 +96,6 @@
           return response.json();
         })
         .then(data => {
-          console.log('输入的 key:', key);
           if (data.hasOwnProperty(key)) {
             document.getElementById("keyInput").value = "";
             fetchWithAuthAndInjectIframe(data[key]);
@@ -110,9 +109,7 @@
     }
 
     function fetchWithAuthAndInjectIframe(url) {
-      fetch(url, {
-        headers: { 'X-Auth-Key': 'dev-key-1' }
-      })
+      fetch(url)
         .then(res => {
           if (!res.ok) throw new Error('页面加载失败');
           return res.text();
