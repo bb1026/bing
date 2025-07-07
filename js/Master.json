@@ -65,8 +65,8 @@
     "icon": "calendar"
   },
   "js-105": {
-    "name": "Master List",
-    "version": "v1.7",
+    "name": "Master",
+    "version": "v1.8",
     "ID": "js-105",
     "argsID": "105",
     "small": false,
