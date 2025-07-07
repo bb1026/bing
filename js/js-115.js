@@ -3,7 +3,6 @@
 // icon-color: teal; icon-glyph: people-carry;
 this.name = "考勤记录";
 this.widget_ID = "js-115";
-this.version = "v1.0";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -616,6 +615,8 @@ function computeStats() {
 }
 
 function render() {
+  const today = new Date();
+  const todayStr = \`\${today.getFullYear()}-\${pad(today.getMonth() + 1)}-\${pad(today.getDate())}\`;
   const year = raw.currentYear, month = raw.currentMonth;
   const rng = computeRange(year, month);
   const startDate = new Date(rng.start);
@@ -646,10 +647,14 @@ function render() {
     const dstr = \`\${temp.getFullYear()}-\${pad(temp.getMonth() + 1)}-\${pad(temp.getDate())}\`;
     const w = temp.getDay();
     const hrs = raw.records[dstr]?.hours || 0;
+    
+    // 判断是否是今天
+    const isToday = dstr === todayStr;
+    
     // 根据是否有加班时间设置不同样式
     const dayStyle = hrs > 0 
-      ? \`background-color: #e6f7ff; border-color: #91d5ff;\`  // 有加班的浅蓝色样式
-      : \`background-color: #f5f5f5; color: #999;\`;          // 无加班的灰色样式
+      ? \`background-color: #e6f7ff; border-color: \${isToday ? '#FF9500' : '#91d5ff'};\`  // 有加班的浅蓝色样式
+      : \`background-color: #f5f5f5; color: \${isToday ? '#FF9500' : '#ccc'};\`;          // 无加班的灰色样式
     
     cal.innerHTML += \`
       <div class="day \${w === 0 ? 'sun' : w === 6 ? 'sat' : ''}" 
