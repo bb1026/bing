@@ -10,7 +10,7 @@
     "update": "没有多大用处",
     "url": "js/js-100.js",
     "introduction": "快捷安装Scriptable",
-    "icon": "layer-group"
+    "icon": "fa-layer-group"
   },
   "js-101": {
     "name": "汉生汇率",
@@ -23,7 +23,7 @@
     "update": "查询汉生汇率",
     "url": "js/js-101.js",
     "introduction": "查看汉生汇率",
-    "icon": "coins"
+    "icon": "fa-coins"
   },
   "js-102": {
     "name": "Panda Remit",
@@ -36,7 +36,7 @@
     "update": "查询熊猫汇款汇率",
     "url": "js/js-102.js",
     "introduction": "查看熊猫汇率",
-    "icon": "money-check"
+    "icon": "fa-money-check"
   },
   "js-103": {
     "name": "Singapore Bus",
@@ -49,7 +49,7 @@
     "update": "查询巴士新加坡巴士时间，没有Busgo好用",
     "url": "js/js-103.js",
     "introduction": "查看巴士时间",
-    "icon": "bus-alt"
+    "icon": "fa-bus-alt"
   },
   "js-104": {
     "name": "日历📆Calendar",
@@ -62,7 +62,7 @@
     "update": "显示农历日历",
     "url": "js/js-104.js",
     "introduction": "查看日历",
-    "icon": "calendar"
+    "icon": "fa-calendar"
   },
   "js-105": {
     "name": "Master",
@@ -75,7 +75,7 @@
     "update": "修复错误",
     "url": "js/js-105.js",
     "introduction": "所有的代码都在这里",
-    "icon": "database"
+    "icon": "fa-database"
   },
   "js-106": {
     "name": "音乐下载",
@@ -88,7 +88,7 @@
     "update": "可以去下载音乐",
     "url": "js/js-106.js",
     "introduction": "下载音乐",
-    "icon": "music"
+    "icon": "fa-music"
   },
   "js-107": {
     "name": "附近的Bus SG",
@@ -101,7 +101,7 @@
     "update": "新加坡定位查看附近巴士时间",
     "url": "js/js-107.js",
     "introduction": "查看附近的巴士",
-    "icon": "bus"
+    "icon": "fa-bus"
   },
   "js-108": {
     "name": "Birthday",
@@ -114,7 +114,7 @@
     "update": "可以展示距离生日多久",
     "url": "js/js-108.js",
     "introduction": "可以记录生日还有多久",
-    "icon": "birthday-cake"
+    "icon": "fa-birthday-cake"
   },
   "js-109": {
     "name": "BusGo",
@@ -127,7 +127,7 @@
     "update": "可以查询新加坡巴士时间",
     "url": "js/js-109.js",
     "introduction": "查看巴士时间",
-    "icon": "bus"
+    "icon": "fa-bus"
   },
   "js-110": {
     "name": "农历",
@@ -140,7 +140,7 @@
     "update": "可以展示农历日历",
     "url": "js/js-110.js",
     "introduction": "有农历的日历",
-    "icon": "calendar-alt"
+    "icon": "fa-calendar-alt"
   },
   "js-111": {
     "name": "Simba",
@@ -153,7 +153,7 @@
     "update": "可以快速显示Simba的话费，流量等用量",
     "url": "js/js-111.js",
     "introduction": "查看Simba的使用情况",
-    "icon": "signal"
+    "icon": "fa-signal"
   },
   "js-112": {
     "name": "缓存清理工具",
@@ -166,7 +166,7 @@
     "update": "可以清除这个软件产生的缓存",
     "url": "js/js-112.js",
     "introduction": "清理Scriptable的缓存文件",
-    "icon": "broom"
+    "icon": "fa-broom"
   },
   "js-113": {
     "name": "今年百分比",
@@ -179,7 +179,7 @@
     "update": "查看今年百分比",
     "url": "js/js-113.js",
     "introduction": "今年还剩多少",
-    "icon": "calendar-minus"
+    "icon": "fa-calendar-minus"
   },
   "js-115": {
     "name": "考勤记录",
@@ -192,6 +192,6 @@
     "update": "上传代码",
     "url": "js/js-115.js",
     "introduction": "记录加班，不支持更新",
-    "icon": "th-list"
+    "icon": "fa-th-list"
   }
 }
