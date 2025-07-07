@@ -1,166 +1,141 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: cyan; icon-glyph: theater-masks;
-this.name = "Master List";
+this.name = "Master";
 this.widget_ID = "js-105";
-this.version = "v1.7";
+this.version = "v1.8";
 
-let installation, getUrls;
-await CheckKu();
-await installation(this.widget_ID, this.version);
+const Local_remote_mode = 0; //0远程;1本地
 
-const widget = new ListWidget();
+const Ku = await importRemoteModule("http://bing.0515364.xyz/js/Ku.js");
+const iCloudFm = FileManager.iCloud();
+const webView = new WebView()
+const getUrls = await Ku.getUrls();
+let html;
 
-if (args.widgetParameter) {
-  const paramValue = args.widgetParameter.split(";")[0];
+async function loadHTML() {
+  if (Local_remote_mode) {
+    const Local_html = importModule("HTML");// 本地
+    html = Local_html.html
+  } else {
+    html = await importRemoteModule(getUrls.HTML_URL);
+  }
+  
+const request = new Request(getUrls.MASTER_JSON_URL);
+request.headers = { "X-Auth-Key": getUrls.Auth_key };
+
+const finalHTML = html.replace("%TOOLS%", JSON.stringify(await request.loadJSON()));
+
+await webView.loadHTML(finalHTML);
+webView.present(true);
+}
+
+// 检测剪切板内容
+const clipboardContent = Pasteboard.paste();
+if (clipboardContent && clipboardContent.includes('"install-tool"')) {
   try {
-    const scriptList = await getScriptList();
-    const paramData = scriptList[`js-${paramValue}`];
-    let widgetSize = config.widgetFamily;
-
-    if (!paramData[widgetSize]) {
-      widget.addText(`不支持 ${widgetSize} 尺寸，请更换其它尺寸。`);
-      Script.setWidget(widget);
-    }
-    const url = paramData.url;
-    (async () => {
-      const code = await new Request(url).loadString();
-      return await new Function(
-        "args",
-        "code",
-        `
-    return (async () => {
-      const module = { exports: {} };
-      with ({ module, console, args }) {
-        ${code}
-      }
-      return typeof module.exports === 'function'
-        ? await module.exports()
-        : module.exports;
-    })();
-  `
-      )(args ?? {}, code);
-    })();
-  } catch (error) {
-    widget.addText("请检查Parameter").textColor = Color.red();
-    Script.setWidget(widget);
+    // 验证是否是合法 JSON
+    JSON.parse(clipboardContent);
+    // 注入到 webView
+    await webView.evaluateJavaScript(`
+      window._result = '${clipboardContent}';
+    `, false);
+  } catch (e) {
+    console.log("剪切板内容不是有效的 JSON，回退到正常加载");
+    await loadHTML();
   }
 } else {
-  widget.addText("长按小组件\n输入Parameter").textColor;
-  Script.setWidget(widget);
-  if (!config.runsInWidget) {
-    main().catch(async error => {
-      console.log("脚本运行出错: " + error);
-      const notice = new Notification();
-      notice.title = "错误";
-      notice.body = "脚本运行出错: " + error;
-      await notice.schedule();
-    });
-  }
+  // 正常加载页面
+  await loadHTML();
 }
 
-async function main() {
-  const scriptList = await getScriptList();
+// evaluateJavaScript检测
+const timer = new Timer();
+timer.repeats = true;
+timer.timeInterval = 200;
+timer.schedule(async () => {
+  const res = await webView.evaluateJavaScript("window._result", false);
+  if (res) {
+    await webView.evaluateJavaScript("window._result=null", false);
+    const m = JSON.parse(res);
 
-    const htmlScriptURL = new Request(getUrls().HTML_URL);
-    htmlScriptURL.headers = {'X-Auth-Key': 'scriptable-key'};
-    const htmlScriptCode = await htmlScriptURL.loadString();
-    ({ generateScriptsHTML, createHTMLContent } = new Function(
-      "return " + htmlScriptCode
-    )());
+    if (m.type === "install-tool") {
+      // 安装工具
+      const tool = m.Data;
+console.log(tool);
+      const req = new Request(getUrls.BASE_URL + tool.url);
 
-  const scriptsHTML = await generateScriptsHTML(scriptList);
-const htmlContent = await createHTMLContent(scriptsHTML, Object.values(scriptList));
+      req.headers = {
+        "X-Auth-Key": getUrls.Auth_key
+      };
 
-  const webView = new WebView();
-  await webView.loadHTML(htmlContent);
-  await webView.present(true);
-
-  while (true) {
-    const result = await webView.evaluateJavaScript("window.clicked || null");
-    if (result) {
-      if (result === "clear") {
-        await clearKu();
-      } else {
-        await CheckKu();
-        await installation(result);
-      }
-      await new Promise(resolve => Timer.schedule(1, false, resolve));
-      break;
-    }
-  }
-}
-
-// 异步清除 Ku.js 并通知
-async function clearKu() {
-  const fm = FileManager.local();
-  const filePath = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-
-  const notice = new Notification();
-  notice.title = "数据库操作";
-
-  if (fm.fileExists(filePath)) {
-    fm.remove(filePath);
-    console.log("数据库已清除");
-    notice.body = "数据库已清除";
-  } else {
-    console.log("数据库不存在");
-    notice.body = "数据库不存在";
-  }
-
-  await notice.schedule();
-}
-
-async function getScriptList() {
-  try {
-    const scriptListURL = getUrls().MASTER_JSON_URL;
-    const request = new Request(scriptListURL);
-    request.headers = {'X-Auth-Key': 'scriptable-key'};
-    return await request.loadJSON();
-  } catch (error) {
-    console.log("获取脚本列表失败: " + error);
-    return {};
-  }
-}
-
-async function CheckKu() {
-  const fm = FileManager.local();
-  const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-  const url = "https://bing.0515364.xyz/js/Ku.js";
-  let needDownload = false;
-
-  try {
-    ({
-      installation,
-      getUrls
-    } = importModule("Ku"));
-    
-    if (typeof installation !== "function") {
-      console.log("数据库模块无效，准备重新下载");
-      needDownload = true;
-    }
-  } catch {
-    console.log("数据库导入失败，准备重新下载");
-    needDownload = true;
-  }
-
-  if (needDownload) {
-      const req = new Request(url);
-       req.headers = {
-            "X-Auth-Key": "scriptable-key"
-            };
       try {
-        fm.writeString(path, await req.loadString());
-        if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
-    console.log("数据库下载完成");
-    
-    ({
-      installation,
-      getUrls
-    } = importModule("Ku"));
-    if (typeof installation !== "function") throw new Error("数据库模块无效");
-  } catch (error) {
-    console.error("请求失败:" + error.message);
+        const scriptContent = await req.loadString();
+        iCloudFm.writeString(
+          iCloudFm.joinPath(iCloudFm.documentsDirectory(), `${tool.name}.js`),
+          scriptContent
+        );
+
+        const successAlert = new Notification();
+        successAlert.title = `✔️ 安装成功`;
+        successAlert.body = `点击运行 ${tool.name}\n版本 ${tool.version}`;
+        successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
+          tool.name
+        )}`;
+        await successAlert.schedule();
+        Script.complete();
+      } catch (error) {
+        console.log("安装失败:" + error);
+
+        const failAlert = new Notification();
+        failAlert.title = "❌ 安装失败";
+        failAlert.body = error.localizedDescription || "未知错误";
+        await failAlert.schedule();
+      }
+    } else if (m.type === "home-link") {
+      // 处理首页链接
+      Safari.open("https:/www.0515364.xyz");
+    } else if (m.type === "clear-library") {
+      // 处理清除库文件
+      // ✅ 清除 Ku.js
+      const fm = FileManager.local();
+      const filePath = fm.joinPath(fm.documentsDirectory(), "Ku.js");
+
+      const notice = new Notification();
+      notice.title = "数据库操作";
+
+      if (fm.fileExists(filePath)) {
+        fm.remove(filePath);
+        console.log("数据库已清除");
+        notice.body = "数据库已清除";
+      } else {
+        console.log("数据库不存在");
+        notice.body = "数据库不存在";
+      }
+
+      await notice.schedule();
+    } else if (m.type === "add-library") {
+      Pasteboard.copy(m.Data)
+      Safari.open('scriptable:///add')
     }
   }
+});
+
+// 远程模块导入
+async function importRemoteModule(url) {
+  const request = new Request(url);
+  request.headers = {
+    "X-Auth-Key": "scriptable-key"
+  };
+
+  const jsCode = await request.loadString();
+
+  const sandbox = { module: { exports: null }, exports: null };
+  new Function("module", "exports", jsCode)(sandbox.module, sandbox.exports);
+
+  if (!sandbox.module.exports) {
+    throw new Error("远程模块未正确导出内容");
+  }
+
+  return sandbox.module.exports;
 }
