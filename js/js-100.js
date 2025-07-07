@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
-// icon-color: green; icon-glyph: hippo;
+// icon-color: green; icon-glyph: hands-helping;
 this.name = "安装小助手";
 this.widget_ID = "js-100";
 this.version = "v1.4";
