@@ -3,6 +3,7 @@
 // icon-color: teal; icon-glyph: people-carry;
 this.name = "考勤记录";
 this.widget_ID = "js-115";
+this.version = "v1.1";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -365,6 +366,7 @@ label {
   
   <!-- 新增的时间快捷按钮行 -->
   <div class="btn-row">
+  <button class="time-btn" onclick="fillHours(0)">0小时</button>
     <button class="time-btn" onclick="fillHours(1)">1小时</button>
     <button class="time-btn" onclick="fillHours(2)">2小时</button>
     <button class="time-btn" onclick="fillHours(4)">4小时</button>
@@ -514,6 +516,7 @@ function pad(n) { return ('' + n).padStart(2, '0'); }
 function weekdayLabel(dt) {
   return ["日", "一", "二", "三", "四", "五", "六"][new Date(dt).getDay()];
 }
+
 function computeRange(year, month) {
   if (raw.settings.dateRangeMode === "natural") {
     return {
@@ -522,8 +525,14 @@ function computeRange(year, month) {
     };
   } else {
     let fd = +raw.settings.fromDay, td = +raw.settings.toDay;
+    let t = new Date();
+    let c = t.getDate();
     let s = new Date(year, month - 1, fd);
     let e = new Date(year, month, td);
+    if (e < t) {
+      s = new Date(year, month, fd);
+      e = new Date(year, month + 1, td);
+    }
     return {
       start: s.getFullYear() + '-' + pad(s.getMonth() + 1) + '-' + pad(s.getDate()),
       end: e.getFullYear() + '-' + pad(e.getMonth() + 1) + '-' + pad(e.getDate())
