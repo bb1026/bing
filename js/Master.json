@@ -183,13 +183,13 @@
   },
   "js-115": {
     "name": "考勤记录",
-    "version": "不提供更新",
+    "version": "v1.1",
     "ID": "js-115",
     "argsID": "",
     "small": false,
     "medium": false,
     "large": false,
-    "update": "上传代码",
+    "update": "修复自动周期显示",
     "url": "js/js-115.js",
     "introduction": "记录加班，不支持更新",
     "icon": "fa-th-list"
