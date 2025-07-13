@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v2.7";
+this.version = "v2.8";
 
 let installation, calendar;
 await CheckKu();
@@ -32,7 +32,7 @@ function getTitlePrefix(title, length = 4) {
 }
 
 function formatDate(date) {
-  return `${date.getMonth() + 1}月${date.getDate()}日`;
+  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 }
 
 const WEEK_DAYS = ["日", "一", "二", "三", "四", "五", "六"];
@@ -817,7 +817,7 @@ async function createCalendarWidget() {
         let cell = UITableCell.text(item.day.toString(), lunarText);
         cell.centerAligned();
         cell.titleFont = Font.systemFont(28);
-        cell.subtitleFont = Font.systemFont(16);
+        cell.subtitleFont = Font.systemFont(12);
 
         let isWeekend = i === 0 || i === 6;
         let isToday =
@@ -889,7 +889,7 @@ async function createCalendarWidget() {
         // 添加事件行
         let row = new UITableRow();
         row.height = 25;
-        let datePrefix = `${m + 1}月${d}日 `;
+        let datePrefix = `${y}年${m + 1}月${d}日 `;
         row.addText(datePrefix + ev.title).titleFont = Font.systemFont(16);
         table.addRow(row);
       }
@@ -940,7 +940,7 @@ await createCalendarWidget();
 async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-  const url = "https://bing.0515364.xyz/js/Ku.js";
+  const url = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
   let needDownload = false;
 
   try {
@@ -957,9 +957,7 @@ async function CheckKu() {
 
   if (needDownload) {
     const req = new Request(url);
-    req.headers = {
-      "X-Auth-Key": "scriptable-key"
-    };
+    req.req.timeoutInterval = 5;
     try {
       fm.writeString(path, await req.loadString());
       if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
