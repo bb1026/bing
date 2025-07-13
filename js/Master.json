@@ -131,13 +131,13 @@
   },
   "js-110": {
     "name": "农历",
-    "version": "v2.7",
+    "version": "v2.8",
     "ID": "js-110",
     "argsID": "110",
     "small": true,
     "medium": true,
     "large": true,
-    "update": "可以展示农历日历",
+    "update": "修改日期年月日显示",
     "url": "js/js-110.js",
     "introduction": "有农历的日历",
     "icon": "fa-calendar-alt"
