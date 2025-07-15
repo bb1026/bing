@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: people-carry;
 this.name = "考勤记录";
 this.widget_ID = "js-115";
-this.version = "v1.1";
+this.version = "v1.2";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -111,9 +111,9 @@ body {
 }
 .salary-tag {
   position: fixed;
-  bottom: 100px; /*设置下边距*/
-  right: 30px; /*设置右边距*/
-  transform: rotate(0deg); /*设置旋转角度*/
+  bottom: 100px;
+  right: 30px;
+  transform: rotate(0deg);
   transform-origin: right bottom;
   background: #4CAF50;
   color: white;
@@ -128,18 +128,18 @@ body {
 #inputBox {
   display: none;
   position: fixed;
-  width: 80%; /* 固定宽度代替auto */
-  max-width: 300px; /* 设置最大宽度 */
+  width: 80%;
+  max-width: 300px;
   left: 50%;
   top: 30%;
-  transform: translateX(-50%); /* 水平居中 */
+  transform: translateX(-50%);
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 15px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   z-index: 999;
-  box-sizing: border-box; /* 确保padding包含在宽度内 */
+  box-sizing: border-box;
 }
 #inputBox .btn-row {
   display: flex;
@@ -244,13 +244,13 @@ body {
   padding: 6px 0;
 }
 #hourInput {
-  width: calc(100% - 8px); /* 减去padding */
+  width: calc(100% - 8px);
   padding: 8px;
   margin-bottom: 12px;
   font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  box-sizing: border-box; /* 重要 */
+  box-sizing: border-box;
 }
 .time-btn {
   flex: 1;
@@ -274,9 +274,9 @@ body {
   transform: translateY(0);
 }
 #weekHours {
-  width: 100px; /* 固定宽度 */
-  display: block; /* 单独一行 */
-  margin-bottom: 15px; /* 增加间距 */
+  width: 100px;
+  display: block;
+  margin-bottom: 15px;
 }
 /* iOS风格开关样式 */
 .ios-switch {
@@ -325,11 +325,10 @@ input:checked + .ios-switch-slider:before {
   transform: translateX(20px);
 }
 
-/* 添加点击动画 */
 .ios-switch:active .ios-switch-slider:before {
   width: 30px;
 }
-/* 基础重置 */
+
 select, input, label {
   vertical-align: middle;
   box-sizing: border-box;
@@ -337,20 +336,21 @@ select, input, label {
   font-size: 14px;
 }
 
-/* 标签精细控制 */
 label {
-  line-height: 1.3; /* 更精确的文字位置控制 */
-  padding-bottom: 1px; /* 视觉微调 */
+  line-height: 1.3;
+  padding-bottom: 1px;
 }
 </style>
 </head>
 <body>
 
 <div style="display:flex;justify-content:center;flex-wrap:wrap">
-  <button class="nav-btn" onclick="prevMonth()">‹ 上月</button>
-  <button class="nav-btn" onclick="nextMonth()">下月 ›</button>
-  <button class="settings-btn" onclick="openSettings()">⚙️ 设置</button>
-  <button class="btn" onclick="openBatchEdit()">批量编辑</button>
+  <button class="nav-btn" onclick="prevMonth()">‹‹上月</button>
+  <button class="nav-btn" onclick="goCurrentMonth()">当月</button>
+  <button class="nav-btn" onclick="nextMonth()">下月››</button>
+  <button class="settings-btn" onclick="openSettings()">设置</button>
+  <button class="btn" onclick="openBatchEdit()">批量</button>
+  <button class="btn" onclick="restartScript()" style="background:#4CAF50;">刷新</button>
 </div>
 
 <div class="title" id="monthTitle"></div>
@@ -358,13 +358,12 @@ label {
 <div class="calendar" id="calendar"></div>
 <div id="stat"></div>
 
-<!-- 单日编辑弹窗 -->
+<!-- 单日添加弹窗和快捷数字 -->
 <div id="inputBox">
   <div id="inputDate" style="font-weight:bold;margin-bottom:8px"></div>
   <div id="inputWeek" style="margin-bottom:8px;font-size:14px;"></div>
   <input type="number" id="hourInput" placeholder="输入加班小时" onchange="formatInput(this)">
   
-  <!-- 新增的时间快捷按钮行 -->
   <div class="btn-row">
   <button class="time-btn" onclick="fillHours(0)">0小时</button>
     <button class="time-btn" onclick="fillHours(1)">1小时</button>
@@ -397,7 +396,6 @@ label {
     </label>
   </div>
   
-<!-- 周期模式+周工作时（精确垂直居中） -->
 <div style="display:flex; align-items:center; margin:15px 0; height:34px;">
   <div style="display:flex; align-items:center; margin-right:20px;">
     <label style="width:80px; display:flex; align-items:center; height:34px; margin:0; font-size: 18px;">周期模式:</label>
@@ -414,7 +412,6 @@ label {
   </div>
 </div>
 
-<!-- 日期范围（精确垂直居中） -->
 <div style="display:flex; align-items:center; margin-bottom:15px; height:34px;">
   <div style="display:flex; align-items:center; margin-right:20px;">
     <label style="width:80px; display:flex; align-items:center; height:34px; margin:0; font-size: 18px;">开始日期:</label>
@@ -444,11 +441,10 @@ label {
   </div>
 </div>
 
-<!-- 批量编辑弹窗 -->
+<!-- 批量添加弹窗 -->
 <div id="batchEditBox">
-  <!-- 添加右上角关闭按钮 -->
   <div class="batch-edit-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-    <h3 style="margin:0">批量编辑加班时间</h3>
+    <h3 style="margin:0">批量添加加班时间</h3>
     <button onclick="closeBatchEdit()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#666;">
       &times; 关闭
     </button>
@@ -484,7 +480,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // 添加切换事件
   toggle.addEventListener('change', function() {
-    // 更新UI元素显示/隐藏
     document.querySelectorAll('.salary-display').forEach(el => {
       el.style.display = this.checked ? 'block' : 'none';
     });
@@ -496,7 +491,6 @@ document.addEventListener('DOMContentLoaded', function() {
       settings: raw.settings 
     });
     
-    // iOS风格的动画反馈
     if (this.checked) {
       this.parentElement.classList.add('active');
       setTimeout(() => this.parentElement.classList.remove('active'), 300);
@@ -508,8 +502,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function fillHours(hours) {
   const input = document.getElementById('hourInput');
   input.value = hours;
-  input.focus(); // 可选：保持输入框焦点
-  input.dispatchEvent(new Event('change')); // 触发change事件确保响应
+  input.focus();
+  input.dispatchEvent(new Event('change')); 
 }
 
 function pad(n) { return ('' + n).padStart(2, '0'); }
@@ -524,15 +518,25 @@ function computeRange(year, month) {
       end: year + '-' + pad(month + 1) + '-' + pad(new Date(year, month + 1, 0).getDate())
     };
   } else {
-    let fd = +raw.settings.fromDay, td = +raw.settings.toDay;
-    let t = new Date();
-    let c = t.getDate();
-    let s = new Date(year, month - 1, fd);
-    let e = new Date(year, month, td);
-    if (e < t) {
-      s = new Date(year, month, fd);
-      e = new Date(year, month + 1, td);
+    const fd = +raw.settings.fromDay;
+    const td = +raw.settings.toDay;
+    let startMonth, endMonth;
+    
+    if (fd <= td) {
+      startMonth = month;
+      endMonth = month;
+    } else {
+      startMonth = month;
+      endMonth = (month + 1) % 12; 
     }
+
+    const s = new Date(year, startMonth, fd);
+    const e = new Date(
+      endMonth === 0 ? year + 1 : year, 
+      endMonth, 
+      td
+    );
+    
     return {
       start: s.getFullYear() + '-' + pad(s.getMonth() + 1) + '-' + pad(s.getDate()),
       end: e.getFullYear() + '-' + pad(e.getMonth() + 1) + '-' + pad(e.getDate())
@@ -598,9 +602,8 @@ function computeStats() {
   
   const unpaid = totalDays - workdays;
   const salary = calculateSalary();
-  const showSalary = raw.settings?.showSalary !== false; // 默认显示
+  let showSalary = raw.settings?.showSalary !== false;
   
-  // 工资标签
   let salaryTag = document.getElementById('salaryTag');
   if (!salaryTag) {
     salaryTag = document.createElement('div');
@@ -608,19 +611,48 @@ function computeStats() {
     salaryTag.className = 'salary-tag';
     document.body.appendChild(salaryTag);
   }
-  salaryTag.style.display = showSalary ? 'block' : 'none';
-  salaryTag.textContent = '总工资: $' + salary.total.toFixed(2);
+  salaryTag.style.display = 'block'; 
   
-  // 统计信息
-  document.getElementById('stat').innerHTML = \`
-  工作日@\${showSalary ? (salary.hourlyRate *raw.settings.rateWeekday).toFixed(2) : '--'}: \${wday}小时 | $\${showSalary ? (wday * salary.hourlyRate * raw.settings.rateWeekday).toFixed(2) : '--'}<br>
-    星期六@\${showSalary ? (salary.hourlyRate * raw.settings.rateSaturday).toFixed(2) : '--'}: \${wsat}小时 | $\${showSalary ? (wsat * salary.hourlyRate * raw.settings.rateSaturday).toFixed(2) : '--'}<br>
-    星期日@\${showSalary ? (salary.hourlyRate * raw.settings.rateSunday).toFixed(2) : '--'}: \${wsun}小时 | $\${showSalary ? (wsun * salary.hourlyRate * raw.settings.rateSunday).toFixed(2) : '--'}<br>
-    \${showSalary ? \`基础薪资: $\${salary.base.toFixed(2)}<br>
-    住房津贴: $\${salary.allowance.toFixed(2)}<br>
-    全勤奖金: $\${salary.attendance.toFixed(2)}<br>
-    其它项目: $\${salary.custom.toFixed(2)}\` : '工资信息已隐藏'}
- \`;
+  function updateSalaryTag(visible) {
+    salaryTag.textContent = \`总工资: $\${visible ? salary.total.toFixed(2) : '0000.00'}\`;
+  }
+  
+  function getStatHTML(visible) {
+    return \`
+      工作日@\${visible ? (salary.hourlyRate * raw.settings.rateWeekday).toFixed(2) : '00.00'}: \${wday}小时 | $\${visible ? (wday * salary.hourlyRate * raw.settings.rateWeekday).toFixed(2) : '0.00'}<br>
+        星期六@\${visible ? (salary.hourlyRate * raw.settings.rateSaturday).toFixed(2) : '00.00'}: \${wsat}小时 | $\${visible ? (wsat * salary.hourlyRate * raw.settings.rateSaturday).toFixed(2) : '0.00'}<br>
+        星期日@\${visible ? (salary.hourlyRate * raw.settings.rateSunday).toFixed(2) : '00.00'}: \${wsun}小时 | $\${visible ? (wsun * salary.hourlyRate * raw.settings.rateSunday).toFixed(2) : '0.00'}<br>
+        基础薪资: $\${visible ? \`\${salary.base.toFixed(2)}\` : '0.00'}<br>
+        住房津贴: $\${visible ? \`\${salary.allowance.toFixed(2)}\` : '0.00'}<br>
+        全勤奖金: $\${visible ? \`\${salary.attendance.toFixed(2)}\` : '0.00'}<br>
+        其它项目: $\${visible ? \`\${salary.custom.toFixed(2)}\` : '0.00'}
+    \`;
+  }
+  
+  updateSalaryTag(showSalary); 
+  document.getElementById('stat').innerHTML = getStatHTML(showSalary);
+  
+  let salarySwitch = document.getElementById('salaryTagToggle');
+  if (!salarySwitch) {
+    const switchContainer = document.createElement('div');
+    switchContainer.className = 'salary-switch';
+    switchContainer.style = 'position: fixed; bottom: 210px; right: 20px; z-index: 101;';
+    switchContainer.innerHTML = \`
+      <label class="ios-switch">
+        <input type="checkbox" id="salaryTagToggle">
+        <span class="ios-switch-slider"></span>
+      </label>
+    \`;
+    document.body.appendChild(switchContainer);
+    salarySwitch = document.getElementById('salaryTagToggle');
+    
+    salarySwitch.addEventListener('change', function() {
+      const isChecked = this.checked;
+      updateSalaryTag(isChecked); 
+      document.getElementById('stat').innerHTML = getStatHTML(isChecked);
+    });
+  }
+  salarySwitch.checked = showSalary;
 }
 
 function render() {
@@ -657,13 +689,11 @@ function render() {
     const w = temp.getDay();
     const hrs = raw.records[dstr]?.hours || 0;
     
-    // 判断是否是今天
     const isToday = dstr === todayStr;
-    
-    // 根据是否有加班时间设置不同样式
     const dayStyle = hrs > 0 
-      ? \`background-color: #e6f7ff; border-color: \${isToday ? '#FF9500' : '#91d5ff'};\`  // 有加班的浅蓝色样式
-      : \`background-color: #f5f5f5; color: \${isToday ? '#FF9500' : '#ccc'};\`;          // 无加班的灰色样式
+      ? \`background-color: #e6f7ff; border-color: \${isToday ? '#FF9500' : '#91d5ff'};\`
+      
+      : \`background-color: #f5f5f5; color: \${isToday ? '#FF9500' : '#ccc'};\`;
     
     cal.innerHTML += \`
       <div class="day \${w === 0 ? 'sun' : w === 6 ? 'sat' : ''}" 
@@ -709,7 +739,7 @@ function saveHour() {
   render();
 }
 
-// 批量编辑功能
+// 批量添加功能
 function openBatchEdit() {
   const rng = computeRange(raw.currentYear, raw.currentMonth);
   const content = document.getElementById('batchEditContent');
@@ -865,6 +895,24 @@ function nextMonth() {
   render();
 }
 
+function goCurrentMonth() {
+  const now = new Date();
+  raw.currentYear = now.getFullYear();
+  raw.currentMonth = now.getMonth();
+  window._result = JSON.stringify({ 
+    type: 'change-month', 
+    year: raw.currentYear, 
+    month: raw.currentMonth 
+  });
+  render();
+}
+
+function restartScript() {
+  window._result = JSON.stringify({
+    type: 'restart-script',
+  });
+}
+
 // 初始渲染
 render();
 </script>
@@ -895,7 +943,10 @@ timer.schedule(async () => {
     } else if (m.type === "change-month") {
       currentYear = m.year;
       currentMonth = m.month;
+    } else if (m.type === "restart-script") {
+      Safari.open(`scriptable:///run/${encodeURIComponent(Script.name())}`);
     }
+    
     loadData();
     await webView.evaluateJavaScript(`raw=${JSON.stringify({ settings, records, currentYear, currentMonth })}`, false);
     await webView.evaluateJavaScript(`render()`, false);
