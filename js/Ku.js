@@ -747,7 +747,7 @@ async function showLoadingAndFetchData(
     const now = new Date().toISOString();
     fm.writeString(updateTimeCachePath, JSON.stringify({ lastUpdate: now }));
   } catch (error) {
-    console.error("下载过程中出错:", error);
+    console.error("下载过程中出错:" + error);
     await loadingView.evaluateJavaScript(`
       document.querySelector('.spinner').outerHTML = '<div style="font-size: 60px; color: red;">✗</div>';
       document.getElementById('loading-text').textContent = '数据下载失败';
