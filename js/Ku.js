@@ -723,7 +723,7 @@ async function showLoadingAndFetchData(
       document.getElementById('error-message').style.display = 'none';
     `);
     
-    Safari.open(`scriptable:///run?scriptName=Busgo`);
+    // Safari.open(`scriptable:///run?scriptName=Busgo`);
 
     await fetchAllData(tasksToUpdate, async (current, total, name) => {
       const progress = Math.round((current / total) * 100);
