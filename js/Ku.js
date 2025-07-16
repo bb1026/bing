@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v4.4";
+this.version = "v4.5";
 
 function getUrls() {
   const Home_URL = "https://www.0515364.xyz/"
@@ -723,7 +723,7 @@ async function showLoadingAndFetchData(
       document.getElementById('error-message').style.display = 'none';
     `);
     
-    Safari.open(`scriptable:///run?scriptName=${Busgo}`);
+    Safari.open(`scriptable:///run?scriptName=Busgo`);
 
     await fetchAllData(tasksToUpdate, async (current, total, name) => {
       const progress = Math.round((current / total) * 100);
