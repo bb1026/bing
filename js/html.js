@@ -458,7 +458,6 @@ document.getElementById('clearLibrary').addEventListener('click', function(e) {
       document.getElementById("modalContent").innerHTML = \`
         <div class="modal-field"><b>版本：</b>\${tool.version}</div>
         <div class="modal-field"><b>简介：</b>\${tool.introduction || "无"}</div>
-        <div class="modal-field"><b>文件：</b>\${tool.url}</div>
         <div class="modal-field"><b>ID：</b>\${tool.ID}</div>
         <div class="modal-field"><b>argsID：</b>\${tool.argsID}</div>
         <div class="modal-field"><b>更新内容：</b>\${tool.update || "无"}</div>
