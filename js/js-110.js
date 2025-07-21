@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v2.8";
+this.version = "v2.9";
 
 let installation, calendar;
 await CheckKu();
@@ -190,9 +190,9 @@ async function sendNotificationIfNeeded(today, events) {
   const lunar = WidgetUtils.getLunarData(today);
   const dateStr = formatDate(today);
   const lunarStr = `${lunar.IMonthCn}${lunar.IDayCn}`;
-  const eventStr = todayEvents.join("、");
+//   const eventStr = todayEvents.join("、");
 
-  const body = [dateStr, lunarStr, term, eventStr].filter(Boolean).join(" ");
+  const body = [dateStr, lunarStr, term].filter(Boolean).join(" ");
 
   // 发送通知并记录
   const notification = new Notification();
@@ -825,9 +825,7 @@ async function createCalendarWidget() {
           month === currentMonth + 1 &&
           day === today.getDate();
 
-        if (event) {
-          cell.subtitleColor = Color.red();
-        } else if (!item.inCurrentMonth) {
+           if (!item.inCurrentMonth) {
           cell.titleColor = Color.gray();
           cell.subtitleColor = Color.lightGray();
         } else if (isToday) {
@@ -836,10 +834,11 @@ async function createCalendarWidget() {
         } else if (isWeekend) {
           cell.titleColor = Color.red();
           cell.subtitleColor = Color.red();
+        } else if (event) {
+          cell.subtitleColor = Color.red();
         } else {
           cell.subtitleColor = Color.gray();
         }
-
         row.addCell(cell);
       }
       table.addRow(row);
