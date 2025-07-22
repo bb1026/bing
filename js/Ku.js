@@ -36,6 +36,7 @@ const request_ku = new Request(getUrls().KU_SCRIPT_URL);
 
     if (REMOTE_VER && LOCAL_VER !== REMOTE_VER) {
       console.log("发现新版本数据库");
+      console.log("本地数据库" + LOCAL_VER);
       console.log(`✔️ 数据库已更新: ${REMOTE_VER}`);
 
       const kuScriptPath = localFm.joinPath(
