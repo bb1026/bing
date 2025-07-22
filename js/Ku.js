@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v4.5";
+this.version = "v4.6";
 
 function getUrls() {
   const Home_URL = "https://www.0515364.xyz/"
@@ -19,24 +19,25 @@ function getUrls() {
   };
 }
 
+function getRequest(url) {
+  const req = new Request(url);
+  req.headers = { "X-Auth-Key": getUrls().Auth_key };
+  return req;
+}
+
 async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
   const localFm = FileManager.local();
   const iCloudFm = FileManager.iCloud();
 
-const request_ku = new Request(getUrls().KU_SCRIPT_URL);
-  request_ku.headers = {
-  "X-Auth-Key": getUrls().Auth_key
-};
   try {
-    const remoteKuCode = await request_ku.loadString();
+    const remoteKuCode = await getRequest(getUrls().KU_SCRIPT_URL).loadString();
     const REMOTE_VER = remoteKuCode.match(
       /version\s*=\s*["']([^"']+)["']/
     )?.[1];
 
     if (LOCAL_VER !== undefined && REMOTE_VER != null && LOCAL_VER !== REMOTE_VER) {
-      console.log("发现新版本数据库");
-      console.log("本地数据库" + LOCAL_VER);
+      console.log("发现新版本数据库" + REMOTE_VER);
       console.log(`✔️ 数据库已更新: ${REMOTE_VER}`);
 
       const kuScriptPath = localFm.joinPath(
@@ -50,11 +51,7 @@ const request_ku = new Request(getUrls().KU_SCRIPT_URL);
     }
 
     // 2. 检查脚本更新（存 iCloud）
-    const request_master = new Request(getUrls().MASTER_JSON_URL);
-    request_master.headers = {
-  "X-Auth-Key": getUrls().Auth_key
-};
-    const scriptList = await request_master.loadJSON();
+    const scriptList = await getRequest(getUrls().MASTER_JSON_URL).loadJSON();
     console.log("✔️ 连接成功，检查更新");
 
     const remoteScriptInfo = scriptList[scriptID];
@@ -75,18 +72,13 @@ console.log(
 );
 
     if (thisVersion !== remoteVersion) {
-    const SCRIPT_DOWNLOAD_URL = getUrls().BASE_URL + scriptList[scriptID].url;
     const LOCAL_SCRIPT_PATH = iCloudFm.joinPath(
         iCloudFm.documentsDirectory(),
         `${scriptName}.js`
     );
 
     console.log("[*] 开始下载脚本...");
-    const req = new Request(SCRIPT_DOWNLOAD_URL);
-req.headers = {
-  "X-Auth-Key": getUrls().Auth_key
-};
-    const scriptContent = await req.loadString();
+    const scriptContent = await getRequest(getUrls().BASE_URL + scriptList[scriptID].url).loadString();
     console.log("[+] 脚本下载完成");
 
     console.log("[#] 开始写入脚本...");
