@@ -4,19 +4,59 @@
 const currentModule = {
   name: "Master",
   widget_ID: "js-105",
-  version: "v1.8"
+  version: "v1.9"
 };
 
 const Local_remote_mode = 0; //0远程;1本地
 
 const Ku = await importRemoteModule("http://bing.0515364.xyz/js/Ku.js");
 const iCloudFm = FileManager.iCloud();
-const webView = new WebView()
+const webView = new WebView();
+const widget = new ListWidget();
 const getUrls = await Ku.getUrls();
 let html;
 
 await Ku.installation(currentModule.widget_ID, currentModule.version);
 
+if (args.widgetParameter) {
+    const paramValue = args.widgetParameter.split(";")[0];
+    try {
+    const scriptList = await getRequest(getUrls.MASTER_JSON_URL).loadJSON();
+    const paramData = scriptList[`js-${paramValue}`];
+    let widgetSize = config.widgetFamily || 'large';
+
+    if (!paramData[widgetSize]) {
+      widget.addText(`不支持 ${widgetSize} 尺寸，请更换其它尺寸。`);
+      Script.setWidget(widget);
+    }
+    (async () => {
+      const code = await getRequest(getUrls.BASE_URL + paramData.url).loadString();
+      return await new Function(
+        "args",
+        "code",
+        `
+    return (async () => {
+      const module = { exports: {} };
+      with ({ module, console, args }) {
+        ${code}
+      }
+      return typeof module.exports === 'function'
+        ? await module.exports()
+        : module.exports;
+    })();
+  `
+      )(args ?? {}, code);
+    })();
+  } catch (error) {
+    widget.addText("请检查Parameter" + paramValue).textColor = Color.red();
+    Script.setWidget(widget);
+  }
+} else {
+  widget.addText("长按小组件\n输入Parameter").textColor;
+  Script.setWidget(widget);
+};
+
+if (!config.runsInWidget) {
 async function loadHTML() {
   if (Local_remote_mode) {
     const Local_html = importModule("HTML");// 本地
@@ -24,17 +64,13 @@ async function loadHTML() {
   } else {
     html = await importRemoteModule(getUrls.HTML_URL);
   }
-  
-const request = new Request(getUrls.MASTER_JSON_URL);
-request.headers = { "X-Auth-Key": getUrls.Auth_key };
-
-const finalHTML = html.replace("%TOOLS%", JSON.stringify(await request.loadJSON()));
+const request = await getRequest(getUrls.MASTER_JSON_URL).loadJSON();
+const finalHTML = html.replace("%TOOLS%", JSON.stringify(request));
 
 await webView.loadHTML(finalHTML);
 webView.present(true);
 }
 
-// 检测剪切板内容
 const clipboardContent = Pasteboard.paste();
 if (clipboardContent && clipboardContent.includes('"install-tool"')) {
   try {
@@ -62,24 +98,15 @@ timer.schedule(async () => {
   if (res) {
     await webView.evaluateJavaScript("window._result=null", false);
     const m = JSON.parse(res);
-
     if (m.type === "install-tool") {
-      // 安装工具
       const tool = m.Data;
-console.log(tool);
-      const req = new Request(getUrls.BASE_URL + tool.url);
-
-      req.headers = {
-        "X-Auth-Key": getUrls.Auth_key
-      };
-
+      console.log(tool);
       try {
-        const scriptContent = await req.loadString();
+        const scriptContent = await getRequest(getUrls.BASE_URL + tool.url).loadString();
         iCloudFm.writeString(
           iCloudFm.joinPath(iCloudFm.documentsDirectory(), `${tool.name}.js`),
           scriptContent
         );
-
         const successAlert = new Notification();
         successAlert.title = `✔️ 安装成功`;
         successAlert.body = `点击运行 ${tool.name}\n版本 ${tool.version}`;
@@ -90,24 +117,18 @@ console.log(tool);
         Script.complete();
       } catch (error) {
         console.log("安装失败:" + error);
-
         const failAlert = new Notification();
         failAlert.title = "❌ 安装失败";
         failAlert.body = error.localizedDescription || "未知错误";
         await failAlert.schedule();
       }
     } else if (m.type === "home-link") {
-      // 处理首页链接
-      Safari.open("https:/www.0515364.xyz");
+      Safari.open(getUrls.Home_URL);
     } else if (m.type === "clear-library") {
-      // 处理清除库文件
-      // ✅ 清除 Ku.js
       const fm = FileManager.local();
       const filePath = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-
       const notice = new Notification();
       notice.title = "数据库操作";
-
       if (fm.fileExists(filePath)) {
         fm.remove(filePath);
         console.log("数据库已清除");
@@ -116,7 +137,6 @@ console.log(tool);
         console.log("数据库不存在");
         notice.body = "数据库不存在";
       }
-
       await notice.schedule();
     } else if (m.type === "add-library") {
       Pasteboard.copy(m.Data)
@@ -124,22 +144,21 @@ console.log(tool);
     }
   }
 });
+}
 
 // 远程模块导入
 async function importRemoteModule(url) {
-  const request = new Request(url);
-  request.headers = {
-    "X-Auth-Key": "scriptable-key"
-  };
-
-  const jsCode = await request.loadString();
-
+const jsCode = await getRequest(url).loadString();
   const sandbox = { module: { exports: null }, exports: null };
   new Function("module", "exports", jsCode)(sandbox.module, sandbox.exports);
-
   if (!sandbox.module.exports) {
     throw new Error("远程模块未正确导出内容");
   }
-
   return sandbox.module.exports;
+}
+
+function getRequest(url) {
+  const req = new Request(url);
+  req.headers = { "X-Auth-Key": "scriptable-key" };
+  return req;
 }
