@@ -57,9 +57,10 @@ if (args.widgetParameter) {
 };
 
 if (!config.runsInWidget) {
-async function loadHTML() {
-  if (Local_remote_mode) {
-    const Local_html = importModule("HTML");// 本地
+  if (args.widgetParameter) return;
+  async function loadHTML() {
+    if (Local_remote_mode) {
+      const Local_html = importModule("HTML");// 本地
     html = Local_html.html
   } else {
     html = await importRemoteModule(getUrls.HTML_URL);
