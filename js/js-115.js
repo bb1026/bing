@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: people-carry;
 this.name = "考勤记录";
 this.widget_ID = "js-115";
-this.version = "v1.2";
+this.version = "v1.3";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -618,16 +618,36 @@ function computeStats() {
   }
   
   function getStatHTML(visible) {
+  const { wday, wsat, wsun } = getOvertimeHours();
     return \`
       工作日@\${visible ? (salary.hourlyRate * raw.settings.rateWeekday).toFixed(2) : '00.00'}: \${wday}小时 | $\${visible ? (wday * salary.hourlyRate * raw.settings.rateWeekday).toFixed(2) : '0.00'}<br>
         星期六@\${visible ? (salary.hourlyRate * raw.settings.rateSaturday).toFixed(2) : '00.00'}: \${wsat}小时 | $\${visible ? (wsat * salary.hourlyRate * raw.settings.rateSaturday).toFixed(2) : '0.00'}<br>
         星期日@\${visible ? (salary.hourlyRate * raw.settings.rateSunday).toFixed(2) : '00.00'}: \${wsun}小时 | $\${visible ? (wsun * salary.hourlyRate * raw.settings.rateSunday).toFixed(2) : '0.00'}<br>
-        基础薪资: $\${visible ? \`\${salary.base.toFixed(2)}\` : '0.00'}<br>
+        基础薪资: $\${visible ? \`\${salary.base.toFixed(2)}\` : '0000.00'}<br>
         住房津贴: $\${visible ? \`\${salary.allowance.toFixed(2)}\` : '0.00'}<br>
         全勤奖金: $\${visible ? \`\${salary.attendance.toFixed(2)}\` : '0.00'}<br>
         其它项目: $\${visible ? \`\${salary.custom.toFixed(2)}\` : '0.00'}
     \`;
   }
+  
+  // 新增函数：从 raw.records 获取最新的加班时间
+function getOvertimeHours() {
+  const rng = computeRange(raw.currentYear, raw.currentMonth);
+  let wday = 0, wsat = 0, wsun = 0;
+  
+  for (let d = new Date(rng.start); d <= new Date(rng.end); d.setDate(d.getDate() + 1)) {
+    const dt = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    const w = d.getDay(), hrs = raw.records[dt]?.hours || 0;
+    
+    if (hrs > 0) {
+      if (w === 0) wsun += hrs;
+      else if (w === 6) wsat += hrs;
+      else wday += hrs;
+    }
+  }
+  
+  return { wday, wsat, wsun };
+};
   
   updateSalaryTag(showSalary); 
   document.getElementById('stat').innerHTML = getStatHTML(showSalary);
@@ -648,8 +668,9 @@ function computeStats() {
     
     salarySwitch.addEventListener('change', function() {
       const isChecked = this.checked;
-      updateSalaryTag(isChecked); 
-      document.getElementById('stat').innerHTML = getStatHTML(isChecked);
+      const salary = calculateSalary();
+      updateSalaryTag(isChecked, salary); 
+      document.getElementById('stat').innerHTML = getStatHTML(isChecked, salary);
     });
   }
   salarySwitch.checked = showSalary;
