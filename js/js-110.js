@@ -10,7 +10,7 @@ await CheckKu();
 await installation(this.widget_ID, this.version);
 
 // 公共工具函数
-const widgetFamily = config.widgetFamily || "medium"; /*small, medium, large*/
+const widgetFamily = config.widgetFamily || "large"; /*small, medium, large*/
 
 function getDateKey(date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
