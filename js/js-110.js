@@ -3,14 +3,14 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v2.9";
+this.version = "v3.0";
 
 let installation, calendar;
 await CheckKu();
 await installation(this.widget_ID, this.version);
 
 // 公共工具函数
-const widgetFamily = config.widgetFamily || "large"; /*small, medium, large*/
+const widgetFamily = config.widgetFamily || "medium"; /*small, medium, large*/
 
 function getDateKey(date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
@@ -339,6 +339,8 @@ async function createCalendarWidget() {
     dText.font = Font.boldSystemFont(25);
     dText.centerAlignText();
     dayRow.addSpacer();
+    
+    widget.addSpacer();
 
     const weekRow = WidgetUtils.createCenteredRow(widget);
     WEEK_DAYS.forEach((day, i) => {
@@ -348,10 +350,10 @@ async function createCalendarWidget() {
       WidgetUtils.createDateText(dayCell, day, WidgetUtils.isWeekend(i));
       if (i < 6) weekRow.addSpacer(5);
     });
+    
+    widget.addSpacer();
 
     const dateRow = WidgetUtils.createCenteredRow(widget);
-    const dotRow = WidgetUtils.createCenteredRow(widget);
-    const lunarRow = WidgetUtils.createCenteredRow(widget);
 
     for (let i = 0; i < 7; i++) {
       const dayDate = new Date(firstDayOfWeek);
@@ -364,20 +366,25 @@ async function createCalendarWidget() {
       const dateKey = dayDate.toISOString().slice(0, 10);
       const dayEvents = eventMap.get(dateKey) || [];
 
-      // 日期单元格
+      // 大单元格
       const dayCell = dateRow.addStack();
-      dayCell.size = new Size(45, 20);
+      dayCell.layoutVertically();
+      dayCell.size = new Size(45, 50);
       dayCell.centerAlignContent();
+      
+      // 日期单元格
+      const dayRow = dayCell.addStack();
+      dayRow.size = new Size(45, 20);
+      dayRow.centerAlignContent();
       const dayText = WidgetUtils.createDateText(
-        dayCell,
+        dayRow,
         dayDate.getDate().toString(),
         isWeekend,
         isToday
       );
-      if (isToday) WidgetUtils.applyTodayStyle(dayCell, dayText);
 
       // 事件圆点
-      const dotCell = dotRow.addStack();
+      const dotCell = dayCell.addStack();
       dotCell.size = new Size(45, 6);
       dotCell.centerAlignContent();
 
@@ -397,13 +404,15 @@ async function createCalendarWidget() {
       }
 
       // 农历信息
-      const lunarCell = lunarRow.addStack();
+      const lunarCell = dayCell.addStack();
       lunarCell.size = new Size(45, 20);
       const isTerm = WidgetUtils.getIsTerm(dayDate);
       const lunarDisplay = WidgetUtils.getLunarDisplayDate(
         dayDate,
         widgetFamily
       );
+      
+      if (isToday) WidgetUtils.applyTodayStyle(dayCell);
 
       let eventOutput = "";
       if (
@@ -439,10 +448,10 @@ async function createCalendarWidget() {
 
       if (i < 6) {
         dateRow.addSpacer(5);
-        dotRow.addSpacer(5);
-        lunarRow.addSpacer(5);
       }
     }
+    
+    widget.addSpacer();
 
     const weekStart = new Date(firstDayOfWeek);
     weekStart.setHours(0, 0, 0, 0);
@@ -543,7 +552,6 @@ async function createCalendarWidget() {
           isWeekend,
           isToday
         );
-        if (isToday) WidgetUtils.applyTodayStyle(dayStack, dayText);
 
         // 事件圆点
         const dotCell = dateCell.addStack();
@@ -599,6 +607,8 @@ async function createCalendarWidget() {
           date,
           widgetFamily
         );
+        
+        if (isToday) WidgetUtils.applyTodayStyle(dateCell);
 
         let eventOutput = "";
         if (
@@ -930,8 +940,8 @@ async function createCalendarWidget() {
     ? widget.presentSmall()
     : widgetFamily === "medium"
     ? widget.presentMedium()
-    // : widget.presentLarge();
-    : await table.present(true);
+    : widget.presentLarge();
+//     : await table.present(true);
 }
 
 await createCalendarWidget();
