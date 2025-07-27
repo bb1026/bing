@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: people-carry;
 this.name = "考勤记录";
 this.widget_ID = "js-115";
-this.version = "v1.3";
+this.version = "v1.4";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -128,8 +128,7 @@ body {
 #inputBox {
   display: none;
   position: fixed;
-  width: 80%;
-  max-width: 300px;
+  width: 95%;
   left: 50%;
   top: 30%;
   transform: translateX(-50%);
@@ -378,7 +377,6 @@ label {
   </div>
 </div>
 
-<!-- 设置弹窗 -->
 <div id="settingsBox">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:8px;">
     <h3 style="margin:0;">设置</h3>
@@ -734,7 +732,6 @@ function openInput(d) {
   document.getElementById('inputWeek').textContent = "星期" + weekdayLabel(d);
   document.getElementById('hourInput').value = raw.records[d]?.hours || '';
   document.getElementById('inputBox').style.display = 'block';
-  document.getElementById('hourInput').focus();
 }
 
 function closeInput() {
