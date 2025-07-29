@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v3.0";
+this.version = "v3.1";
 
 let installation, calendar;
 await CheckKu();
@@ -204,6 +204,9 @@ async function sendNotificationIfNeeded(today, events) {
   await setLastNotificationDate(new Date().toDateString());
 }
 
+const lunarData = calendar.solar2lunar();
+const viewLunar = `•${lunarData.gzYear}年${lunarData.IMonthCn}${lunarData.IDayCn}`
+
 async function createCalendarWidget() {
   const widget = new ListWidget();
   const widgetWidth = 350;
@@ -214,7 +217,6 @@ async function createCalendarWidget() {
   const dayOfWeek = today.getDay();
   const isWeekend = WidgetUtils.isWeekend(dayOfWeek);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-
   const monthStart = new Date(year, month, 1);
   monthStart.setHours(0, 0, 0, 0);
   const monthEnd = new Date(year, month + 1, 0);
@@ -248,8 +250,8 @@ async function createCalendarWidget() {
     // 日期行
     const dateRow = WidgetUtils.createCenteredRow(contentStack);
     dateRow.addSpacer();
-    const dateText = dateRow.addText(formatDate(today));
-    dateText.font = Font.boldSystemFont(25);
+    const dateText = dateRow.addText(`${today.getDate()}`);
+    dateText.font = Font.boldSystemFont(50);
     if (isWeekend) {
       dateText.textColor = COLORS.weekend;
     }
@@ -295,8 +297,8 @@ async function createCalendarWidget() {
 
     lunarText.font =
       WidgetUtils.getIsTerm(today) || upcoming.length > 0
-        ? Font.boldSystemFont(25)
-        : Font.boldSystemFont(30);
+        ? Font.boldSystemFont(15)
+        : Font.boldSystemFont(25);
 
     if (upcoming.length > 0) {
       const eventRow = widget.addStack();
@@ -335,8 +337,8 @@ async function createCalendarWidget() {
     dayRow.layoutHorizontally();
     dayRow.centerAlignContent();
     dayRow.addSpacer();
-    const dText = dayRow.addText(formatDate(today));
-    dText.font = Font.boldSystemFont(25);
+    const dText = dayRow.addText(formatDate(today) + viewLunar);
+    dText.font = Font.boldSystemFont(20);
     dText.centerAlignText();
     dayRow.addSpacer();
     
@@ -495,13 +497,12 @@ async function createCalendarWidget() {
     widget.addSpacer();
   } else {
     // 大尺寸 - 完整月历
-
     const dayRow = widget.addStack();
     dayRow.layoutHorizontally();
     dayRow.centerAlignContent();
     dayRow.addSpacer();
-    const dText = dayRow.addText(formatDate(today));
-    dText.font = Font.boldSystemFont(25);
+    const dText = dayRow.addText(formatDate(today) + viewLunar);
+    dText.font = Font.boldSystemFont(20);
     dText.centerAlignText();
     dayRow.addSpacer();
     widget.addSpacer();
@@ -720,7 +721,7 @@ async function createCalendarWidget() {
   // 当前视图年月
   let viewYear = currentYear;
   let viewMonth = currentMonth;
-
+  
   async function renderCalendar() {
     table.removeAllRows();
 
@@ -743,7 +744,7 @@ async function createCalendarWidget() {
     let formattedDate = new DateFormatter();
     formattedDate.dateFormat =
       viewYear === currentYear && viewMonth === currentMonth
-        ? "yyyy年M月d日"
+        ? "yyyy年M月d日" + viewLunar
         : "yyyy年M月";
     let headerCell = UITableCell.text(
       formattedDate.string(
@@ -753,7 +754,7 @@ async function createCalendarWidget() {
       )
     );
     headerCell.centerAligned();
-    headerCell.titleFont = Font.boldSystemFont(28);
+    headerCell.titleFont = Font.boldSystemFont(20);
     headerRow.addCell(headerCell);
     table.addRow(headerRow);
 
@@ -940,7 +941,7 @@ async function createCalendarWidget() {
     ? widget.presentSmall()
     : widgetFamily === "medium"
     ? widget.presentMedium()
-//    : widget.presentLarge();
+//   : widget.presentLarge();
     : await table.present(true);
 }
 
