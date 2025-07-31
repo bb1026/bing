@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v3.1";
+this.version = "v3.2";
 
 let installation, calendar;
 await CheckKu();
@@ -502,10 +502,10 @@ async function createCalendarWidget() {
     dayRow.centerAlignContent();
     dayRow.addSpacer();
     const dText = dayRow.addText(formatDate(today) + viewLunar);
-    dText.font = Font.boldSystemFont(20);
+    dText.font = Font.boldSystemFont(18);
     dText.centerAlignText();
     dayRow.addSpacer();
-    widget.addSpacer();
+    widget.addSpacer(2);
 
     const weekRow = WidgetUtils.createCenteredRow(widget);
     WEEK_DAYS.forEach((day, i) => {
@@ -530,7 +530,7 @@ async function createCalendarWidget() {
       for (let j = 0; j < 7; j++) {
         const dateCell = dateRow.addStack();
         dateCell.layoutVertically();
-        dateCell.size = new Size(50, 50);
+        dateCell.size = new Size(50, 48);
         dateCell.centerAlignContent();
 
         if ((i === 0 && j < firstDayOfWeek) || currentDate > daysInMonth) {
@@ -545,7 +545,7 @@ async function createCalendarWidget() {
 
         // 日期数字
         const dayStack = dateCell.addStack();
-        dayStack.size = new Size(50, 20);
+        dayStack.size = new Size(50, 18);
         dayStack.centerAlignContent();
         const dayText = WidgetUtils.createDateText(
           dayStack,
@@ -556,7 +556,7 @@ async function createCalendarWidget() {
 
         // 事件圆点
         const dotCell = dateCell.addStack();
-        dotCell.size = new Size(50, 6);
+        dotCell.size = new Size(50, 5);
         dotCell.centerAlignContent();
 
         const dayStart = new Date(date);
@@ -602,7 +602,7 @@ async function createCalendarWidget() {
 
         // 农历信息
         const lunarStack = dateCell.addStack();
-        lunarStack.size = new Size(50, 20);
+        lunarStack.size = new Size(50, 18);
         const isTerm = WidgetUtils.getIsTerm(date);
         const lunarDisplay = WidgetUtils.getLunarDisplayDate(
           date,
@@ -637,7 +637,7 @@ async function createCalendarWidget() {
 
         const lunarText = lunarStack.addText(displayContent);
 
-        lunarText.font = Font.mediumSystemFont(14);
+        lunarText.font = Font.mediumSystemFont(13);
         if (isTerm || eventOutput) {
           lunarText.textColor = COLORS.weekend;
         }
@@ -707,7 +707,7 @@ async function createCalendarWidget() {
       const datePrefix = `${formatDate(eventDate)} `;
       return datePrefix + event.title;
     }
-    widget.addSpacer();
+//     widget.addSpacer();
     widget.url = "calshow://";
   }
 
@@ -941,8 +941,8 @@ async function createCalendarWidget() {
     ? widget.presentSmall()
     : widgetFamily === "medium"
     ? widget.presentMedium()
-//   : widget.presentLarge();
-    : await table.present(true);
+    : widget.presentLarge();
+//     : await table.present(true);
 }
 
 await createCalendarWidget();
