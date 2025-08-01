@@ -183,13 +183,13 @@
   },
   "js-115": {
     "name": "考勤记录",
-    "version": "v1.4",
+    "version": "v1.5",
     "ID": "js-115",
     "argsID": "",
     "small": false,
     "medium": false,
     "large": false,
-    "update": "修复关闭按钮后时间统计不正确",
+    "update": "修复打开时显示问题",
     "url": "js/js-115.js",
     "introduction": "记录加班，不支持更新",
     "icon": "fa-th-list"
