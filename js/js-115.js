@@ -46,8 +46,20 @@ function loadData() {
 }
 loadData();
 
-let currentYear = new Date().getFullYear();
-let currentMonth = new Date().getMonth();
+let now = new Date();
+let fromDay = +settings.fromDay || 1;
+let toDay = +settings.toDay || 1;
+
+let currentYear = now.getFullYear();
+let currentMonth = now.getMonth();
+
+if (settings.dateRangeMode === "custom") {
+  if (fromDay > toDay && now.getDate() < fromDay) {
+    // 说明今天在“上一个周期”内
+    currentMonth = (currentMonth + 11) % 12;
+    if (currentMonth === 11) currentYear--;
+  }
+}
 
 const webView = new WebView();
 
@@ -69,7 +81,7 @@ body {
 }
 .day { 
   padding: 6px; 
-  border: 1px solid #ccc; 
+  border: 1px solid #ccc;
   text-align: center; 
   font-size: 18px; 
   cursor: pointer;
@@ -915,13 +927,30 @@ function nextMonth() {
 
 function goCurrentMonth() {
   const now = new Date();
-  raw.currentYear = now.getFullYear();
-  raw.currentMonth = now.getMonth();
-  window._result = JSON.stringify({ 
-    type: 'change-month', 
-    year: raw.currentYear, 
-    month: raw.currentMonth 
+  const settings = raw.settings;
+  let year = now.getFullYear();
+  let month = now.getMonth();
+
+  if (settings.dateRangeMode === "custom") {
+    const fromDay = +settings.fromDay;
+    const toDay = +settings.toDay;
+
+    if (fromDay > toDay && now.getDate() < fromDay) {
+      // 说明还在上一个自定义区间内
+      month = (month + 11) % 12;
+      if (month === 11) year--; // 1月时向去年回退
+    }
+  }
+
+  raw.currentYear = year;
+  raw.currentMonth = month;
+
+  window._result = JSON.stringify({
+    type: 'change-month',
+    year: raw.currentYear,
+    month: raw.currentMonth
   });
+
   render();
 }
 
