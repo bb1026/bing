@@ -3,17 +3,11 @@
 // icon-color: deep-brown; icon-glyph: sync;
 this.name = "Panda Remit";
 this.widget_ID = "js-102";
-this.version = "v2.85";
+this.version = "v2.9";
 
-// 检查更新
 let installation, searchCurrency, currencyData, getUrls;
 await CheckKu();
 await installation(this.widget_ID, this.version);
-
-/* 
-以上为获取更新代码
-以下开始运行代码
-*/
 
 const Moneycode = args.widgetParameter
   ? args.widgetParameter.includes(";")
@@ -49,41 +43,9 @@ async function Code_Change(code) {
   return currencyData?.[code]?.zh_currency_abbr || code;
 }
 
-// 工具函数：加载图片（异步调用）
 async function getImage() {
   const request = new Request(picurl);
-  return request.loadImage(); // 返回的是一个 Promise
-}
-
-// 确认手续费是否为小于10
-function isLess10(num) {
-  const Less10 = num < 10;
-  return Less10;
-}
-
-// 工具函数：发送通知（限制为当天一次）
-function sendNotificationOnce(fee, huiOut, fromCurrency, toCurrency) {
-  const todayKey = getTodayKey(fee);
-  // 使用手续费生成当天唯一键
-  if (!Keychain.contains(todayKey) && toCurrency === "CNY") {
-    let notification = new Notification();
-    notification.title = `手续费降低到${fee} 新币`;
-    notification.body = `${fromCurrency} → ${toCurrency}\n当前汇率 ${huiOut}`;
-    notification.openURL = "PandaRemit://";
-    notification.schedule();
-
-    // 记录已通知状态
-    Keychain.set(todayKey, "notified");
-  }
-}
-
-// 工具函数：生成当日唯一键值
-function getTodayKey(fee) {
-  const today = new Date();
-  const dateKey = `${today.getFullYear()}-${
-    today.getMonth() + 1
-  }-${today.getDate()}`;
-  return `panda-remit-${fee}-${dateKey}`;
+  return request.loadImage();
 }
 
 async function createWidget() {
@@ -151,9 +113,6 @@ async function createWidget() {
         ? Color.blue()
         : Color.black();
 
-      const feeText = widget.addText(`费用: $${fee}`);
-      feeText.textColor = fee > 0 ? Color.black() : Color.red();
-
       const t = widget.addText(
         `Update: ${new Date().toLocaleTimeString("en-US", {
           hour12: false,
@@ -162,9 +121,6 @@ async function createWidget() {
         })}`
       );
       t.font = Font.systemFont(12);
-      if (await isLess10(fee)) {
-        sendNotificationOnce(fee, huiOut, fromCurrency, toCurrency);
-      }
     }
   }
   return { widget, result };
