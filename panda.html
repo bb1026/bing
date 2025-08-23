@@ -23,20 +23,20 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             width: 150px;
-            height: 36px; /* 统一高度 */
+            height: 36px;
             margin: 10px 5px;
-            box-sizing: border-box; /* 确保 padding 不影响尺寸 */
+            box-sizing: border-box;
             font-size: 16px;
         }
         select {
-            appearance: none; /* 去除浏览器默认样式 */
+            appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-color: white; /* 确保背景色与 input 一致 */
+            background-color: white;
             text-align: center;
         }
         select::-ms-expand {
-            display: none; /* 隐藏 IE 选择框默认箭头 */
+            display: none;
         }
         .exchange-rate {
             margin-top: 20px;
@@ -61,6 +61,30 @@
         .swap-btn:hover {
             background: #0056b3;
         }
+        .open-app-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background: #28a745;
+            color: white;
+            border-radius: 5px;
+            text-align: center;
+            width: 220px;
+        }
+        .open-app-btn:hover {
+            background: #218838;
+        }
+        .source-link {
+            color: #007BFF;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .source-link:hover {
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -80,8 +104,11 @@
         <button class="swap-btn" onclick="swapCurrencies()">↑ ↓</button>
     </div>
 
+    <!-- 新增打开应用按钮 -->
+    <button class="open-app-btn" onclick="openPandaRemit()">打开 Panda Remit 应用</button>
+
     <div class="source">
-        数据来源 <a href="https://www.pandaremit.com/zh" target="_blank">熊猫汇款(Panda Remit)</a>
+        数据来源 <span class="source-link" onclick="openPandaRemitWebsite()">熊猫汇款(Panda Remit)</span>
     </div>
 
     <script>
@@ -178,6 +205,15 @@
                     console.error('获取汇率数据错误:', error);
                     document.getElementById("exchangeRate").innerHTML = `<p>获取汇率数据错误，请稍后再试。</p>`;
                 });
+        }
+        function openPandaRemit() {
+            window.location.href = 'PandaRemit://';
+            setTimeout(function() {
+                window.location.href = 'https://www.pandaremit.com/zh';
+            }, 500);
+        }
+        function openPandaRemitWebsite() {
+            window.location.href = 'https://www.pandaremit.com/zh';
         }
     </script>
 </body>
