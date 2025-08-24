@@ -23,20 +23,20 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             width: 150px;
-            height: 36px; /* 统一高度 */
+            height: 36px;
             margin: 10px 5px;
-            box-sizing: border-box; /* 确保 padding 不影响尺寸 */
+            box-sizing: border-box;
             font-size: 16px;
         }
         select {
-            appearance: none; /* 去除浏览器默认样式 */
+            appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-color: white; /* 确保背景色与 input 一致 */
+            background-color: white;
             text-align: center;
         }
         select::-ms-expand {
-            display: none; /* 隐藏 IE 选择框默认箭头 */
+            display: none;
         }
         .exchange-rate {
             margin-top: 20px;
@@ -61,9 +61,31 @@
         .swap-btn:hover {
             background: #0056b3;
         }
+        /* 新增熊猫图片样式 */
+        .panda-logo {
+            display: block;
+            margin: 0 auto 20px auto;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            animation: rotate 15s linear infinite;
+            object-fit: cover;
+        }
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- 添加熊猫图片 -->
+    <img src="https://bing.0515364.xyz/imgs/Panda_Remit.JPG" alt="Panda Remit Logo" class="panda-logo">
+    
     <h1>实时汇率</h1>
 
     <div class="exchange-rate" id="exchangeRate">
