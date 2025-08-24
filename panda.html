@@ -1,206 +1,284 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>实时汇率</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-        }
-        .calculator {
-            margin-top: 20px;
-            text-align: center;
-        }
-        input[type="number"],
-        select {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 150px;
-            height: 36px;
-            margin: 10px 5px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-color: white;
-            text-align: center;
-        }
-        select::-ms-expand {
-            display: none;
-        }
-        .exchange-rate {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .source {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 12px;
-            color: #666;
-        }
-        .swap-btn {
-            padding: 5px 10px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            background: #007BFF;
-            color: white;
-            border-radius: 5px;
-            margin: 10px;
-        }
-        .swap-btn:hover {
-            background: #0056b3;
-        }
-        /* 新增熊猫图片样式 */
-        .panda-logo {
-            display: block;
-            margin: 0 auto 20px auto;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
-            animation: rotate 15s linear infinite;
-            object-fit: cover;
-        }
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>实时汇率</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    h1 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
+    .calculator { margin-top: 20px; text-align: center; }
+    input[type="number"], select {
+      padding: 8px; border: 1px solid #ccc; border-radius: 5px;
+      width: 150px; height: 36px; margin: 10px 5px;
+      box-sizing: border-box; font-size: 16px;
+    }
+    select { appearance: none; background-color: white; text-align: center; }
+    .exchange-rate {
+      margin-top: 20px; text-align: center; padding: 10px;
+      background: #f8f9fa; border-radius: 8px;
+    }
+    .source { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+    .swap-btn {
+      padding: 5px 10px; font-size: 16px; cursor: pointer; border: none;
+      background: #007BFF; color: white; border-radius: 5px; margin: 10px;
+      transition: all 0.3s;
+    }
+    .swap-btn:hover { background: #0056b3; transform: scale(1.05); }
+    .panda-container { position: relative; width: 150px; height: 150px; margin: 0 auto 20px auto; cursor: pointer; }
+    .panda-logo { display: block; width: 100%; height: 100%; border-radius: 50%; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); object-fit: cover; transform-origin: center; }
+    .mini-panda { position: absolute; width: 40px; height: 40px; border-radius: 50%; background-image: url('https://bing.0515364.xyz/imgs/Panda_Remit.JPG'); background-size: cover; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); animation: float 3s ease-in-out infinite; z-index: 10; }
+    @keyframes bounce {
+      0% { transform: scale(1) rotate(var(--current-rotation,0deg)); }
+      30% { transform: scale(1.2) rotate(var(--current-rotation,0deg)); }
+      50% { transform: scale(0.9) rotate(var(--current-rotation,0deg)); }
+      70% { transform: scale(1.1) rotate(var(--current-rotation,0deg)); }
+      100% { transform: scale(1) rotate(var(--current-rotation,0deg)); }
+    }
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0px); }
+    }
+    .click-hint { text-align: center; color: #7f8c8d; font-size: 14px; margin-top: 5px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% {opacity:0.6;} 50% {opacity:1;} 100% {opacity:0.6;} }
+  </style>
 </head>
 <body>
-    <!-- 添加熊猫图片 -->
-    <img src="https://bing.0515364.xyz/imgs/Panda_Remit.JPG" alt="Panda Remit Logo" class="panda-logo">
+  <div class="container">
+    <div class="panda-container" id="pandaContainer">
+      <img src="https://bing.0515364.xyz/imgs/Panda_Remit.JPG" alt="Panda Remit Logo" class="panda-logo" id="pandaLogo">
+    </div>
+    <div class="click-hint">点击熊猫有惊喜！</div>
     
     <h1>实时汇率</h1>
-
-    <div class="exchange-rate" id="exchangeRate">
-        <p>加载中...</p>
-    </div>
+    <div class="exchange-rate" id="exchangeRate"><p>加载中...</p></div>
     
     <div class="calculator">
-        <input type="number" id="num1" value="100" oninput="updateResult('num1', 'num2', 'multiply')" onblur="removeLeadingZero('num1')">
-        <select id="fromCurrency" onchange="fetchExchangeRate()"></select>
-        <br>
-        <input type="number" id="num2" oninput="updateResult('num2', 'num1', 'divide')" onblur="removeLeadingZero('num2')">
-        <select id="toCurrency" onchange="fetchExchangeRate()"></select>
-        <br>
-        <button class="swap-btn" onclick="swapCurrencies()">↑ ↓</button>
+      <input type="number" id="num1" value="100" oninput="updateResult('num1','num2','multiply')" onblur="removeLeadingZero('num1')">
+      <select id="fromCurrency"></select><br>
+      <input type="number" id="num2" oninput="updateResult('num2','num1','divide')" onblur="removeLeadingZero('num2')">
+      <select id="toCurrency"></select><br>
+      <button class="swap-btn" onclick="swapCurrencies()">↑ ↓ 切换货币</button>
     </div>
+    <div class="source">数据来源 <a href="https://www.pandaremit.com/zh" target="_blank">熊猫汇款(Panda Remit)</a></div>
+  </div>
 
-    <div class="source">
-        数据来源 <a href="https://www.pandaremit.com/zh" target="_blank">熊猫汇款(Panda Remit)</a>
-    </div>
+<script>
+const currencyOptions = [
+  { value: "CNY", text: "CNY 中国" },
+  { value: "SGD", text: "SGD 新加坡" },
+  { value: "MYR", text: "MYR 马来西亚" },
+  { value: "HKD", text: "HKD 香港" },
+  { value: "USD", text: "USD 美国" },
+  { value: "JPY", text: "JPY 日本" },
+  { value: "THB", text: "THB 泰国" },
+  { value: "KRW", text: "KRW 韩国" }
+];
 
-    <script>
-        const currencyOptions = [
-            { value: "CNY", text: "CNY 中国" },
-            { value: "SGD", text: "SGD 新加坡" },
-            { value: "MYR", text: "MYR 马来西亚" },
-            { value: "HKD", text: "HKD 香港" },
-            { value: "USD", text: "USD 美国" },
-            { value: "JPY", text: "JPY 日本" },
-            { value: "THB", text: "THB 泰国" },
-            { value: "KRW", text: "KRW 韩国" }
-        ];
+function initCurrencySelect(id) {
+  const select = document.getElementById(id);
+  currencyOptions.forEach(option => {
+    let opt = document.createElement("option");
+    opt.value = option.value;
+    opt.textContent = option.text;
+    select.appendChild(opt);
+  });
+}
 
-        function initCurrencySelect(id) {
-            const select = document.getElementById(id);
-            currencyOptions.forEach(option => {
-                let opt = document.createElement("option");
-                opt.value = option.value;
-                opt.textContent = option.text;
-                select.appendChild(opt);
-            });
-        }
+// 解析 URL 中 test.html/SGDCNY 或 test.html/CNYSGD
+function getCurrencyPairFromUrl() {
+  const pathParts = window.location.pathname.split("/");
+  const lastPart = pathParts[pathParts.length - 1];
+  if (lastPart.includes(".html")) return null;
+  const maybePair = lastPart.toUpperCase();
+  if (maybePair.length === 6) {
+    const from = maybePair.slice(0, 3);
+    const to = maybePair.slice(3, 6);
+    const validCodes = currencyOptions.map(c => c.value);
+    if (validCodes.includes(from) && validCodes.includes(to)) {
+      return [from, to];
+    }
+  }
+  return null;
+}
 
-        document.addEventListener("DOMContentLoaded", function() {
-            initCurrencySelect("fromCurrency");
-            initCurrencySelect("toCurrency");
+// 更新 URL 为 test.html/SGDCNY
+function updateUrlWithCurrencies(from, to) {
+  const pathParts = window.location.pathname.split("/");
+  const baseFile = pathParts.find(p => p.includes(".html"));
+  const newPath = `/${baseFile}/${from}${to}`;
+  window.history.replaceState({}, "", newPath);
+}
 
-            // 设置默认货币对 SGD → CNY
-            document.getElementById("fromCurrency").value = "SGD";
-            document.getElementById("toCurrency").value = "CNY";
+document.addEventListener("DOMContentLoaded", function() {
+  initCurrencySelect("fromCurrency");
+  initCurrencySelect("toCurrency");
 
-            fetchExchangeRate();
-        });
+  const pair = getCurrencyPairFromUrl();
+  const fromCurrency = document.getElementById("fromCurrency");
+  const toCurrency = document.getElementById("toCurrency");
 
-        function swapCurrencies() {
-            let fromCurrency = document.getElementById("fromCurrency");
-            let toCurrency = document.getElementById("toCurrency");
-            let tempValue = fromCurrency.value;
-            fromCurrency.value = toCurrency.value;
-            toCurrency.value = tempValue;
-            fetchExchangeRate(); // 交换后更新汇率
-        }
+  if (pair) {
+    fromCurrency.value = pair[0];
+    toCurrency.value = pair[1];
+  } else {
+    fromCurrency.value = "SGD";
+    toCurrency.value = "CNY";
+    updateUrlWithCurrencies("SGD","CNY");
+  }
+  fetchExchangeRate();
 
-        function updateResult(inputId, outputId, operation) {
-            const inputElement = document.getElementById(inputId);
-            const outputElement = document.getElementById(outputId);
-            const exchangeRateElement = document.getElementById("exchangeRateValue");
+  fromCurrency.addEventListener("change", () => {
+    updateUrlWithCurrencies(fromCurrency.value, toCurrency.value);
+    fetchExchangeRate();
+  });
+  toCurrency.addEventListener("change", () => {
+    updateUrlWithCurrencies(fromCurrency.value, toCurrency.value);
+    fetchExchangeRate();
+  });
 
-            if (!exchangeRateElement) return;
+  startSmoothRotation();
+});
 
-            const inputNumber = parseFloat(inputElement.value) || 0;
-            const exchangeRate = parseFloat(exchangeRateElement.innerText);
+function swapCurrencies() {
+  let fromCurrency = document.getElementById("fromCurrency");
+  let toCurrency = document.getElementById("toCurrency");
+  let tempValue = fromCurrency.value;
+  fromCurrency.value = toCurrency.value;
+  toCurrency.value = tempValue;
+  updateUrlWithCurrencies(fromCurrency.value, toCurrency.value);
+  fetchExchangeRate();
+}
 
-            if (!exchangeRate) {
-                outputElement.value = "";
-                return;
-            }
+function updateResult(inputId, outputId, operation) {
+  const inputElement = document.getElementById(inputId);
+  const outputElement = document.getElementById(outputId);
+  const exchangeRateElement = document.getElementById("exchangeRateValue");
+  if (!exchangeRateElement) return;
+  const inputNumber = parseFloat(inputElement.value) || 0;
+  const exchangeRate = parseFloat(exchangeRateElement.innerText);
+  if (!exchangeRate) { outputElement.value=""; return; }
+  let result;
+  if (operation==="multiply") result = (inputNumber*exchangeRate).toFixed(2);
+  else if (operation==="divide" && inputNumber!==0) result = (inputNumber/exchangeRate).toFixed(2);
+  else result="";
+  outputElement.value=result;
+}
+function removeLeadingZero(id) {
+  const el=document.getElementById(id);
+  el.value=el.value.replace(/^0+(?=\d)/,'')||"0";
+}
+function fetchExchangeRate() {
+  const from=document.getElementById("fromCurrency").value;
+  const to=document.getElementById("toCurrency").value;
+  fetch(`https://prod.pandaremit.com/pricing/rate/${from}/${to}`)
+    .then(r=>r.json())
+    .then(data=>{
+      const rate=parseFloat(data.model.pandaRate).toFixed(4);
+      const c=data.model.code, t=data.model.target;
+      document.getElementById("exchangeRate").innerHTML=
+        `<p style="font-size:20px;font-weight:bold;">1 ${c} = <span id="exchangeRateValue">${rate}</span> ${t}</p>`;
+      updateResult('num1','num2','multiply');
+    })
+    .catch(()=>{
+      document.getElementById("exchangeRate").innerHTML="<p>获取汇率数据错误，请稍后再试。</p>";
+    });
+}
 
-            let result;
-            if (operation === "multiply") {
-                result = (inputNumber * exchangeRate).toFixed(2);
-            } else if (operation === "divide" && inputNumber !== 0) {
-                result = (inputNumber / exchangeRate).toFixed(2);
-            } else {
-                result = "";
-            }
+// ========= 🐼 熊猫动画部分 =========
+const pandaLogo = document.getElementById('pandaLogo');
+const pandaContainer = document.getElementById('pandaContainer');
+let clickCount = 0;
+let currentRotation = 0;
+let animationId = null;
+let isAnimating = false;
+let lastTimestamp = 0;
+let rotationSpeed = 0.5;
 
-            outputElement.value = result;
-        }
+function startSmoothRotation() {
+  if (animationId) cancelAnimationFrame(animationId);
+  function animate(timestamp) {
+    if (!lastTimestamp) lastTimestamp = timestamp;
+    const elapsed = timestamp - lastTimestamp;
+    if (elapsed > 16) {
+      currentRotation = (currentRotation + rotationSpeed) % 360;
+      pandaLogo.style.transform = `rotate(${currentRotation}deg)`;
+      lastTimestamp = timestamp;
+    }
+    animationId = requestAnimationFrame(animate);
+  }
+  animationId = requestAnimationFrame(animate);
+}
 
-        function removeLeadingZero(inputId) {
-            const inputElement = document.getElementById(inputId);
-            inputElement.value = inputElement.value.replace(/^0+(?=\d)/, '') || "0";
-        }
+pandaLogo.addEventListener('click', function(e) {
+  if (isAnimating) return;
+  isAnimating = true;
+  if (animationId) cancelAnimationFrame(animationId);
+  this.style.setProperty('--current-rotation', `${currentRotation}deg`);
+  this.style.animation = 'bounce 0.5s ease forwards';
+  createMiniPanda(e);
+  setTimeout(() => {
+    this.style.animation = '';
+    startSmoothRotation();
+    isAnimating = false;
+  }, 500);
+  clickCount++;
+  if (clickCount > 5) {
+    document.querySelector('.click-hint').textContent = `已创建 ${clickCount} 只小熊猫！`;
+  }
+});
 
-        function fetchExchangeRate() {
-            const fromCurrency = document.getElementById("fromCurrency").value;
-            const toCurrency = document.getElementById("toCurrency").value;
-            fetch(`https://prod.pandaremit.com/pricing/rate/${fromCurrency}/${toCurrency}`)
-                .then(response => response.json())
-                .then(data => {
-                    const exchangeRate = parseFloat(data.model.pandaRate).toFixed(4);
-                    const currency = data.model.code;
-                    const targetCurrency = data.model.target;
-                    document.getElementById("exchangeRate").innerHTML = `
-                        <p style="font-size: 20px; font-weight: bold;">
-                            1 ${currency} = <span id="exchangeRateValue">${exchangeRate}</span> ${targetCurrency}
-                        </p>
-                    `;
-                    updateResult('num1', 'num2', 'multiply');
-                })
-                .catch(error => {
-                    console.error('获取汇率数据错误:', error);
-                    document.getElementById("exchangeRate").innerHTML = `<p>获取汇率数据错误，请稍后再试。</p>`;
-                });
-        }
-    </script>
+function createMiniPanda(e) {
+  const rect = pandaContainer.getBoundingClientRect();
+  const maxX = rect.width - 40;
+  const maxY = rect.height - 40;
+  const x = Math.floor(Math.random() * maxX);
+  const y = Math.floor(Math.random() * maxY);
+  const miniPanda = document.createElement('div');
+  miniPanda.className = 'mini-panda';
+  miniPanda.style.left = `${x}px`;
+  miniPanda.style.top = `${y}px`;
+  miniPanda.style.animationDelay = `${Math.random() * 2}s`;
+  pandaContainer.appendChild(miniPanda);
+  setTimeout(() => {
+    miniPanda.style.opacity = '0';
+    miniPanda.style.transform = 'scale(0.5)';
+    setTimeout(() => {
+      if (miniPanda.parentNode) pandaContainer.removeChild(miniPanda);
+    }, 300);
+  }, 2000);
+}
+
+document.addEventListener('wheel', function(e) {
+  if (e.ctrlKey) e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=')) {
+    e.preventDefault();
+  }
+});
+
+if ('connection' in navigator && navigator.connection.saveData === true) {
+  rotationSpeed = 0.3;
+}
+</script>
 </body>
 </html>
