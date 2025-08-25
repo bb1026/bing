@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>实时汇率</title>
+  <title>Panda Remit 实时汇率</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,6 +13,8 @@
       min-height: 100vh;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      position: relative;
+      overflow-x: hidden;
     }
     .container {
       max-width: 600px;
@@ -41,33 +43,36 @@
       transition: all 0.3s;
     }
     .swap-btn:hover { background: #0056b3; transform: scale(1.05); }
-    .panda-container { position: relative; width: 150px; height: 150px; margin: 0 auto 20px auto; cursor: pointer; }
+    .panda-container { position: relative; width: 150px; height: 150px; margin: 0 auto 20px auto; cursor: default; }
     .panda-logo { display: block; width: 100%; height: 100%; border-radius: 50%; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); object-fit: cover; transform-origin: center; }
-    .mini-panda { position: absolute; width: 40px; height: 40px; border-radius: 50%; background-image: url('https://bing.0515364.xyz/imgs/Panda_Remit.JPG'); background-size: cover; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); animation: float 3s ease-in-out infinite; z-index: 10; }
-    @keyframes bounce {
-      0% { transform: scale(1) rotate(var(--current-rotation,0deg)); }
-      30% { transform: scale(1.2) rotate(var(--current-rotation,0deg)); }
-      50% { transform: scale(0.9) rotate(var(--current-rotation,0deg)); }
-      70% { transform: scale(1.1) rotate(var(--current-rotation,0deg)); }
-      100% { transform: scale(1) rotate(var(--current-rotation,0deg)); }
+    .click-hint { text-align: center; color: #7f8c8d; font-size: 14px; margin-top: 5px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% {opacity:0.6;} 50% {opacity:1;} 100% {opacity:0.6;} }
+    .mini-panda {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-image: url('https://bing.0515364.xyz/imgs/Panda_Remit.JPG');
+      background-size: cover;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      position: absolute;
+      z-index: 9999;
+      animation: float 3s ease-in-out infinite;
     }
     @keyframes float {
       0% { transform: translateY(0px); }
       50% { transform: translateY(-8px); }
       100% { transform: translateY(0px); }
     }
-    .click-hint { text-align: center; color: #7f8c8d; font-size: 14px; margin-top: 5px; animation: pulse 2s infinite; }
-    @keyframes pulse { 0% {opacity:0.6;} 50% {opacity:1;} 100% {opacity:0.6;} }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="panda-container" id="pandaContainer">
+    <div class="panda-container">
       <img src="https://bing.0515364.xyz/imgs/Panda_Remit.JPG" alt="Panda Remit Logo" class="panda-logo" id="pandaLogo">
     </div>
-    <div class="click-hint">点击熊猫有惊喜！</div>
+    <div class="click-hint">点击页面有惊喜！</div>
     
-    <h1>实时汇率</h1>
+    <h1>Panda Remit</h1>
     <div class="exchange-rate" id="exchangeRate"><p>加载中...</p></div>
     
     <div class="calculator">
@@ -102,71 +107,32 @@ function initCurrencySelect(id) {
   });
 }
 
-// 解析 URL 中 test.html/SGDCNY 或 test.html/CNYSGD
-function getCurrencyPairFromUrl() {
-  const pathParts = window.location.pathname.split("/");
-  const lastPart = pathParts[pathParts.length - 1];
-  if (lastPart.includes(".html")) return null;
-  const maybePair = lastPart.toUpperCase();
-  if (maybePair.length === 6) {
-    const from = maybePair.slice(0, 3);
-    const to = maybePair.slice(3, 6);
-    const validCodes = currencyOptions.map(c => c.value);
-    if (validCodes.includes(from) && validCodes.includes(to)) {
-      return [from, to];
-    }
-  }
-  return null;
-}
-
-// 更新 URL 为 test.html/SGDCNY
-function updateUrlWithCurrencies(from, to) {
-  const pathParts = window.location.pathname.split("/");
-  const baseFile = pathParts.find(p => p.includes(".html"));
-  const newPath = `/${baseFile}/${from}${to}`;
-  window.history.replaceState({}, "", newPath);
-}
-
 document.addEventListener("DOMContentLoaded", function() {
   initCurrencySelect("fromCurrency");
   initCurrencySelect("toCurrency");
 
-  const pair = getCurrencyPairFromUrl();
-  const fromCurrency = document.getElementById("fromCurrency");
-  const toCurrency = document.getElementById("toCurrency");
+  document.getElementById("fromCurrency").value = "SGD";
+  document.getElementById("toCurrency").value = "CNY";
 
-  if (pair) {
-    fromCurrency.value = pair[0];
-    toCurrency.value = pair[1];
-  } else {
-    fromCurrency.value = "SGD";
-    toCurrency.value = "CNY";
-    updateUrlWithCurrencies("SGD","CNY");
-  }
   fetchExchangeRate();
 
-  fromCurrency.addEventListener("change", () => {
-    updateUrlWithCurrencies(fromCurrency.value, toCurrency.value);
-    fetchExchangeRate();
-  });
-  toCurrency.addEventListener("change", () => {
-    updateUrlWithCurrencies(fromCurrency.value, toCurrency.value);
-    fetchExchangeRate();
-  });
+  document.getElementById("fromCurrency").addEventListener("change", fetchExchangeRate);
+  document.getElementById("toCurrency").addEventListener("change", fetchExchangeRate);
 
   startSmoothRotation();
 });
 
+// 交换货币
 function swapCurrencies() {
   let fromCurrency = document.getElementById("fromCurrency");
   let toCurrency = document.getElementById("toCurrency");
   let tempValue = fromCurrency.value;
   fromCurrency.value = toCurrency.value;
   toCurrency.value = tempValue;
-  updateUrlWithCurrencies(fromCurrency.value, toCurrency.value);
   fetchExchangeRate();
 }
 
+// 汇率计算器逻辑
 function updateResult(inputId, outputId, operation) {
   const inputElement = document.getElementById(inputId);
   const outputElement = document.getElementById(outputId);
@@ -185,6 +151,8 @@ function removeLeadingZero(id) {
   const el=document.getElementById(id);
   el.value=el.value.replace(/^0+(?=\d)/,'')||"0";
 }
+
+// 获取汇率
 function fetchExchangeRate() {
   const from=document.getElementById("fromCurrency").value;
   const to=document.getElementById("toCurrency").value;
@@ -202,13 +170,43 @@ function fetchExchangeRate() {
     });
 }
 
-// ========= 🐼 熊猫动画部分 =========
-const pandaLogo = document.getElementById('pandaLogo');
-const pandaContainer = document.getElementById('pandaContainer');
+// ========= 🐼 点击页面生成小熊猫 =========
 let clickCount = 0;
+
+document.addEventListener('click', function(e) {
+  // 避免点击输入框或按钮触发
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') return;
+
+  createMiniPandaAt(e.clientX, e.clientY);
+  clickCount++;
+  if (clickCount > 5) {
+    const hint = document.querySelector('.click-hint');
+    if(hint) hint.textContent = `已创建 ${clickCount} 只小熊猫！`;
+  }
+});
+
+function createMiniPandaAt(x, y) {
+  const miniPanda = document.createElement('div');
+  miniPanda.className = 'mini-panda';
+  miniPanda.style.left = `${x - 20}px`;
+  miniPanda.style.top = `${y - 20}px`;
+  miniPanda.style.animationDelay = `${Math.random() * 2}s`;
+  document.body.appendChild(miniPanda);
+
+  setTimeout(() => {
+    miniPanda.style.transition = 'all 0.3s';
+    miniPanda.style.opacity = '0';
+    miniPanda.style.transform = 'scale(0.5)';
+    setTimeout(() => {
+      if (miniPanda.parentNode) miniPanda.parentNode.removeChild(miniPanda);
+    }, 300);
+  }, 2000);
+}
+
+// ========= 🐼 熊猫 Logo 旋转 =========
+const pandaLogo = document.getElementById('pandaLogo');
 let currentRotation = 0;
 let animationId = null;
-let isAnimating = false;
 let lastTimestamp = 0;
 let rotationSpeed = 0.5;
 
@@ -226,55 +224,6 @@ function startSmoothRotation() {
   }
   animationId = requestAnimationFrame(animate);
 }
-
-pandaLogo.addEventListener('click', function(e) {
-  if (isAnimating) return;
-  isAnimating = true;
-  if (animationId) cancelAnimationFrame(animationId);
-  this.style.setProperty('--current-rotation', `${currentRotation}deg`);
-  this.style.animation = 'bounce 0.5s ease forwards';
-  createMiniPanda(e);
-  setTimeout(() => {
-    this.style.animation = '';
-    startSmoothRotation();
-    isAnimating = false;
-  }, 500);
-  clickCount++;
-  if (clickCount > 5) {
-    document.querySelector('.click-hint').textContent = `已创建 ${clickCount} 只小熊猫！`;
-  }
-});
-
-function createMiniPanda(e) {
-  const rect = pandaContainer.getBoundingClientRect();
-  const maxX = rect.width - 40;
-  const maxY = rect.height - 40;
-  const x = Math.floor(Math.random() * maxX);
-  const y = Math.floor(Math.random() * maxY);
-  const miniPanda = document.createElement('div');
-  miniPanda.className = 'mini-panda';
-  miniPanda.style.left = `${x}px`;
-  miniPanda.style.top = `${y}px`;
-  miniPanda.style.animationDelay = `${Math.random() * 2}s`;
-  pandaContainer.appendChild(miniPanda);
-  setTimeout(() => {
-    miniPanda.style.opacity = '0';
-    miniPanda.style.transform = 'scale(0.5)';
-    setTimeout(() => {
-      if (miniPanda.parentNode) pandaContainer.removeChild(miniPanda);
-    }, 300);
-  }, 2000);
-}
-
-document.addEventListener('wheel', function(e) {
-  if (e.ctrlKey) e.preventDefault();
-}, { passive: false });
-
-document.addEventListener('keydown', function(e) {
-  if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=')) {
-    e.preventDefault();
-  }
-});
 
 if ('connection' in navigator && navigator.connection.saveData === true) {
   rotationSpeed = 0.3;
