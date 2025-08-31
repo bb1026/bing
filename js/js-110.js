@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v3.2";
+this.version = "v3.3";
 
 let installation, calendar;
 await CheckKu();
@@ -48,7 +48,7 @@ const WEEK_DAYS_FULL = [
 
 const COLORS = {
   weekend: Color.red(),
-  todayBorder: Color.blue()
+  todayBorder: new Color("#FF6600")
 };
 
 const lunarCache = {};
@@ -180,6 +180,8 @@ async function sendNotificationIfNeeded(today, events) {
       e => e.title.trim().replace(/（.*?）|\(.*?\)/g, "") // 去除括号用于展示
     );
 
+  console.log(todayEvents);
+
   // 获取节气信息
   const term = WidgetUtils.getIsTerm(today) ? WidgetUtils.getTerm(today) : null;
 
@@ -190,9 +192,9 @@ async function sendNotificationIfNeeded(today, events) {
   const lunar = WidgetUtils.getLunarData(today);
   const dateStr = formatDate(today);
   const lunarStr = `${lunar.IMonthCn}${lunar.IDayCn}`;
-//   const eventStr = todayEvents.join("、");
+  //   const eventStr = todayEvents.join("、");
 
-  const body = [dateStr, lunarStr, term].filter(Boolean).join(" ");
+  const body = [dateStr, lunarStr, term, todayEvents].filter(Boolean).join(" ");
 
   // 发送通知并记录
   const notification = new Notification();
@@ -205,7 +207,7 @@ async function sendNotificationIfNeeded(today, events) {
 }
 
 const lunarData = calendar.solar2lunar();
-const viewLunar = `•${lunarData.gzYear}年${lunarData.IMonthCn}${lunarData.IDayCn}`
+const viewLunar = `•${lunarData.gzYear}年${lunarData.IMonthCn}${lunarData.IDayCn}`;
 
 async function createCalendarWidget() {
   const widget = new ListWidget();
@@ -341,7 +343,7 @@ async function createCalendarWidget() {
     dText.font = Font.boldSystemFont(20);
     dText.centerAlignText();
     dayRow.addSpacer();
-    
+
     widget.addSpacer();
 
     const weekRow = WidgetUtils.createCenteredRow(widget);
@@ -352,7 +354,7 @@ async function createCalendarWidget() {
       WidgetUtils.createDateText(dayCell, day, WidgetUtils.isWeekend(i));
       if (i < 6) weekRow.addSpacer(5);
     });
-    
+
     widget.addSpacer();
 
     const dateRow = WidgetUtils.createCenteredRow(widget);
@@ -373,7 +375,7 @@ async function createCalendarWidget() {
       dayCell.layoutVertically();
       dayCell.size = new Size(45, 50);
       dayCell.centerAlignContent();
-      
+
       // 日期单元格
       const dayRow = dayCell.addStack();
       dayRow.size = new Size(45, 20);
@@ -413,7 +415,7 @@ async function createCalendarWidget() {
         dayDate,
         widgetFamily
       );
-      
+
       if (isToday) WidgetUtils.applyTodayStyle(dayCell);
 
       let eventOutput = "";
@@ -452,7 +454,7 @@ async function createCalendarWidget() {
         dateRow.addSpacer(5);
       }
     }
-    
+
     widget.addSpacer();
 
     const weekStart = new Date(firstDayOfWeek);
@@ -581,7 +583,7 @@ async function createCalendarWidget() {
             }
           }
 
-        // 添加前置 spacer
+          // 添加前置 spacer
           const totalWidth =
             shownColors.length * 6 + (shownColors.length - 1) * 2;
           const remainingSpace = 12 - totalWidth;
@@ -608,7 +610,7 @@ async function createCalendarWidget() {
           date,
           widgetFamily
         );
-        
+
         if (isToday) WidgetUtils.applyTodayStyle(dateCell);
 
         let eventOutput = "";
@@ -667,22 +669,68 @@ async function createCalendarWidget() {
       upcomingEvents.push(e);
     }
 
-    for (let i = 0; i < upcomingEvents.length; i += 2) {
-      const row = widget.addStack();
-      row.layoutHorizontally();
-      row.spacing = 16;
-      row.topAlignContent();
+    let i = 0;
+    while (i < upcomingEvents.length) {
+      const currentEvent = upcomingEvents[i];
+      const nextEvent = upcomingEvents[i + 1];
 
-      for (let j = 0; j < 2; j++) {
-        const event = upcomingEvents[i + j];
-        if (!event) break;
+      const currentTitleLength = (
+        formatDate(currentEvent.startDate) +
+        " " +
+        currentEvent.title
+      ).length;
+      const nextTitleLength = nextEvent
+        ? (formatDate(nextEvent.startDate) + " " + nextEvent.title).length
+        : 0;
 
-        const container = row.addStack();
-        container.size = new Size(160, 15);
+      // 如果当前事件或下一个事件长度超过14，或者下一个事件不存在，就单独处理
+      if (currentTitleLength > 16 || !nextEvent || nextTitleLength > 16) {
+        // 当前事件单独一行
+        const singleRow = widget.addStack();
+        singleRow.layoutHorizontally();
+        singleRow.spacing = 16;
+
+        const container = singleRow.addStack();
+        container.size = new Size(320, 15); // 全宽度
         container.layoutVertically();
         container.topAlignContent();
 
-        addEventToStack(container, event, formatTitle(event));
+        addEventToStack(container, currentEvent, formatTitle(currentEvent));
+        i++; // 只处理当前事件
+
+        // 如果下一个事件也存在且长度超过16，也单独处理
+        if (nextEvent && nextTitleLength > 16) {
+          const nextSingleRow = widget.addStack();
+          nextSingleRow.layoutHorizontally();
+          nextSingleRow.spacing = 16;
+
+          const nextContainer = nextSingleRow.addStack();
+          nextContainer.size = new Size(320, 15);
+          nextContainer.layoutVertically();
+          nextContainer.topAlignContent();
+
+          addEventToStack(nextContainer, nextEvent, formatTitle(nextEvent));
+          i++; // 也处理下一个事件
+        }
+      } else {
+        // 正常的两列布局
+        const row = widget.addStack();
+        row.layoutHorizontally();
+        row.spacing = 16;
+        row.topAlignContent();
+
+        for (let j = 0; j < 2; j++) {
+          const event = upcomingEvents[i + j];
+          if (!event) break;
+
+          const container = row.addStack();
+          container.size = new Size(160, 15);
+          container.layoutVertically();
+          container.topAlignContent();
+
+          addEventToStack(container, event, formatTitle(event));
+        }
+        i += 2; // 一次处理两个事件
       }
     }
 
@@ -699,7 +747,6 @@ async function createCalendarWidget() {
       const titleText = eventStack.addText(title);
       titleText.font = Font.systemFont(12);
       titleText.lineLimit = 1;
-      titleText.minimumScaleFactor = 0.8;
     }
 
     function formatTitle(event) {
@@ -707,7 +754,7 @@ async function createCalendarWidget() {
       const datePrefix = `${formatDate(eventDate)} `;
       return datePrefix + event.title;
     }
-//     widget.addSpacer();
+
     widget.url = "calshow://";
   }
 
@@ -721,7 +768,7 @@ async function createCalendarWidget() {
   // 当前视图年月
   let viewYear = currentYear;
   let viewMonth = currentMonth;
-  
+
   async function renderCalendar() {
     table.removeAllRows();
 
@@ -836,12 +883,12 @@ async function createCalendarWidget() {
           month === currentMonth + 1 &&
           day === today.getDate();
 
-           if (!item.inCurrentMonth) {
+        if (!item.inCurrentMonth) {
           cell.titleColor = Color.gray();
           cell.subtitleColor = Color.lightGray();
         } else if (isToday) {
-          cell.titleColor = Color.blue();
-          cell.subtitleColor = Color.blue();
+          cell.titleColor = new Color("#FF6600");
+          cell.subtitleColor = new Color("#FF6600");
         } else if (isWeekend) {
           cell.titleColor = Color.red();
           cell.subtitleColor = Color.red();
@@ -941,8 +988,8 @@ async function createCalendarWidget() {
     ? widget.presentSmall()
     : widgetFamily === "medium"
     ? widget.presentMedium()
-//     : widget.presentLarge();
-    : await table.present(true);
+    : widget.presentLarge();
+  //     : await table.present(true);
 }
 
 await createCalendarWidget();
