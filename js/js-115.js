@@ -1,9 +1,9 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: teal; icon-glyph: people-carry;
-this.name = "考勤记录";
+this.name = "加班记录";
 this.widget_ID = "js-115";
-this.version = "v1.4";
+this.version = "v1.5";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -276,7 +276,7 @@ body {
 }
 
 .time-btn:hover {
-  background: #e0e0e0;
+  background: #e6b03c;
   transform: translateY(-1px);
 }
 
@@ -512,7 +512,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function fillHours(hours) {
   const input = document.getElementById('hourInput');
   input.value = hours;
-  input.focus();
   input.dispatchEvent(new Event('change')); 
 }
 
@@ -562,7 +561,6 @@ function calculateSalary() {
   for (let d = new Date(rng.start); d <= new Date(rng.end); d.setDate(d.getDate() + 1)) {
     const dt = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
     const w = d.getDay(), hrs = raw.records[dt]?.hours || 0;
-    
     if (hrs > 0) {
       if (w === 0) {
         sundayPay += hrs * hourlyRate * raw.settings.rateSunday;
@@ -593,12 +591,16 @@ function calculateSalary() {
   };
 }
 
+// 初始化临时状态
+if (raw.tempShowSalary === undefined) {
+  raw.tempShowSalary = raw.settings?.showSalary !== false;
+}
+
 function computeStats() {
   const rng = computeRange(raw.currentYear, raw.currentMonth);
-  const sd = new Date(rng.start), ed = new Date(rng.end);
   let wday = 0, wsat = 0, wsun = 0, workdays = 0, totalDays = 0;
-  
-  for (let d = new Date(sd); d <= ed; d.setDate(d.getDate() + 1)) {
+
+  for (let d = new Date(rng.start); d <= new Date(rng.end); d.setDate(d.getDate() + 1)) {
     totalDays++;
     const dt = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
     const w = d.getDay(), hrs = raw.records[dt]?.hours || 0;
@@ -612,7 +614,7 @@ function computeStats() {
   
   const unpaid = totalDays - workdays;
   const salary = calculateSalary();
-  let showSalary = raw.settings?.showSalary !== false;
+  let showSalary = raw.tempShowSalary; // 用临时状态
   
   let salaryTag = document.getElementById('salaryTag');
   if (!salaryTag) {
@@ -624,6 +626,7 @@ function computeStats() {
   salaryTag.style.display = 'block'; 
   
   function updateSalaryTag(visible) {
+  const salary = calculateSalary();
     salaryTag.textContent = \`总工资: $\${visible ? salary.total.toFixed(2) : '0000.00'}\`;
   }
   
@@ -648,7 +651,6 @@ function getOvertimeHours() {
   for (let d = new Date(rng.start); d <= new Date(rng.end); d.setDate(d.getDate() + 1)) {
     const dt = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
     const w = d.getDay(), hrs = raw.records[dt]?.hours || 0;
-    
     if (hrs > 0) {
       if (w === 0) wsun += hrs;
       else if (w === 6) wsat += hrs;
@@ -677,10 +679,9 @@ function getOvertimeHours() {
     salarySwitch = document.getElementById('salaryTagToggle');
     
     salarySwitch.addEventListener('change', function() {
-      const isChecked = this.checked;
-      const salary = calculateSalary();
-      updateSalaryTag(isChecked, salary); 
-      document.getElementById('stat').innerHTML = getStatHTML(isChecked, salary);
+      raw.tempShowSalary = this.checked; // 只更新临时状态
+      updateSalaryTag(raw.tempShowSalary); 
+      document.getElementById('stat').innerHTML = getStatHTML(raw.tempShowSalary);
     });
   }
   salarySwitch.checked = showSalary;
@@ -755,11 +756,12 @@ function saveHour() {
   let h = parseFloat(document.getElementById('hourInput').value);
   if (isNaN(h) || h < 0) h = 0;
   const w = new Date(d).getDay();
+  const week = weekdayLabel(d);
   const r = w === 0 ? raw.settings.rateSunday : 
             w === 6 ? raw.settings.rateSaturday : raw.settings.rateWeekday;
   
   if (h > 0) {
-    raw.records[d] = { hours: h, rate: r };
+    raw.records[d] = { week: week, hours: h, rate: r };
   } else if (raw.records[d]) {
     delete raw.records[d];
   }
@@ -993,9 +995,24 @@ timer.schedule(async () => {
     } else if (m.type === "restart-script") {
       Safari.open(`scriptable:///run/${encodeURIComponent(Script.name())}`);
     }
-    
+
     loadData();
-    await webView.evaluateJavaScript(`raw=${JSON.stringify({ settings, records, currentYear, currentMonth })}`, false);
+
+    // 保留临时状态
+    const tempShowSalary =
+      (await webView.evaluateJavaScript("raw.tempShowSalary", false)) ??
+      settings?.showSalary !== false;
+
+    await webView.evaluateJavaScript(
+      `raw=${JSON.stringify({ settings, records, currentYear, currentMonth })}`,
+      false
+    );
+    // 重新赋值临时状态
+    await webView.evaluateJavaScript(
+      `raw.tempShowSalary=${tempShowSalary}`,
+      false
+    );
+
     await webView.evaluateJavaScript(`render()`, false);
   }
 });
