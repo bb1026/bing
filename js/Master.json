@@ -191,7 +191,7 @@
     "large": false,
     "update": "修复打开时显示问题",
     "url": "js/js-115.js",
-    "introduction": "记录加班，不支持更新",
+    "introduction": "记录加班",
     "icon": "fa-th-list"
   }
 }
