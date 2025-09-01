@@ -182,7 +182,7 @@
     "icon": "fa-calendar-minus"
   },
   "js-115": {
-    "name": "考勤记录",
+    "name": "加班记录",
     "version": "v1.5",
     "ID": "js-115",
     "argsID": "",
