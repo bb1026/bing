@@ -175,7 +175,7 @@ let clickCount = 0;
 
 document.addEventListener('click', function(e) {
   // 避免点击输入框或按钮触发
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('a')) return;
 
   createMiniPandaAt(e.clientX, e.clientY);
   clickCount++;
