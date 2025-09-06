@@ -684,7 +684,7 @@ async function createCalendarWidget() {
         : 0;
 
       // 如果当前事件或下一个事件长度超过14，或者下一个事件不存在，就单独处理
-      if (currentTitleLength > 16 || !nextEvent || nextTitleLength > 16) {
+      if (currentTitleLength > 14 || !nextEvent || nextTitleLength > 14) {
         // 当前事件单独一行
         const singleRow = widget.addStack();
         singleRow.layoutHorizontally();
@@ -698,8 +698,8 @@ async function createCalendarWidget() {
         addEventToStack(container, currentEvent, formatTitle(currentEvent));
         i++; // 只处理当前事件
 
-        // 如果下一个事件也存在且长度超过16，也单独处理
-        if (nextEvent && nextTitleLength > 16) {
+        // 如果下一个事件也存在且长度超过14，也单独处理
+        if (nextEvent && nextTitleLength > 14) {
           const nextSingleRow = widget.addStack();
           nextSingleRow.layoutHorizontally();
           nextSingleRow.spacing = 16;
