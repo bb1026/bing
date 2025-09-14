@@ -183,13 +183,13 @@
   },
   "js-115": {
     "name": "加班记录",
-    "version": "v1.5",
+    "version": "v1.6",
     "ID": "js-115",
     "argsID": "",
     "small": false,
     "medium": false,
     "large": false,
-    "update": "修复打开时显示问题",
+    "update": "加班时间精确到0.25，改变时间颜色",
     "url": "js/js-115.js",
     "introduction": "记录加班",
     "icon": "fa-th-list"
