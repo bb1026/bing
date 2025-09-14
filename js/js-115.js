@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: people-carry;
 this.name = "加班记录";
 this.widget_ID = "js-115";
-this.version = "v1.5";
+this.version = "v1.6";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -475,8 +475,9 @@ let raw = ${JSON.stringify(inj)};
 function formatInput(input) {
   let value = parseFloat(input.value);
   if (isNaN(value)) value = 0;
-  value = Math.min(10, Math.max(0, Math.round(value * 2) / 2));
-  input.value = value % 1 === 0 ? value : value.toFixed(1);
+// 四舍五入到 0.25 的倍数，限制范围0~10
+  value = Math.min(10, Math.max(0, Math.round(value / 0.25) * 0.25));
+  input.value = value.toFixed(2);
 }
 
 // 初始化开关状态
@@ -502,7 +503,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     if (this.checked) {
-      this.parentElement.classList.add('active');
+    this.parentElement.classList.add('active');
       setTimeout(() => this.parentElement.classList.remove('active'), 300);
     }
   });
@@ -724,16 +725,15 @@ function render() {
     const isToday = dstr === todayStr;
     const dayStyle = hrs > 0 
       ? \`background-color: #e6f7ff; border-color: \${isToday ? '#FF9500' : '#91d5ff'};\`
-      
       : \`background-color: #f5f5f5; color: \${isToday ? '#FF9500' : '#ccc'};\`;
-    
     cal.innerHTML += \`
       <div class="day \${w === 0 ? 'sun' : w === 6 ? 'sat' : ''}" 
            onclick="openInput('\${dstr}')"
            style="\${dayStyle}">
         \${temp.getDate()}<br>
-        <span style="color:#666;font-size:14px">\${hrs}hrs</span>
-      </div>\`;
+        //加班时间颜色
+        <span style="font-size:14px; color:\${hrs === 0 ? '#666' : hrs > 4 ? 'green' : 'blue'}">\${hrs === 0 ? hrs + 'hrs' : hrs}</span>// 0 → 灰色 >4 → 绿色 1~4 → 蓝色
+        </div>\`;
     temp.setDate(temp.getDate() + 1);
   }
 
@@ -791,11 +791,11 @@ function openBatchEdit() {
       </div>\`;
   }
   
-  document.getElementById('batchEditBox').style.display = 'block';
+document.getElementById('batchEditBox').style.display = 'block';
 }
 
 function closeBatchEdit() {
-  document.getElementById('batchEditBox').style.display = 'none';
+document.getElementById('batchEditBox').style.display = 'none';
 }
 
 function saveBatchEdit() {
@@ -834,7 +834,7 @@ function openSettings() {
 }
 
 function closeSettings() {
-  document.getElementById('settingsBox').style.display = 'none';
+document.getElementById('settingsBox').style.display = 'none';
 }
 
 function toggleCustom() {
@@ -855,7 +855,7 @@ function loadFields() {
 }
 
 function addField() {
-  document.getElementById('settingsBody').insertAdjacentHTML('beforeend',
+document.getElementById('settingsBody').insertAdjacentHTML('beforeend',
     \`<tr><td><input type="text" placeholder="字段名"></td><td><input type="text" placeholder="金额"></td><td><button class="btn btn-danger" onclick="delField(this)">删</button></td></tr>\`);
 }
 
