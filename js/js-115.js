@@ -726,13 +726,14 @@ function render() {
     const dayStyle = hrs > 0 
       ? \`background-color: #e6f7ff; border-color: \${isToday ? '#FF9500' : '#91d5ff'};\`
       : \`background-color: #f5f5f5; color: \${isToday ? '#FF9500' : '#ccc'};\`;
+      
+  // 加班时间颜色0→灰色 >4→绿色 1~4→蓝色
     cal.innerHTML += \`
       <div class="day \${w === 0 ? 'sun' : w === 6 ? 'sat' : ''}" 
            onclick="openInput('\${dstr}')"
            style="\${dayStyle}">
         \${temp.getDate()}<br>
-        //加班时间颜色
-        <span style="font-size:14px; color:\${hrs === 0 ? '#666' : hrs > 4 ? 'green' : 'blue'}">\${hrs === 0 ? hrs + 'hrs' : hrs}</span>// 0 → 灰色 >4 → 绿色 1~4 → 蓝色
+        <span style="font-size:14px; color:\${hrs === 0 ? '#666' : hrs > 4 ? 'green' : 'blue'}">\${hrs === 0 ? hrs + 'hrs' : hrs}</span>
         </div>\`;
     temp.setDate(temp.getDate() + 1);
   }
