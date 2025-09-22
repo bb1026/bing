@@ -1,9 +1,9 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
-// icon-color: teal; icon-glyph: people-carry;
-this.name = "加班记录";
+// icon-color: deep-green; icon-glyph: briefcase;
+this.name = "出勤记录";
 this.widget_ID = "js-115";
-this.version = "v1.6";
+this.version = "v1.7";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -241,7 +241,27 @@ body {
   border: 1px solid #ccc; 
   padding: 8px;
   text-align: center; 
-  font-size: 22px;
+  font-size: 15px;
+  vertical-align: middle; /* 确保内容垂直居中 */
+}
+
+/* 调整输入框样式以适应新的行高 */
+#settingsTable input[type="text"] {
+  height: 30px; /* 增加输入框高度 */
+  padding: 8px 12px;
+  font-size: 15px; /* 稍微调大字体 */
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* 调整按钮样式 */
+#settingsTable .btn {
+  height: 30px; /* 增加按钮高度 */
+  padding: 8px 16px;
+  font-size: 15px; /* 稍微调大字体 */
+  line-height: 1.2;
 }
 .calendar-header {
   display: grid; 
@@ -263,6 +283,7 @@ body {
   border-radius: 4px;
   box-sizing: border-box;
 }
+
 .time-btn {
   flex: 1;
   padding: 8px 5px;
@@ -275,15 +296,24 @@ body {
   transition: all 0.2s;
 }
 
-.time-btn:hover {
-  background: #e6b03c;
-  transform: translateY(-1px);
+.time-btn.active {
+  background-color: #1890ff;
+  color: #fff;
+  border: 1px solid #1890ff;
 }
 
-.time-btn:active {
-  background: #d0d0d0;
-  transform: translateY(0);
+.time-btn.disabled {
+  background: #e9ecef;
+  color: #999;
+  cursor: not-allowed;
 }
+
+.toggle-btn.active {
+  background-color: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+}
+
 #weekHours {
   width: 100px;
   display: block;
@@ -351,6 +381,7 @@ label {
   line-height: 1.3;
   padding-bottom: 1px;
 }
+
 </style>
 </head>
 <body>
@@ -373,17 +404,26 @@ label {
 <div id="inputBox">
   <div id="inputDate" style="font-weight:bold;margin-bottom:8px"></div>
   <div id="inputWeek" style="margin-bottom:8px;font-size:14px;"></div>
-  <input type="number" id="hourInput" placeholder="输入加班小时" onchange="formatInput(this)">
+  
+  <!-- 输入加班时间（数字） -->
+  <input type="number" id="hourInput" placeholder="输入加班小时" min="0" step="0.5" style="margin-bottom:8px">
   
   <div class="btn-row">
-  <button class="time-btn" onclick="fillHours(0)">0小时</button>
-    <button class="time-btn" onclick="fillHours(1)">1小时</button>
-    <button class="time-btn" onclick="fillHours(2)">2小时</button>
-    <button class="time-btn" onclick="fillHours(4)">4小时</button>
-    <button class="time-btn" onclick="fillHours(8)">8小时</button>
+    <button class="time-btn" data-hour="0" onclick="fillHours(0)">0小时</button>
+<button class="time-btn" data-hour="1" onclick="fillHours(1)">1小时</button>
+<button class="time-btn" data-hour="2" onclick="fillHours(2)">2小时</button>
+<button class="time-btn" data-hour="4" onclick="fillHours(4)">4小时</button>
+<button class="time-btn" data-hour="8" onclick="fillHours(8)">8小时</button>
   </div>
   
-  <div style="display:flex;justify-content:flex-end">
+  <div class="btn-row">
+    <button class="time-btn toggle-btn" data-type="rest" onclick="toggleType(this)">休</button>
+    <button class="time-btn toggle-btn" data-type="medical" onclick="toggleType(this)">MC</button>
+    <button class="time-btn toggle-btn" data-type="amRest" onclick="toggleType(this)">上</button>
+    <button class="time-btn toggle-btn" data-type="pmRest" onclick="toggleType(this)">下</button>
+  </div>
+  
+  <div style="display:flex;justify-content:flex-end;margin-top:10px">
     <button class="btn" onclick="saveHour()">保存</button>
     <button class="btn btn-danger" onclick="closeInput()" style="margin-left:10px">取消</button>
   </div>
@@ -398,7 +438,7 @@ label {
   </div>
   
   <!-- iOS风格开关 -->
-  <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f0f0; font-size: 22px;">
+  <div style="display:flex; justify-content:space-between; align-items:center;  border-bottom:1px solid #f0f0f0; font-size: 22px;">
     <span>显示工资信息</span>
     <label class="ios-switch">
       <input type="checkbox" id="salaryToggle" checked>
@@ -444,11 +484,22 @@ label {
     <tbody id="settingsBody"></tbody>
   </table>
   
-  <div style="margin-top:15px">
+  <div style="margin-top:10px">
     <button class="btn" onclick="addField()">+ 添加字段</button>
     <button class="btn" onclick="saveSettings()" style="margin-left:10px">✓ 保存</button>
     <button class="btn btn-danger" onclick="closeSettings()">× 关闭</button>
   </div>
+  
+  <!-- 在设置底部添加版本信息和更新按钮 -->
+    <div style="margin-top: 10px; padding-top: 15px; border-top: 1px solid #eee;">
+        <div style="text-align: center; margin-bottom: 5px; color: #666; font-size: 14px;">
+            当前版本: ${this.version}
+        </div>
+        <div id="versionInfo" style="text-align: center; margin-bottom: 15px; font-size: 14px;"></div>
+        <button class="btn" onclick="checkUpdate()" id="updateBtn" style="width: 100%;">
+            检查更新
+        </button>
+    </div>
 </div>
 
 <!-- 批量添加弹窗 -->
@@ -480,40 +531,77 @@ function formatInput(input) {
   input.value = value.toFixed(2);
 }
 
-// 初始化开关状态
 document.addEventListener('DOMContentLoaded', function() {
   const toggle = document.getElementById('salaryToggle');
   
-  // 从设置加载状态
   if (raw.settings.hasOwnProperty('showSalary')) {
     toggle.checked = raw.settings.showSalary;
   }
   
-  // 添加切换事件
   toggle.addEventListener('change', function() {
-    document.querySelectorAll('.salary-display').forEach(el => {
-      el.style.display = this.checked ? 'block' : 'none';
-    });
-    
-    // 保存设置
     raw.settings.showSalary = this.checked;
     window._result = JSON.stringify({ 
       type: 'save-settings', 
       settings: raw.settings 
     });
-    
-    if (this.checked) {
-    this.parentElement.classList.add('active');
-      setTimeout(() => this.parentElement.classList.remove('active'), 300);
-    }
   });
 });
 // 苹果开关风格
 
-function fillHours(hours) {
-  const input = document.getElementById('hourInput');
-  input.value = hours;
-  input.dispatchEvent(new Event('change')); 
+function fillHours(h) {
+  document.getElementById('hourInput').value = h;
+  
+  const hourInput = document.getElementById('hourInput');
+  if (!hourInput.disabled) {
+    highlightHourButton(h);
+  }
+}
+
+function toggleType(btn) {
+  const type = btn.dataset.type;
+  const alreadyActive = btn.classList.contains('active');
+  const hourInput = document.getElementById('hourInput');
+  const timeBtns = document.querySelectorAll('.time-btn:not(.toggle-btn)');
+  const currentHour = parseFloat(hourInput.value.trim()) || 0;
+
+  if (alreadyActive) {
+    btn.classList.remove('active');
+    enableTimeButtons();
+    return;
+  }
+
+  document.querySelectorAll('.toggle-btn').forEach(b => {
+    if (b !== btn) {
+      b.classList.remove('active');
+    }
+  });
+
+  btn.classList.add('active');
+
+  if (type === 'rest' || type === 'medical' || type === 'pmRest') {
+    hourInput.value = '0';
+    disableTimeButtons();
+  } else if (type === 'amRest') {
+    enableTimeButtons();
+    highlightHourButton(currentHour);
+  }
+
+  function enableTimeButtons() {
+    hourInput.disabled = false;
+    timeBtns.forEach(b => {
+      b.disabled = false;
+      b.classList.remove('disabled');
+    });
+  }
+
+  function disableTimeButtons() {
+    hourInput.disabled = true;
+    timeBtns.forEach(b => {
+      b.disabled = true;
+      b.classList.add('disabled');
+      b.classList.remove('active');
+    });
+  }
 }
 
 function pad(n) { return ('' + n).padStart(2, '0'); }
@@ -558,7 +646,6 @@ function calculateSalary() {
   const hourlyRate = (raw.settings.baseSalary * 12) / (raw.settings.weekHours * 52);
   const rng = computeRange(raw.currentYear, raw.currentMonth);
   let weekdayPay = 0, saturdayPay = 0, sundayPay = 0;
-
   for (let d = new Date(rng.start); d <= new Date(rng.end); d.setDate(d.getDate() + 1)) {
     const dt = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
     const w = d.getDay(), hrs = raw.records[dt]?.hours || 0;
@@ -572,13 +659,11 @@ function calculateSalary() {
       }
     }
   }
-
   const overtimePay = weekdayPay + saturdayPay + sundayPay;
   const customFieldsSum = Object.values(raw.settings.customFields).reduce((sum, val) => {
     const num = Number(val);
     return sum + (isNaN(num) ? 0 : num);
   }, 0);
-
   return {
     base: raw.settings.baseSalary,
     overtime: overtimePay,
@@ -615,7 +700,7 @@ function computeStats() {
   
   const unpaid = totalDays - workdays;
   const salary = calculateSalary();
-  let showSalary = raw.tempShowSalary; // 用临时状态
+  let showSalary = raw.tempShowSalary;
   
   let salaryTag = document.getElementById('salaryTag');
   if (!salaryTag) {
@@ -644,11 +729,9 @@ function computeStats() {
     \`;
   }
   
-  // 新增函数：从 raw.records 获取最新的加班时间
 function getOvertimeHours() {
   const rng = computeRange(raw.currentYear, raw.currentMonth);
   let wday = 0, wsat = 0, wsun = 0;
-  
   for (let d = new Date(rng.start); d <= new Date(rng.end); d.setDate(d.getDate() + 1)) {
     const dt = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
     const w = d.getDay(), hrs = raw.records[dt]?.hours || 0;
@@ -658,9 +741,8 @@ function getOvertimeHours() {
       else wday += hrs;
     }
   }
-  
   return { wday, wsat, wsun };
-};
+}
   
   updateSalaryTag(showSalary); 
   document.getElementById('stat').innerHTML = getStatHTML(showSalary);
@@ -668,7 +750,6 @@ function getOvertimeHours() {
   let salarySwitch = document.getElementById('salaryTagToggle');
   if (!salarySwitch) {
     const switchContainer = document.createElement('div');
-    switchContainer.className = 'salary-switch';
     switchContainer.style = 'position: fixed; bottom: 210px; right: 20px; z-index: 101;';
     switchContainer.innerHTML = \`
       <label class="ios-switch">
@@ -680,7 +761,7 @@ function getOvertimeHours() {
     salarySwitch = document.getElementById('salaryTagToggle');
     
     salarySwitch.addEventListener('change', function() {
-      raw.tempShowSalary = this.checked; // 只更新临时状态
+      raw.tempShowSalary = this.checked; 
       updateSalaryTag(raw.tempShowSalary); 
       document.getElementById('stat').innerHTML = getStatHTML(raw.tempShowSalary);
     });
@@ -720,21 +801,48 @@ function render() {
   while (temp <= endDate) {
     const dstr = \`\${temp.getFullYear()}-\${pad(temp.getMonth() + 1)}-\${pad(temp.getDate())}\`;
     const w = temp.getDay();
-    const hrs = raw.records[dstr]?.hours || 0;
-    
+    const rec = raw.records[dstr] || {};
+    const hrs = typeof rec.hours === "number" ? rec.hours : 0;
+    const type = rec.type || null;
+
     const isToday = dstr === todayStr;
-    const dayStyle = hrs > 0 
-      ? \`background-color: #e6f7ff; border-color: \${isToday ? '#FF9500' : '#91d5ff'};\`
-      : \`background-color: #f5f5f5; color: \${isToday ? '#FF9500' : '#ccc'};\`;
-      
-  // 加班时间颜色0→灰色 >4→绿色 1~4→蓝色
+    const dayStyle = \`\${
+      type === "rest"
+        ? \`background-color: #f5f5f5; color: \${isToday ? '#FF9500' : 'purple'}; border-color: \${isToday ? '#FF9500' : 'purple'};\`
+        : type === "medical"
+          ? \`background-color: #f5f5f5; color: \${isToday ? '#FF9500' : 'red'}; border-color: \${isToday ? '#FF9500' : 'red'};\`
+          : (hrs === 0 && temp < new Date(todayStr))
+            ? \`background-color: #e6f7ff; color: #666; border-color: \${isToday ? '#FF9500' : '#91d5ff'};\`
+            : hrs > 0
+              ? \`background-color: #e6f7ff; border-color: \${isToday ? '#FF9500' : '#91d5ff'};\`
+              : \`background-color: #f5f5f5; border-color: \${isToday ? '#FF9500' : '#ccc'};\`
+    }\`;
+
     cal.innerHTML += \`
       <div class="day \${w === 0 ? 'sun' : w === 6 ? 'sat' : ''}" 
            onclick="openInput('\${dstr}')"
-           style="\${dayStyle}">
-        \${temp.getDate()}<br>
-        <span style="font-size:14px; color:\${hrs === 0 ? '#666' : hrs > 4 ? 'green' : 'blue'}">\${hrs === 0 ? hrs + 'hrs' : hrs}</span>
-        </div>\`;
+           style="\${dayStyle}; position: relative;">
+        \${temp.getDate()}<br> 
+
+        <!-- 上午休 / 下午休角标 -->
+        \${type === "amRest"
+          ? '<span style="position:absolute; top:2px; left:2px; font-size:10px; color:purple;">上</span>'
+          : type === "pmRest"
+            ? '<span style="position:absolute; top:2px; right:2px; font-size:10px; color:purple;">下</span>'
+            : ''}
+
+         <!-- 加班时间显示 -->
+        <span style="font-size:14px; color:\${
+          type === "medical" ? "red"
+            : type === "rest" ? "purple"
+            : (hrs === 0 ? "#666" : hrs > 4 ? "green" : "blue")
+        }">
+        \${type === "medical" ? "MC" 
+        : type === "rest" ? "休" 
+        : hrs + "hrs"}
+        </span>
+      </div>
+    \`;
     temp.setDate(temp.getDate() + 1);
   }
 
@@ -744,8 +852,123 @@ function render() {
 function openInput(d) {
   document.getElementById('inputDate').textContent = d;
   document.getElementById('inputWeek').textContent = "星期" + weekdayLabel(d);
-  document.getElementById('hourInput').value = raw.records[d]?.hours || '';
+  
+  const record = raw.records[d] || {};
+  const hours = record.hours || 0;
+  const type = record.type || null;
+  
+  document.getElementById('hourInput').value = hours;
+  
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  document.querySelectorAll('.time-btn:not(.toggle-btn)').forEach(btn => {
+    btn.classList.remove('active', 'disabled');
+    btn.disabled = false;
+  });
+  
+  let statusLabel = document.getElementById('statusLabel');
+  let overtimeLabel = document.getElementById('overtimeLabel');
+  
+  if (!statusLabel) {
+    statusLabel = document.createElement('div');
+    statusLabel.id = 'statusLabel';
+    statusLabel.style.marginBottom = '8px';
+    statusLabel.style.fontSize = '14px';
+    statusLabel.style.color = '#666';
+    document.getElementById('inputWeek').insertAdjacentElement('afterend', statusLabel);
+  }
+  
+  if (!overtimeLabel) {
+    overtimeLabel = document.createElement('div');
+    overtimeLabel.id = 'overtimeLabel';
+    overtimeLabel.style.marginBottom = '8px';
+    overtimeLabel.style.fontSize = '14px';
+    overtimeLabel.style.color = '#666';
+    statusLabel.insertAdjacentElement('afterend', overtimeLabel);
+  }
+  
+  let statusText = '';
+  let statusColor = '#666';
+  
+  if (type) {
+  switch(type) {
+    case 'rest':
+      statusText = '休息';
+      statusColor = '#FF9800'; // 橙色
+      break;
+    case 'medical':
+      statusText = '病假';
+      statusColor = '#F44336'; // 红色
+      break;
+    case 'amRest':
+      statusText = '上午休息';
+      statusColor = '#9C27B0'; // 紫色
+      break;
+    case 'pmRest':
+      statusText = '下午休息';
+      statusColor = '#673AB7'; // 深紫色
+  }
+  
+  statusLabel.innerHTML = \`<span style="color: \${statusColor}; font-weight: bold;">状态: \${statusText}</span>\`;
+  statusLabel.style.display = 'block';
+  } else {
+    statusLabel.style.display = 'none';
+  }
+  
+  if (hours > 0) {
+    overtimeLabel.innerHTML = \`<span style="color: #2196F3; font-weight: bold;">加班: \${hours} 小时</span>\`;
+    overtimeLabel.style.display = 'block';
+  } else {
+    overtimeLabel.style.display = 'none';
+  }
+  
+  if (type) {
+    const typeBtn = document.querySelector(\`.toggle-btn[data-type="\${type}"]\`);
+    if (typeBtn) {
+      typeBtn.classList.add('active');
+      
+      if (type === 'rest' || type === 'medical' || type === 'pmRest') {
+        document.getElementById('hourInput').disabled = true;
+        document.querySelectorAll('.time-btn:not(.toggle-btn)').forEach(btn => {
+          btn.classList.add('disabled');
+          btn.disabled = true;
+        });
+      } else if (type === 'amRest') {
+        document.getElementById('hourInput').disabled = false;
+        highlightHourButton(hours);
+      }
+    }
+  } else if (hours > 0) {
+      document.getElementById('hourInput').disabled = false;
+    highlightHourButton(hours);
+  } else {
+    document.getElementById('hourInput').disabled = false;
+  }
   document.getElementById('inputBox').style.display = 'block';
+}
+
+function highlightHourButton(hours, type) {
+  if (typeof hours === "number" && !isNaN(hours)) {
+    document.querySelectorAll('.time-btn:not(.toggle-btn)').forEach(btn => {
+      const btnHour = parseFloat(btn.dataset.hour);
+      if (btnHour === hours) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  }
+
+  if (type) {
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+      if (btn.dataset.type === type) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  }
 }
 
 function closeInput() {
@@ -754,19 +977,33 @@ function closeInput() {
 
 function saveHour() {
   const d = document.getElementById('inputDate').textContent;
-  let h = parseFloat(document.getElementById('hourInput').value);
-  if (isNaN(h) || h < 0) h = 0;
-  const w = new Date(d).getDay();
-  const week = weekdayLabel(d);
-  const r = w === 0 ? raw.settings.rateSunday : 
-            w === 6 ? raw.settings.rateSaturday : raw.settings.rateWeekday;
-  
-  if (h > 0) {
-    raw.records[d] = { week: week, hours: h, rate: r };
-  } else if (raw.records[d]) {
-    delete raw.records[d];
+  const h = parseFloat(document.getElementById('hourInput').value) || 0;
+
+  let type = null;
+  const activeBtn = document.querySelector('.toggle-btn.active');
+  if (activeBtn) {
+    type = activeBtn.dataset.type;
   }
-  
+
+  if (h === 0 && !type) {
+    delete raw.records[d];
+  } else {
+    const w = new Date(d).getDay();
+    const week = weekdayLabel(d);
+    const r = w === 0 ? raw.settings.rateSunday : 
+              w === 6 ? raw.settings.rateSaturday : raw.settings.rateWeekday;
+
+    raw.records[d] = {
+      week: week,
+      hours: h,
+      type: type
+    };
+
+    if (h > 0) {
+      raw.records[d].rate = r;
+    }
+  }
+
   window._result = JSON.stringify({ type: 'save-records', records: raw.records });
   closeInput();
   render();
@@ -781,7 +1018,7 @@ function openBatchEdit() {
   for (let d = new Date(rng.start); d <= new Date(rng.end); d.setDate(d.getDate() + 1)) {
     const dt = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
     const w = d.getDay();
-    const hrs = raw.records[dt]?.hours || 0;
+    const hrs = typeof raw.records[dt]?.hours === "number" ? raw.records[dt].hours : 0;
     const dayName = ['周日','周一','周二','周三','周四','周五','周六'][w];
     const isWeekend = w === 0 || w === 6;
     
@@ -792,11 +1029,11 @@ function openBatchEdit() {
       </div>\`;
   }
   
-document.getElementById('batchEditBox').style.display = 'block';
+  document.getElementById('batchEditBox').style.display = 'block';
 }
 
 function closeBatchEdit() {
-document.getElementById('batchEditBox').style.display = 'none';
+  document.getElementById('batchEditBox').style.display = 'none';
 }
 
 function saveBatchEdit() {
@@ -835,7 +1072,7 @@ function openSettings() {
 }
 
 function closeSettings() {
-document.getElementById('settingsBox').style.display = 'none';
+  document.getElementById('settingsBox').style.display = 'none';
 }
 
 function toggleCustom() {
@@ -856,7 +1093,7 @@ function loadFields() {
 }
 
 function addField() {
-document.getElementById('settingsBody').insertAdjacentHTML('beforeend',
+  document.getElementById('settingsBody').insertAdjacentHTML('beforeend',
     \`<tr><td><input type="text" placeholder="字段名"></td><td><input type="text" placeholder="金额"></td><td><button class="btn btn-danger" onclick="delField(this)">删</button></td></tr>\`);
 }
 
@@ -963,6 +1200,109 @@ function restartScript() {
   });
 }
 
+// 版本检查函数
+async function checkUpdate() {
+    const updateBtn = document.getElementById('updateBtn');
+    const versionInfo = document.getElementById('versionInfo');
+    const authKey = {"X-Auth-Key": "tX3$9mGz@7vLq#F!b2R"};
+    updateBtn.textContent = '检查中...';
+    updateBtn.disabled = true;
+    versionInfo.innerHTML = '';
+    versionInfo.style.color = '#666';
+    
+    const response =  await fetch('https://bing.0515364.xyz/js/Master.json', {
+  headers: authKey
+});
+        
+        if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+        }
+        
+        const data = await response.json();
+        const appInfo = data['js-115'];
+        
+        if (!appInfo) {
+            throw new Error('未找到js-115的应用信息');
+        }
+        
+        const currentVersion = '${this.version}'.replace('v', '');
+        const latestVersion = appInfo.version.replace('v', '');
+        
+        // 版本比较
+        if (compareVersions(latestVersion, currentVersion) > 0) {
+            versionInfo.innerHTML = '有新版本可用: ' + appInfo.version;
+            versionInfo.style.color = 'green';
+            
+const updateBtn = document.createElement('button');
+updateBtn.className = 'btn';
+updateBtn.style = 'background: #4CAF50; width: 100%; margin-top: 10px;';
+updateBtn.innerHTML = '立即更新';
+
+updateBtn.onclick = async () => {
+  const remoteScriptUrl = 'https://bing.0515364.xyz/' + appInfo.url;
+  const scriptName = '${this.name}';
+  await downloadToICloud(remoteScriptUrl, scriptName, authKey);
+};
+versionInfo.appendChild(updateBtn);
+            
+            // 显示更新内容
+            if (appInfo.update) {
+                const notes = document.createElement('div');
+                notes.style.marginTop = '10px';
+                notes.style.fontSize = '14px';
+                notes.style.textAlign = 'center';
+                notes.style.color = '#666';
+                notes.innerHTML = '<strong>更新内容:</strong>' + appInfo.update.replace(/\\n/g, '<br>');
+                versionInfo.appendChild(notes);
+            }
+        } else {
+            versionInfo.innerHTML = '已是最新版本';
+            versionInfo.style.color = 'green';
+            
+            if (appInfo.update) {
+                const notes = document.createElement('div');
+                notes.style.marginTop = '8px';
+                notes.style.fontSize = '12px';
+                notes.style.textAlign = 'center';
+                notes.style.color = '#666';
+                notes.innerHTML = '<strong>版本说明:</strong> ' + appInfo.update;
+                versionInfo.appendChild(notes);
+            }
+        }
+        updateBtn.textContent = '检查更新';
+        updateBtn.disabled = false;
+}
+
+// 版本比较
+function compareVersions(v1, v2) {
+    const parts1 = v1.split('.').map(Number);
+    const parts2 = v2.split('.').map(Number);
+    
+    for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+        const num1 = parts1[i] || 0;
+        const num2 = parts2[i] || 0;
+        
+        if (num1 > num2) return 1;
+        if (num1 < num2) return -1;
+    }
+    
+    return 0;
+}
+
+async function downloadToICloud(scriptUrl, scriptName, authKey) {
+    window._result = JSON.stringify({
+      type: "start-download",
+      data: {
+        serverScriptUrl: scriptUrl,
+        scriptName: scriptName,
+        authKey: authKey
+      }
+    });
+
+    const versionInfo = document.getElementById('versionInfo');
+    versionInfo.innerHTML += '<div style="color: #007AFF; margin-top: 8px;">[*] 正在更新...</div>';
+}
+
 // 初始渲染
 render();
 </script>
@@ -984,6 +1324,27 @@ timer.schedule(async () => {
   if (res) {
     await webView.evaluateJavaScript("window._result=null", false);
     const m = JSON.parse(res);
+    
+  // 处理下载指令
+    if (m.type === "start-download") {
+      const { serverScriptUrl, scriptName, authKey } = m.data;
+      const iCloudFm = FileManager.iCloud();
+        const LOCAL_SCRIPT_PATH = iCloudFm.joinPath(
+          iCloudFm.documentsDirectory(),
+          `${scriptName}.js`
+        );
+        const request = new Request(serverScriptUrl);
+        request.headers = authKey;
+        const scriptContent = await request.loadString();
+        iCloudFm.writeString(LOCAL_SCRIPT_PATH, scriptContent);
+        const successAlert = new Notification();
+        successAlert.title = "✔️ 更新成功（iCloud）";
+        successAlert.body = `文件：${scriptName}.js\n已保存到iCloud`;
+        successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`;
+        await successAlert.schedule();
+      return;
+    }
+    
     if (m.type === "save-records") {
       records = m.records;
       fm.writeString(recordsPath, JSON.stringify(records, null, 2));
