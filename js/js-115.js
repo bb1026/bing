@@ -17,7 +17,7 @@ const defaultSettings = {
   rateSaturday: 1.5,
   rateSunday: 2.0,
   method: "daily",
-  dateRangeMode: "natural",
+  dateRangeMode: "natural", // 日期显示(自然月)
   fromDay: 11,
   toDay: 12,
   weekHours: 40,
