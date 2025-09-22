@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: briefcase;
 this.name = "出勤记录";
 this.widget_ID = "js-115";
-this.version = "v1.7";
+this.version = "v1.5";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -237,19 +237,36 @@ body {
   border-collapse: collapse;
   margin: 12px 0;
 }
-#settingsTable th, #settingsTable td {
+#settingsTable { 
+  width: 100%; 
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+/* 表头行：设置较大高度（如 55px），突出标题 */
+#settingsTable th {
   border: 1px solid #ccc; 
   padding: 8px;
   text-align: center; 
-  font-size: 15px;
-  vertical-align: middle; /* 确保内容垂直居中 */
+  font-size: 18px;
+  vertical-align: middle;
+  height: 25px; /* 表头高度 */
+  background-color: #f5f5f5;
+}
+/* 内容行：设置适中高度（如 45px），适配输入框 */
+#settingsTable td {
+  border: 1px solid #ccc; 
+  padding: 8px;
+  text-align: center; 
+  font-size: 18px;
+  vertical-align: middle;
+  height: 35px; /* 内容行高度 */
 }
 
 /* 调整输入框样式以适应新的行高 */
 #settingsTable input[type="text"] {
-  height: 30px; /* 增加输入框高度 */
+//   height: 30px; /* 增加输入框高度 */
   padding: 8px 12px;
-  font-size: 15px; /* 稍微调大字体 */
+//   font-size: 16px; /* 稍微调大字体 */
   box-sizing: border-box;
   width: 100%;
   border: 1px solid #ddd;
@@ -258,9 +275,9 @@ body {
 
 /* 调整按钮样式 */
 #settingsTable .btn {
-  height: 30px; /* 增加按钮高度 */
+//   height: 30px; /* 增加按钮高度 */
   padding: 8px 16px;
-  font-size: 15px; /* 稍微调大字体 */
+//   font-size: 15px; /* 稍微调大字体 */
   line-height: 1.2;
 }
 .calendar-header {
@@ -1211,73 +1228,71 @@ async function checkUpdate() {
     versionInfo.style.color = '#666';
     
     const response =  await fetch('https://bing.0515364.xyz/js/Master.json', {
-  headers: authKey
-});
+        headers: authKey
+    });
         
-        if (!response.ok) {
-            throw new Error('HTTP error! status: ' + response.status);
+    if (!response.ok) {
+        throw new Error('HTTP error! status: ' + response.status);
+    }
+        
+    const data = await response.json();
+    const appInfo = data['js-115'];
+    if (!appInfo) {
+        throw new Error('未找到js-115的应用信息');
+    }
+    const currentVersion = '${this.version}';
+    const latestVersion = appInfo.version;
+    // 重置原“检查更新”按钮基础状态
+    updateBtn.textContent = '检查更新';
+    updateBtn.disabled = false;
+    updateBtn.style.width = '100%'; 
+    if (compareVersions(latestVersion, currentVersion) > 0) {
+        versionInfo.innerHTML = '有新版本可用: ' + appInfo.version;
+        versionInfo.style.color = 'green';
+        
+        if (appInfo.update) {
+            const notes = document.createElement('div');
+            notes.style.marginTop = '6px';
+            notes.style.fontSize = '14px';
+            notes.style.textAlign = 'center';
+            notes.style.color = '#666';
+            notes.innerHTML = '<strong>更新内容:</strong>' + appInfo.update.replace(/\\n/g, '<br>');
+            versionInfo.appendChild(notes);
         }
         
-        const data = await response.json();
-        const appInfo = data['js-115'];
-        
-        if (!appInfo) {
-            throw new Error('未找到js-115的应用信息');
-        }
-        
-        const currentVersion = '${this.version}'.replace('v', '');
-        const latestVersion = appInfo.version.replace('v', '');
-        
-        // 版本比较
-        if (compareVersions(latestVersion, currentVersion) > 0) {
-            versionInfo.innerHTML = '有新版本可用: ' + appInfo.version;
-            versionInfo.style.color = 'green';
-            
-const updateBtn = document.createElement('button');
-updateBtn.className = 'btn';
-updateBtn.style = 'background: #4CAF50; width: 100%; margin-top: 10px;';
-updateBtn.innerHTML = '立即更新';
+        versionInfo.appendChild(updateBtn);
+        const newUpdateBtn = document.createElement('button');
+        newUpdateBtn.className = 'btn';
+        newUpdateBtn.style = 'background: #4CAF50; width: 100%; margin-top: 8px;'; 
+        newUpdateBtn.innerHTML = '立即更新';
 
-updateBtn.onclick = async () => {
-  const remoteScriptUrl = 'https://bing.0515364.xyz/' + appInfo.url;
-  const scriptName = '${this.name}';
-  await downloadToICloud(remoteScriptUrl, scriptName, authKey);
-};
-versionInfo.appendChild(updateBtn);
-            
-            // 显示更新内容
-            if (appInfo.update) {
-                const notes = document.createElement('div');
-                notes.style.marginTop = '10px';
-                notes.style.fontSize = '14px';
-                notes.style.textAlign = 'center';
-                notes.style.color = '#666';
-                notes.innerHTML = '<strong>更新内容:</strong>' + appInfo.update.replace(/\\n/g, '<br>');
-                versionInfo.appendChild(notes);
-            }
-        } else {
-            versionInfo.innerHTML = '已是最新版本';
-            versionInfo.style.color = 'green';
-            
-            if (appInfo.update) {
-                const notes = document.createElement('div');
-                notes.style.marginTop = '8px';
-                notes.style.fontSize = '12px';
-                notes.style.textAlign = 'center';
-                notes.style.color = '#666';
-                notes.innerHTML = '<strong>版本说明:</strong> ' + appInfo.update;
-                versionInfo.appendChild(notes);
-            }
+        newUpdateBtn.onclick = async () => {
+            const remoteScriptUrl = 'https://bing.0515364.xyz/' + appInfo.url;
+            const scriptName = '${this.name}';
+            await downloadToICloud(remoteScriptUrl, scriptName, authKey);
+        };
+        versionInfo.appendChild(newUpdateBtn);
+    } else {
+        versionInfo.innerHTML = '已是最新版本';
+        versionInfo.style.color = 'green';
+        if (appInfo.update) {
+            const notes = document.createElement('div');
+            notes.style.marginTop = '6px';
+            notes.style.fontSize = '12px';
+            notes.style.textAlign = 'center';
+            notes.style.color = '#666';
+            notes.innerHTML = '<strong>版本说明:</strong> ' + appInfo.update;
+            versionInfo.appendChild(notes);
         }
-        updateBtn.textContent = '检查更新';
-        updateBtn.disabled = false;
+        updateBtn.style.marginTop = '10px';
+        versionInfo.appendChild(updateBtn);
+    }
 }
 
 // 版本比较
 function compareVersions(v1, v2) {
     const parts1 = v1.split('.').map(Number);
     const parts2 = v2.split('.').map(Number);
-    
     for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
         const num1 = parts1[i] || 0;
         const num2 = parts2[i] || 0;
@@ -1285,7 +1300,6 @@ function compareVersions(v1, v2) {
         if (num1 > num2) return 1;
         if (num1 < num2) return -1;
     }
-    
     return 0;
 }
 
@@ -1298,7 +1312,6 @@ async function downloadToICloud(scriptUrl, scriptName, authKey) {
         authKey: authKey
       }
     });
-
     const versionInfo = document.getElementById('versionInfo');
     versionInfo.innerHTML += '<div style="color: #007AFF; margin-top: 8px;">[*] 正在更新...</div>';
 }
