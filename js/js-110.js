@@ -583,7 +583,6 @@ async function createCalendarWidget() {
             }
           }
 
-          // 添加前置 spacer
           const totalWidth =
             shownColors.length * 6 + (shownColors.length - 1) * 2;
           const remainingSpace = 12 - totalWidth;
@@ -591,7 +590,6 @@ async function createCalendarWidget() {
             dotCell.addSpacer(remainingSpace / 2);
           }
 
-          // 添加圆点和间距
           shownColors.forEach((colorHex, index) => {
             const dot = dotCell.addText("●");
             dot.textColor = new Color("#" + colorHex);
@@ -683,22 +681,19 @@ async function createCalendarWidget() {
         ? (formatDate(nextEvent.startDate) + " " + nextEvent.title).length
         : 0;
 
-      // 如果当前事件或下一个事件长度超过14，或者下一个事件不存在，就单独处理
       if (currentTitleLength > 14 || !nextEvent || nextTitleLength > 14) {
-        // 当前事件单独一行
         const singleRow = widget.addStack();
         singleRow.layoutHorizontally();
         singleRow.spacing = 16;
 
         const container = singleRow.addStack();
-        container.size = new Size(320, 15); // 全宽度
+        container.size = new Size(320, 15);
         container.layoutVertically();
         container.topAlignContent();
 
         addEventToStack(container, currentEvent, formatTitle(currentEvent));
-        i++; // 只处理当前事件
-
-        // 如果下一个事件也存在且长度超过14，也单独处理
+        i++;
+        
         if (nextEvent && nextTitleLength > 14) {
           const nextSingleRow = widget.addStack();
           nextSingleRow.layoutHorizontally();
@@ -710,10 +705,9 @@ async function createCalendarWidget() {
           nextContainer.topAlignContent();
 
           addEventToStack(nextContainer, nextEvent, formatTitle(nextEvent));
-          i++; // 也处理下一个事件
+          i++;
         }
       } else {
-        // 正常的两列布局
         const row = widget.addStack();
         row.layoutHorizontally();
         row.spacing = 16;
@@ -722,7 +716,6 @@ async function createCalendarWidget() {
         for (let j = 0; j < 2; j++) {
           const event = upcomingEvents[i + j];
           if (!event) break;
-
           const container = row.addStack();
           container.size = new Size(160, 15);
           container.layoutVertically();
@@ -730,8 +723,9 @@ async function createCalendarWidget() {
 
           addEventToStack(container, event, formatTitle(event));
         }
-        i += 2; // 一次处理两个事件
+        i += 2;
       }
+      widget.addSpacer();
     }
 
     function addEventToStack(stack, event, title) {
@@ -764,8 +758,6 @@ async function createCalendarWidget() {
 
   let currentYear = today.getFullYear();
   let currentMonth = today.getMonth();
-
-  // 当前视图年月
   let viewYear = currentYear;
   let viewMonth = currentMonth;
 
@@ -775,7 +767,6 @@ async function createCalendarWidget() {
     let monthStart = new Date(viewYear, viewMonth, 1);
     let monthEnd = new Date(viewYear, viewMonth + 1, 0, 23, 59, 59);
     let events = await CalendarEvent.between(monthStart, monthEnd);
-    // 构建 eventMap
     let eventMap = {};
     for (let ev of events) {
       if (ev.title.includes("生日")) continue;
@@ -786,7 +777,6 @@ async function createCalendarWidget() {
       eventMap[key].push(ev);
     }
 
-    // 顶部标题
     let headerRow = new UITableRow();
     let formattedDate = new DateFormatter();
     formattedDate.dateFormat =
@@ -805,7 +795,6 @@ async function createCalendarWidget() {
     headerRow.addCell(headerCell);
     table.addRow(headerRow);
 
-    // 星期行
     let weekRow = new UITableRow();
     let weekDays = ["日", "一", "二", "三", "四", "五", "六"];
     for (let i = 0; i < 7; i++) {
@@ -817,7 +806,6 @@ async function createCalendarWidget() {
     }
     table.addRow(weekRow);
 
-    // 生成网格数据
     function getCalendarGrid(year, month) {
       let firstDay = new Date(year, month, 1);
       let startWeekday = firstDay.getDay();
@@ -851,7 +839,6 @@ async function createCalendarWidget() {
       return grid;
     }
 
-    // 渲染网格
     let calendarData = getCalendarGrid(viewYear, viewMonth);
     for (let week = 0; week < 6; week++) {
       let row = new UITableRow();
@@ -902,7 +889,6 @@ async function createCalendarWidget() {
       table.addRow(row);
     }
 
-    // 按钮
     let controlRow = new UITableRow();
     let prevCell = UITableCell.button("⬅️ 上一月");
     prevCell.centerAligned();
@@ -918,7 +904,6 @@ async function createCalendarWidget() {
 
     table.addRow(controlRow);
 
-    // 简要事件列表
     if (events.length > 0) {
       let titleSet = new Set();
       for (let ev of events) {
@@ -926,24 +911,19 @@ async function createCalendarWidget() {
         let y = start.getFullYear();
         let m = start.getMonth();
 
-        // 只显示当前视图的月份
         if (y !== viewYear || m !== viewMonth) continue;
 
         let d = start.getDate();
         let dateKey = `${y}-${m + 1}-${d}`;
 
-        // 去除括号内容并保留前4个字用于比较
         let cleanTitle = ev.title
           .replace(/（.*?）|\(.*?\)/g, "")
           .trim()
           .slice(0, 4);
 
-        // 构造唯一键：日期 + 标题前4字
         let uniqueKey = `${dateKey}::${cleanTitle}`;
         if (titleSet.has(uniqueKey)) continue;
         titleSet.add(uniqueKey);
-
-        // 添加事件行
         let row = new UITableRow();
         row.height = 25;
         let datePrefix = `${y}年${m + 1}月${d}日 `;
@@ -988,7 +968,7 @@ async function createCalendarWidget() {
     ? widget.presentSmall()
     : widgetFamily === "medium"
     ? widget.presentMedium()
-//    : widget.presentLarge();
+//     : widget.presentLarge();
     : await table.present(true);
 }
 
