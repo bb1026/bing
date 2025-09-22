@@ -189,7 +189,7 @@
     "small": false,
     "medium": false,
     "large": false,
-    "update": "增加休假按钮，更新按钮，若干代码修改",
+    "update": "增加休假按钮，更新若干代码",
     "url": "js/js-115.js",
     "introduction": "记录加班",
     "icon": "fa-th-list"
