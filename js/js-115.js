@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: briefcase;
 this.name = "出勤记录";
 this.widget_ID = "js-115";
-this.version = "v1.8";
+this.version = "v1.9";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -177,7 +177,7 @@ body {
   position: fixed;
   width: 80%;
   max-height: 80%;
-  left: 10%;
+//   left: 5%;
   top: 15%;
   background: #fff;
   border: 1px solid #ccc;
@@ -187,12 +187,26 @@ body {
   z-index: 1001;
   overflow-y: auto;
 }
+
 .batch-edit-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
+
+.batch-edit-header h3 {
+  margin: 0;
+}
+
+.batch-edit-header button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #666;
+}
+
 .batch-edit-row {
   display: flex;
   margin-bottom: 10px;
@@ -202,17 +216,40 @@ body {
   margin-left: 8px;
 }
 .batch-edit-day {
-  width: 35%;
+  width: 25%;
   font-weight: bold;
   font-size: 14px;
 }
 .batch-edit-input {
-  width: 40%;
+  width: 15%;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
 }
+
+.batch-edit-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.batch-edit-type {
+  margin-left: 10px;
+  padding: 3px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.batch-edit-type.active {
+  background-color: #1890ff;
+  color: #fff;
+  border-color: #1890ff;
+}
+
 #settingsBox label {
   display: block;
   margin-bottom: 5px;
@@ -505,16 +542,14 @@ label {
 
 <!-- 批量添加弹窗 -->
 <div id="batchEditBox">
-  <div class="batch-edit-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-    <h3 style="margin:0">批量添加加班时间</h3>
-    <button onclick="closeBatchEdit()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#666;">
-      &times; 关闭
-    </button>
+  <div class="batch-edit-header">
+    <h3>批量添加加班时间</h3>
+    <button onclick="closeBatchEdit()">&times; 关闭</button>
   </div>
   
   <div id="batchEditContent"></div>
   
-  <div style="display:flex;justify-content:space-between;margin-top:15px">
+  <div class="batch-edit-footer">
     <button class="btn" onclick="saveBatchEdit()">保存全部</button>
     <button class="btn btn-danger" onclick="closeBatchEdit()">取消</button>
   </div>
@@ -522,6 +557,7 @@ label {
 
 <script>
 let raw = ${JSON.stringify(inj)};
+let tempBatchRecords = {};
 
 // 加班时间控制
 function formatInput(input) {
@@ -1028,22 +1064,62 @@ function openBatchEdit() {
   const rng = computeRange(raw.currentYear, raw.currentMonth);
   const content = document.getElementById('batchEditContent');
   content.innerHTML = '';
-  
+
+  tempBatchRecords = JSON.parse(JSON.stringify(raw.records || {}));
+
   for (let d = new Date(rng.start); d <= new Date(rng.end); d.setDate(d.getDate() + 1)) {
     const dt = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
     const w = d.getDay();
-    const hrs = typeof raw.records[dt]?.hours === "number" ? raw.records[dt].hours : 0;
+    const rec = tempBatchRecords[dt] || {};
+    const hrs = typeof rec.hours === "number" ? rec.hours : 0;
+    const type = rec.type || null;
     const dayName = ['周日','周一','周二','周三','周四','周五','周六'][w];
     const isWeekend = w === 0 || w === 6;
-    
+
     content.innerHTML += \`
       <div class="batch-edit-row">
         <div class="batch-edit-day" style="color:\${isWeekend ? 'red' : 'inherit'}">\${dt.slice(5)} \${dayName}</div>
-        <input type="number" class="batch-edit-input" data-date="\${dt}" value="\${hrs}" placeholder="0" onblur="formatInput(this)"><span>小时</span>
+        <input type="number" class="batch-edit-input" data-date="\${dt}" value="\${hrs}" placeholder="0" 
+          onblur="formatInput(this)" \${type === 'rest' || type === 'medical' || type === 'pmRest' ? 'disabled' : ''}>
+        <span>小时</span>
+        <button class="batch-edit-type \${type === 'rest' ? 'active' : ''}" data-type="rest" data-date="\${dt}" onclick="toggleBatchType(this)">休</button>
+        <button class="batch-edit-type \${type === 'medical' ? 'active' : ''}" data-type="medical" data-date="\${dt}" onclick="toggleBatchType(this)">病</button>
+        <button class="batch-edit-type \${type === 'amRest' ? 'active' : ''}" data-type="amRest" data-date="\${dt}" onclick="toggleBatchType(this)">上</button>
+        <button class="batch-edit-type \${type === 'pmRest' ? 'active' : ''}" data-type="pmRest" data-date="\${dt}" onclick="toggleBatchType(this)">下</button>
       </div>\`;
   }
-  
+
   document.getElementById('batchEditBox').style.display = 'block';
+}
+
+function toggleBatchType(btn) {
+  const date = btn.dataset.date;
+  const type = btn.dataset.type;
+  const input = document.querySelector(\`.batch-edit-input[data-date="\${date}"]\`);
+
+  const alreadyActive = btn.classList.contains("active");
+
+  if (alreadyActive) {
+    btn.classList.remove("active");
+    input.disabled = false;
+    if (tempBatchRecords[date]) {
+      delete tempBatchRecords[date].type;
+    }
+    return;
+  }
+
+  document.querySelectorAll(\`.batch-edit-type[data-date="\${date}"]\`).forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+
+  if (type === "rest" || type === "medical" || type === "pmRest") {
+    input.value = 0;
+    input.disabled = true;
+  } else {
+    input.disabled = false;
+  }
+
+  if (!tempBatchRecords[date]) tempBatchRecords[date] = {};
+  tempBatchRecords[date].type = type;
 }
 
 function closeBatchEdit() {
@@ -1056,18 +1132,22 @@ function saveBatchEdit() {
     const date = input.dataset.date;
     let hours = parseFloat(input.value) || 0;
     if (hours < 0) hours = 0;
-    
-    if (hours > 0) {
+
+    let type = tempBatchRecords[date]?.type || null;
+
+    if (hours > 0 || type) {
       const w = new Date(date).getDay();
       const rate = w === 0 ? raw.settings.rateSunday : 
                   w === 6 ? raw.settings.rateSaturday : raw.settings.rateWeekday;
-      raw.records[date] = { hours, rate };
-    } else if (raw.records[date]) {
-      delete raw.records[date];
+      tempBatchRecords[date] = { hours, rate, type };
+    } else if (tempBatchRecords[date]) {
+      delete tempBatchRecords[date];
     }
   });
-  
+
+  raw.records = tempBatchRecords;
   window._result = JSON.stringify({ type: 'save-records', records: raw.records });
+
   closeBatchEdit();
   render();
 }
