@@ -183,13 +183,13 @@
   },
   "js-115": {
     "name": "加班记录",
-    "version": "v1.8",
+    "version": "v1.9",
     "ID": "js-115",
     "argsID": "",
     "small": false,
     "medium": false,
     "large": false,
-    "update": "增加休假按钮，更新若干代码",
+    "update": "增加批量休假按钮，更新若干代码",
     "url": "js/js-115.js",
     "introduction": "记录加班",
     "icon": "fa-th-list"
