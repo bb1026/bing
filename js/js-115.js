@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: briefcase;
 this.name = "出勤记录";
 this.widget_ID = "js-115";
-this.version = "v1.5";
+this.version = "v1.8";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -17,7 +17,7 @@ const defaultSettings = {
   rateSaturday: 1.5,
   rateSunday: 2.0,
   method: "daily",
-  dateRangeMode: "natural", // 日期显示(自然月)
+  dateRangeMode: "natural",
   fromDay: 11,
   toDay: 12,
   weekHours: 40,
@@ -242,31 +242,29 @@ body {
   border-collapse: collapse;
   margin: 12px 0;
 }
-/* 表头行：设置较大高度（如 55px），突出标题 */
+/* 表头行 */
 #settingsTable th {
   border: 1px solid #ccc; 
   padding: 8px;
   text-align: center; 
   font-size: 18px;
   vertical-align: middle;
-  height: 25px; /* 表头高度 */
+  height: 25px;
   background-color: #f5f5f5;
 }
-/* 内容行：设置适中高度（如 45px），适配输入框 */
+/* 内容行 */
 #settingsTable td {
   border: 1px solid #ccc; 
   padding: 8px;
   text-align: center; 
   font-size: 18px;
   vertical-align: middle;
-  height: 35px; /* 内容行高度 */
+  height: 35px;
 }
 
-/* 调整输入框样式以适应新的行高 */
+/* 输入框样式 */
 #settingsTable input[type="text"] {
-//   height: 30px; /* 增加输入框高度 */
   padding: 8px 12px;
-//   font-size: 16px; /* 稍微调大字体 */
   box-sizing: border-box;
   width: 100%;
   border: 1px solid #ddd;
@@ -275,9 +273,7 @@ body {
 
 /* 调整按钮样式 */
 #settingsTable .btn {
-//   height: 30px; /* 增加按钮高度 */
   padding: 8px 16px;
-//   font-size: 15px; /* 稍微调大字体 */
   line-height: 1.2;
 }
 .calendar-header {
@@ -300,7 +296,6 @@ body {
   border-radius: 4px;
   box-sizing: border-box;
 }
-
 .time-btn {
   flex: 1;
   padding: 8px 5px;
@@ -312,30 +307,27 @@ body {
   font-size: 14px;
   transition: all 0.2s;
 }
-
 .time-btn.active {
   background-color: #1890ff;
   color: #fff;
   border: 1px solid #1890ff;
 }
-
 .time-btn.disabled {
   background: #e9ecef;
   color: #999;
   cursor: not-allowed;
 }
-
 .toggle-btn.active {
   background-color: #4CAF50;
   color: white;
   border-color: #4CAF50;
 }
-
 #weekHours {
   width: 100px;
   display: block;
   margin-bottom: 15px;
 }
+
 /* iOS风格开关样式 */
 .ios-switch {
   position: relative;
@@ -343,13 +335,11 @@ body {
   width: 50px;
   height: 30px;
 }
-
 .ios-switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 .ios-switch-slider {
   position: absolute;
   cursor: pointer;
@@ -361,7 +351,6 @@ body {
   transition: .4s;
   border-radius: 34px;
 }
-
 .ios-switch-slider:before {
   position: absolute;
   content: "";
@@ -374,15 +363,12 @@ body {
   border-radius: 50%;
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
-
 input:checked + .ios-switch-slider {
-  background-color: #34C759; /* iOS绿色 */
+  background-color: #34C759; 
 }
-
 input:checked + .ios-switch-slider:before {
   transform: translateX(20px);
 }
-
 .ios-switch:active .ios-switch-slider:before {
   width: 30px;
 }
@@ -393,7 +379,6 @@ select, input, label {
   font-family: -apple-system, sans-serif;
   font-size: 14px;
 }
-
 label {
   line-height: 1.3;
   padding-bottom: 1px;
@@ -507,7 +492,6 @@ label {
     <button class="btn btn-danger" onclick="closeSettings()">× 关闭</button>
   </div>
   
-  <!-- 在设置底部添加版本信息和更新按钮 -->
     <div style="margin-top: 10px; padding-top: 15px; border-top: 1px solid #eee;">
         <div style="text-align: center; margin-bottom: 5px; color: #666; font-size: 14px;">
             当前版本: ${this.version}
@@ -543,7 +527,6 @@ let raw = ${JSON.stringify(inj)};
 function formatInput(input) {
   let value = parseFloat(input.value);
   if (isNaN(value)) value = 0;
-// 四舍五入到 0.25 的倍数，限制范围0~10
   value = Math.min(10, Math.max(0, Math.round(value / 0.25) * 0.25));
   input.value = value.toFixed(2);
 }
@@ -563,7 +546,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
-// 苹果开关风格
 
 function fillHours(h) {
   document.getElementById('hourInput').value = h;
@@ -821,19 +803,34 @@ function render() {
     const rec = raw.records[dstr] || {};
     const hrs = typeof rec.hours === "number" ? rec.hours : 0;
     const type = rec.type || null;
-
     const isToday = dstr === todayStr;
-    const dayStyle = \`\${
-      type === "rest"
-        ? \`background-color: #f5f5f5; color: \${isToday ? '#FF9500' : 'purple'}; border-color: \${isToday ? '#FF9500' : 'purple'};\`
-        : type === "medical"
-          ? \`background-color: #f5f5f5; color: \${isToday ? '#FF9500' : 'red'}; border-color: \${isToday ? '#FF9500' : 'red'};\`
-          : (hrs === 0 && temp < new Date(todayStr))
-            ? \`background-color: #e6f7ff; color: #666; border-color: \${isToday ? '#FF9500' : '#91d5ff'};\`
-            : hrs > 0
-              ? \`background-color: #e6f7ff; border-color: \${isToday ? '#FF9500' : '#91d5ff'};\`
-              : \`background-color: #f5f5f5; border-color: \${isToday ? '#FF9500' : '#ccc'};\`
-    }\`;
+    let bg = "#f5f5f5";
+    let color = "";
+    let border = "";
+    let istd = "orange"
+    
+    if (type === "rest") {
+      color = isToday ? istd : "purple";
+      border = isToday ? istd : "purple";
+    } else if (type === "medical") {
+      color = isToday ? istd : "red";
+      border = isToday ? istd : "red";
+    } else if (type === "amRest" || type === "pmRest") {
+      bg = "#e6f7ff";
+      color = isToday ? istd : "brown";
+      border = isToday ? istd : "brown";
+    } else if (hrs === 0 && temp < new Date(todayStr)) {
+      bg = "#e6f7ff";
+      color = "#666";
+      border = isToday ? istd : "#91d5ff";
+    } else if (hrs > 0) {
+      bg = "#e6f7ff";
+      border = isToday ? istd : "#91d5ff";
+    } else {
+      border = isToday ? istd : "#ccc";
+    }
+
+const dayStyle = \`background-color: \${bg};\${color ? \` color: \${color};\` : ""} border-color: \${border};\`;
 
     cal.innerHTML += \`
       <div class="day \${w === 0 ? 'sun' : w === 6 ? 'sat' : ''}" 
@@ -843,9 +840,9 @@ function render() {
 
         <!-- 上午休 / 下午休角标 -->
         \${type === "amRest"
-          ? '<span style="position:absolute; top:2px; left:2px; font-size:10px; color:purple;">上</span>'
+          ? '<span style="position:absolute; top:2px; left:2px; font-size:10px; color:brown;">上</span>'
           : type === "pmRest"
-            ? '<span style="position:absolute; top:2px; right:2px; font-size:10px; color:purple;">下</span>'
+            ? '<span style="position:absolute; top:2px; right:2px; font-size:10px; color:brown;">下</span>'
             : ''}
 
          <!-- 加班时间显示 -->
@@ -912,19 +909,19 @@ function openInput(d) {
   switch(type) {
     case 'rest':
       statusText = '休息';
-      statusColor = '#FF9800'; // 橙色
+      statusColor = 'orange';
       break;
     case 'medical':
       statusText = '病假';
-      statusColor = '#F44336'; // 红色
+      statusColor = 'red';
       break;
     case 'amRest':
       statusText = '上午休息';
-      statusColor = '#9C27B0'; // 紫色
+      statusColor = 'brown';
       break;
     case 'pmRest':
       statusText = '下午休息';
-      statusColor = '#673AB7'; // 深紫色
+      statusColor = 'brown';
   }
   
   statusLabel.innerHTML = \`<span style="color: \${statusColor}; font-weight: bold;">状态: \${statusText}</span>\`;
@@ -1325,7 +1322,6 @@ render();
   await webView.loadHTML(html);
   webView.present(true);
 }
-
 await loadHTML();
 
 // Scriptable 后台监听 WebView 通信
@@ -1370,14 +1366,12 @@ timer.schedule(async () => {
     } else if (m.type === "restart-script") {
       Safari.open(`scriptable:///run/${encodeURIComponent(Script.name())}`);
     }
-
     loadData();
 
     // 保留临时状态
     const tempShowSalary =
       (await webView.evaluateJavaScript("raw.tempShowSalary", false)) ??
       settings?.showSalary !== false;
-
     await webView.evaluateJavaScript(
       `raw=${JSON.stringify({ settings, records, currentYear, currentMonth })}`,
       false
@@ -1387,7 +1381,6 @@ timer.schedule(async () => {
       `raw.tempShowSalary=${tempShowSalary}`,
       false
     );
-
     await webView.evaluateJavaScript(`render()`, false);
   }
 });
