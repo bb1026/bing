@@ -978,13 +978,13 @@ await createCalendarWidget();
 async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
-  const url = "https://raw.githubusercontent.com/bb1026/bing/main/js/Ku.js";
+  const url = "https://bing.0515364.xyz/js/Ku.js";
   let needDownload = false;
 
   try {
     ({ installation, calendar } = importModule("Ku"));
 
-    if (typeof installation !== "function") {
+    if (!fm.fileExists(path) || typeof installation !== "function") {
       console.log("数据库模块无效，准备重新下载");
       needDownload = true;
     }
@@ -995,7 +995,7 @@ async function CheckKu() {
 
   if (needDownload) {
     const req = new Request(url);
-    req.req.timeoutInterval = 5;
+    req.headers = { "X-Auth-Key": "scriptable-key" };
     try {
       fm.writeString(path, await req.loadString());
       if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
