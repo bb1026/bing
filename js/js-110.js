@@ -725,8 +725,9 @@ async function createCalendarWidget() {
         }
         i += 2;
       }
-      widget.addSpacer();
     }
+    
+    widget.addSpacer();
 
     function addEventToStack(stack, event, title) {
       const eventStack = stack.addStack();
