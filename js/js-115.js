@@ -533,11 +533,7 @@ label {
     <button class="btn" onclick="saveSettings()" style="margin-left:10px">✓ 保存</button>
     <button class="btn btn-danger" onclick="closeSettings()">× 关闭</button>
   </div>
-  
-    <div style="margin-top: 10px; padding-top: 15px; border-top: 1px solid #eee;">
-        <div style="text-align: center; margin-bottom: 5px; color: #666; font-size: 14px;">
-            当前版本: ${this.version}
-        </div>
+  <div style="margin-top: 10px; padding-top: 15px; border-top: 1px solid #eee;">
         <div id="versionInfo" style="text-align: center; margin-bottom: 15px; font-size: 14px;"></div>
         <button class="btn" onclick="checkUpdate()" id="updateBtn" style="width: 100%;">
             检查更新
@@ -1322,7 +1318,7 @@ async function checkUpdate() {
     const updateBtn = document.getElementById('updateBtn');
     const versionInfo = document.getElementById('versionInfo');
     const authKey = {"X-Auth-Key": "tX3$9mGz@7vLq#F!b2R"};
-    const remoteUrl = \`https://bing.0515364.xyz/js/${this.widget_ID}.js\`;
+    const remoteUrl = \`https://bing.0515364.xyz/js/js-115.js\`;
 
     updateBtn.textContent = '检查中...';
     updateBtn.disabled = true;
@@ -1358,7 +1354,7 @@ async function checkUpdate() {
             updateBtn.style.background = '#4CAF50';
             updateBtn.style.color = '#fff';
             updateBtn.onclick = async () => {
-                await downloadToICloud(remoteUrl, \`${this.name}\`, authKey);
+                await downloadToICloud(remoteUrl, \`出勤记录\`, authKey);
             };
 
         } else {
