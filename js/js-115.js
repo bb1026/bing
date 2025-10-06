@@ -1179,6 +1179,7 @@ function saveBatchEdit() {
 
 function openSettings() {
   document.getElementById('settingsBox').style.display = 'block';
+  document.body.classList.add('modal-open');
   document.getElementById('modeSelect').value = raw.settings.dateRangeMode;
   ['fromDay','toDay'].forEach(id => {
     const sel = document.getElementById(id);
@@ -1192,6 +1193,7 @@ function openSettings() {
 
 function closeSettings() {
   document.getElementById('settingsBox').style.display = 'none';
+  document.body.classList.remove('modal-open');
 }
 
 function toggleCustom() {
