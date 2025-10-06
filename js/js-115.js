@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: briefcase;
 this.name = "出勤记录";
 this.widget_ID = "js-115";
-this.version = "v1.9";
+this.version = "v2.0";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -172,12 +172,17 @@ body {
   overflow: auto; 
   z-index: 1000;
 }
+
+body.modal-open {
+  overflow: hidden;
+}
 #batchEditBox {
   display: none;
   position: fixed;
-  width: 80%;
+  max-width: 100%;
   max-height: 80%;
-//   left: 5%;
+  left: 0;
+  right: 0;
   top: 15%;
   background: #fff;
   border: 1px solid #ccc;
@@ -221,7 +226,7 @@ body {
   font-size: 14px;
 }
 .batch-edit-input {
-  width: 15%;
+  width: 17%;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -456,7 +461,8 @@ label {
   </div>
   
   <div class="btn-row">
-    <button class="time-btn toggle-btn" data-type="rest" onclick="toggleType(this)">休</button>
+    <button class="time-btn toggle-btn" data-type="holiday" onclick="toggleType(this)">节</button>
+    <button class="time-btn toggle-btn" data-type="rest" onclick="toggleType(this)">假</button>
     <button class="time-btn toggle-btn" data-type="medical" onclick="toggleType(this)">MC</button>
     <button class="time-btn toggle-btn" data-type="amRest" onclick="toggleType(this)">上</button>
     <button class="time-btn toggle-btn" data-type="pmRest" onclick="toggleType(this)">下</button>
@@ -563,8 +569,9 @@ let tempBatchRecords = {};
 function formatInput(input) {
   let value = parseFloat(input.value);
   if (isNaN(value)) value = 0;
-  value = Math.min(10, Math.max(0, Math.round(value / 0.25) * 0.25));
-  input.value = value.toFixed(2);
+  value = Math.round(value / 0.25) * 0.25;
+  value = Math.min(12, Math.max(0, value));
+  input.value = value.toFixed(2); 
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -613,7 +620,7 @@ function toggleType(btn) {
 
   btn.classList.add('active');
 
-  if (type === 'rest' || type === 'medical' || type === 'pmRest') {
+  if (type === 'rest' || type === 'medical' || type === 'pmRest' || type === 'holiday') {
     hourInput.value = '0';
     disableTimeButtons();
   } else if (type === 'amRest') {
@@ -855,7 +862,9 @@ function render() {
       bg = "#e6f7ff";
       color = isToday ? istd : "brown";
       border = isToday ? istd : "brown";
-    } else if (hrs === 0 && temp < new Date(todayStr)) {
+    } else if (((w === 0 || w === 6) || type === "holiday") && hrs === 0) {
+      color = "#666";
+    } else if (hrs === 0 && temp < new Date(todayStr) && temp < new Date(todayStr)) {
       bg = "#e6f7ff";
       color = "#666";
       border = isToday ? istd : "#91d5ff";
@@ -874,12 +883,14 @@ const dayStyle = \`background-color: \${bg};\${color ? \` color: \${color};\` : 
            style="\${dayStyle}; position: relative;">
         \${temp.getDate()}<br> 
 
-        <!-- 上午休 / 下午休角标 -->
-        \${type === "amRest"
-          ? '<span style="position:absolute; top:2px; left:2px; font-size:10px; color:brown;">上</span>'
-          : type === "pmRest"
-            ? '<span style="position:absolute; top:2px; right:2px; font-size:10px; color:brown;">下</span>'
-            : ''}
+        <!-- 上午休 / 下午休 / 节日角标 -->
+\${type === "amRest"
+  ? '<span style="position:absolute; top:2px; left:2px; font-size:10px; color:brown;">上</span>'
+  : type === "pmRest"
+    ? '<span style="position:absolute; top:2px; right:2px; font-size:10px; color:brown;">下</span>'
+    : type === "holiday"
+      ? '<span style="position:absolute; top:2px; right:2px; font-size:10px; color:red;">节</span>'
+      : ''}
 
          <!-- 加班时间显示 -->
         <span style="font-size:14px; color:\${
@@ -888,7 +899,7 @@ const dayStyle = \`background-color: \${bg};\${color ? \` color: \${color};\` : 
             : (hrs === 0 ? "#666" : hrs > 4 ? "green" : "blue")
         }">
         \${type === "medical" ? "MC" 
-        : type === "rest" ? "休" 
+        : type === "rest" ? "假" 
         : hrs + "hrs"}
         </span>
       </div>
@@ -943,8 +954,12 @@ function openInput(d) {
   
   if (type) {
   switch(type) {
+    case 'holiday':
+      statusText = '节假日';
+      statusColor = 'red';
+      break;
     case 'rest':
-      statusText = '休息';
+      statusText = '请假';
       statusColor = 'orange';
       break;
     case 'medical':
@@ -1079,17 +1094,26 @@ function openBatchEdit() {
     content.innerHTML += \`
       <div class="batch-edit-row">
         <div class="batch-edit-day" style="color:\${isWeekend ? 'red' : 'inherit'}">\${dt.slice(5)} \${dayName}</div>
-        <input type="number" class="batch-edit-input" data-date="\${dt}" value="\${hrs}" placeholder="0" 
-          onblur="formatInput(this)" \${type === 'rest' || type === 'medical' || type === 'pmRest' ? 'disabled' : ''}>
+        <input type="number" 
+       class="batch-edit-input" 
+       data-date="\${dt}" 
+       value="\${hrs}" 
+       placeholder="0" 
+       min="0" 
+       max="12" 
+       onblur="formatInput(this)" 
+       \${type === 'rest' || type === 'medical' || type === 'pmRest' || type === 'holiday' ? 'disabled' : ''}>
         <span>小时</span>
-        <button class="batch-edit-type \${type === 'rest' ? 'active' : ''}" data-type="rest" data-date="\${dt}" onclick="toggleBatchType(this)">休</button>
+        <button class="batch-edit-type \${type === 'rest' ? 'active' : ''}" data-type="rest" data-date="\${dt}" onclick="toggleBatchType(this)">假</button>
         <button class="batch-edit-type \${type === 'medical' ? 'active' : ''}" data-type="medical" data-date="\${dt}" onclick="toggleBatchType(this)">病</button>
+        <button class="batch-edit-type \${type === 'holiday' ? 'active' : ''}" data-type="holiday" data-date="\${dt}" onclick="toggleBatchType(this)">节</button>
         <button class="batch-edit-type \${type === 'amRest' ? 'active' : ''}" data-type="amRest" data-date="\${dt}" onclick="toggleBatchType(this)">上</button>
         <button class="batch-edit-type \${type === 'pmRest' ? 'active' : ''}" data-type="pmRest" data-date="\${dt}" onclick="toggleBatchType(this)">下</button>
       </div>\`;
   }
 
   document.getElementById('batchEditBox').style.display = 'block';
+  document.body.classList.add('modal-open');
 }
 
 function toggleBatchType(btn) {
@@ -1111,7 +1135,7 @@ function toggleBatchType(btn) {
   document.querySelectorAll(\`.batch-edit-type[data-date="\${date}"]\`).forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
 
-  if (type === "rest" || type === "medical" || type === "pmRest") {
+  if (type === "rest" || type === "medical" || type === "pmRest" || type === 'holiday') {
     input.value = 0;
     input.disabled = true;
   } else {
@@ -1123,7 +1147,8 @@ function toggleBatchType(btn) {
 }
 
 function closeBatchEdit() {
-  document.getElementById('batchEditBox').style.display = 'none';
+document.getElementById('batchEditBox').style.display = 'none';
+  document.body.classList.remove('modal-open');
 }
 
 function saveBatchEdit() {
@@ -1319,7 +1344,6 @@ async function checkUpdate() {
     }
     const currentVersion = '${this.version}';
     const latestVersion = appInfo.version;
-    // 重置原“检查更新”按钮基础状态
     updateBtn.textContent = '检查更新';
     updateBtn.disabled = false;
     updateBtn.style.width = '100%'; 
