@@ -1,8 +1,12 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-green; icon-glyph: briefcase;
+// Variables used by Scriptable.
+// These must be at the very top of the file. Do not edit.
+// icon-color: deep-green; icon-glyph: briefcase;
 this.name = "出勤记录";
 this.widget_ID = "js-115";
+this.version = "v2.0";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -533,7 +537,11 @@ label {
     <button class="btn" onclick="saveSettings()" style="margin-left:10px">✓ 保存</button>
     <button class="btn btn-danger" onclick="closeSettings()">× 关闭</button>
   </div>
-  <div style="margin-top: 10px; padding-top: 15px; border-top: 1px solid #eee;">
+  
+    <div style="margin-top: 10px; padding-top: 15px; border-top: 1px solid #eee;">
+        <div style="text-align: center; margin-bottom: 5px; color: #666; font-size: 14px;">
+            当前版本: ${this.version}
+        </div>
         <div id="versionInfo" style="text-align: center; margin-bottom: 15px; font-size: 14px;"></div>
         <button class="btn" onclick="checkUpdate()" id="updateBtn" style="width: 100%;">
             检查更新
@@ -1314,72 +1322,89 @@ function restartScript() {
   });
 }
 
+// 版本检查函数
 async function checkUpdate() {
     const updateBtn = document.getElementById('updateBtn');
     const versionInfo = document.getElementById('versionInfo');
     const authKey = {"X-Auth-Key": "tX3$9mGz@7vLq#F!b2R"};
-    const remoteUrl = \`https://bing.0515364.xyz/js/js-115.js\`;
-
     updateBtn.textContent = '检查中...';
     updateBtn.disabled = true;
     versionInfo.innerHTML = '';
     versionInfo.style.color = '#666';
-
-    try {
-        const response = await fetch(remoteUrl, { headers: authKey });
-        if (!response.ok) throw new Error('HTTP error! status: ' + response.status);
-        const remoteScript = await response.text();
-        const remoteHash = simpleHash(remoteScript);
-
-        const scriptTags = document.querySelectorAll('script[src]');
-        let localScript = '';
-        for (let s of scriptTags) {
-            if (s.src.includes(this.widget_ID)) {
-                const res = await fetch(s.src);
-                localScript = await res.text();
-                break;
-            }
+    
+    const response =  await fetch('https://bing.0515364.xyz/js/Master.json', {
+        headers: authKey
+    });
+        
+    if (!response.ok) {
+        throw new Error('HTTP error! status: ' + response.status);
+    }
+        
+    const data = await response.json();
+    const appInfo = data['js-115'];
+    if (!appInfo) {
+        throw new Error('未找到js-115的应用信息');
+    }
+    const currentVersion = '${this.version}';
+    const latestVersion = appInfo.version;
+    updateBtn.textContent = '检查更新';
+    updateBtn.disabled = false;
+    updateBtn.style.width = '100%'; 
+    if (compareVersions(latestVersion, currentVersion) > 0) {
+        versionInfo.innerHTML = '有新版本可用: ' + appInfo.version;
+        versionInfo.style.color = 'green';
+        
+        if (appInfo.update) {
+            const notes = document.createElement('div');
+            notes.style.marginTop = '6px';
+            notes.style.fontSize = '14px';
+            notes.style.textAlign = 'center';
+            notes.style.color = '#666';
+            notes.innerHTML = '<strong>更新内容:</strong>' + appInfo.update.replace(/\\n/g, '<br>');
+            versionInfo.appendChild(notes);
         }
+        
+        versionInfo.appendChild(updateBtn);
+        const newUpdateBtn = document.createElement('button');
+        newUpdateBtn.className = 'btn';
+        newUpdateBtn.style = 'background: #4CAF50; width: 100%; margin-top: 8px;'; 
+        newUpdateBtn.innerHTML = '立即更新';
 
-        const localHash = simpleHash(localScript);
-
-        updateBtn.disabled = false;
-        updateBtn.style.width = '100%';
-
-        if (remoteHash !== localHash) {
-            versionInfo.innerHTML = '有新版本可用';
-            versionInfo.style.color = 'green';
-
-            updateBtn.textContent = '立即更新';
-            updateBtn.style.background = '#4CAF50';
-            updateBtn.style.color = '#fff';
-            updateBtn.onclick = async () => {
-                await downloadToICloud(remoteUrl, \`出勤记录\`, authKey);
-            };
-
-        } else {
-            versionInfo.innerHTML = '已是最新版本';
-            versionInfo.style.color = 'green';
-            updateBtn.textContent = '检查更新';
+        newUpdateBtn.onclick = async () => {
+            const remoteScriptUrl = 'https://bing.0515364.xyz/' + appInfo.url;
+            const scriptName = '${this.name}';
+            await downloadToICloud(remoteScriptUrl, scriptName, authKey);
+        };
+        versionInfo.appendChild(newUpdateBtn);
+    } else {
+        versionInfo.innerHTML = '已是最新版本';
+        versionInfo.style.color = 'green';
+        if (appInfo.update) {
+            const notes = document.createElement('div');
+            notes.style.marginTop = '6px';
+            notes.style.fontSize = '12px';
+            notes.style.textAlign = 'center';
+            notes.style.color = '#666';
+            notes.innerHTML = '<strong>版本说明:</strong> ' + appInfo.update;
+            versionInfo.appendChild(notes);
         }
-
-    } catch (err) {
-        console.error(err);
-        updateBtn.textContent = '检查更新';
-        updateBtn.disabled = false;
-        versionInfo.innerHTML = '检查失败: ' + err.message;
-        versionInfo.style.color = 'red';
+        updateBtn.style.marginTop = '10px';
+        versionInfo.appendChild(updateBtn);
     }
 }
 
-function simpleHash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
+// 版本比较
+function compareVersions(v1, v2) {
+    const parts1 = v1.split('.').map(Number);
+    const parts2 = v2.split('.').map(Number);
+    for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+        const num1 = parts1[i] || 0;
+        const num2 = parts2[i] || 0;
+        
+        if (num1 > num2) return 1;
+        if (num1 < num2) return -1;
     }
-    return Math.abs(hash).toString(16);
+    return 0;
 }
 
 async function downloadToICloud(scriptUrl, scriptName, authKey) {
@@ -1392,7 +1417,7 @@ async function downloadToICloud(scriptUrl, scriptName, authKey) {
       }
     });
     const versionInfo = document.getElementById('versionInfo');
-    versionInfo.innerHTML += '<div style="color: #007AFF; margin-top: 8px;">* 正在更新...</div>';
+    versionInfo.innerHTML += '<div style="color: #007AFF; margin-top: 8px;">[*] 正在更新...</div>';
 }
 
 // 初始渲染
