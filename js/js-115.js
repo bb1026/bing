@@ -1,12 +1,8 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-green; icon-glyph: briefcase;
-// Variables used by Scriptable.
-// These must be at the very top of the file. Do not edit.
-// icon-color: deep-green; icon-glyph: briefcase;
 this.name = "出勤记录";
 this.widget_ID = "js-115";
-this.version = "v2.0";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -95,7 +91,7 @@ body {
 .title { 
   font-size: 22px; 
   text-align: center; 
-  margin: 1em 0;
+  margin: 0.2em 0;
   font-weight: bold;
 }
 .nav-btn, .settings-btn, .btn {
@@ -175,7 +171,6 @@ body {
   overflow: auto; 
   z-index: 1000;
 }
-
 body.modal-open {
   overflow: hidden;
 }
@@ -195,18 +190,15 @@ body.modal-open {
   z-index: 1001;
   overflow-y: auto;
 }
-
 .batch-edit-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
 }
-
 .batch-edit-header h3 {
   margin: 0;
 }
-
 .batch-edit-header button {
   background: none;
   border: none;
@@ -214,7 +206,6 @@ body.modal-open {
   cursor: pointer;
   color: #666;
 }
-
 .batch-edit-row {
   display: flex;
   margin-bottom: 10px;
@@ -235,13 +226,11 @@ body.modal-open {
   border-radius: 4px;
   font-size: 14px;
 }
-
 .batch-edit-footer {
   display: flex;
   justify-content: space-between;
   margin-top: 15px;
 }
-
 .batch-edit-type {
   margin-left: 10px;
   padding: 3px 6px;
@@ -251,13 +240,11 @@ body.modal-open {
   cursor: pointer;
   font-size: 12px;
 }
-
 .batch-edit-type.active {
   background-color: #1890ff;
   color: #fff;
   border-color: #1890ff;
 }
-
 #settingsBox label {
   display: block;
   margin-bottom: 5px;
@@ -306,7 +293,6 @@ body.modal-open {
   vertical-align: middle;
   height: 35px;
 }
-
 /* 输入框样式 */
 #settingsTable input[type="text"] {
   padding: 8px 12px;
@@ -315,7 +301,6 @@ body.modal-open {
   border: 1px solid #ddd;
   border-radius: 4px;
 }
-
 /* 调整按钮样式 */
 #settingsTable .btn {
   padding: 8px 16px;
@@ -372,7 +357,6 @@ body.modal-open {
   display: block;
   margin-bottom: 15px;
 }
-
 /* iOS风格开关样式 */
 .ios-switch {
   position: relative;
@@ -417,7 +401,6 @@ input:checked + .ios-switch-slider:before {
 .ios-switch:active .ios-switch-slider:before {
   width: 30px;
 }
-
 select, input, label {
   vertical-align: middle;
   box-sizing: border-box;
@@ -428,7 +411,6 @@ label {
   line-height: 1.3;
   padding-bottom: 1px;
 }
-
 </style>
 </head>
 <body>
@@ -537,12 +519,8 @@ label {
     <button class="btn" onclick="saveSettings()" style="margin-left:10px">✓ 保存</button>
     <button class="btn btn-danger" onclick="closeSettings()">× 关闭</button>
   </div>
-  
-    <div style="margin-top: 10px; padding-top: 15px; border-top: 1px solid #eee;">
-        <div style="text-align: center; margin-bottom: 5px; color: #666; font-size: 14px;">
-            当前版本: ${this.version}
-        </div>
-        <div id="versionInfo" style="text-align: center; margin-bottom: 15px; font-size: 14px;"></div>
+  <div style="margin-top: 10px; padding-top: 15px; border-top: 1px solid #eee;">
+        <div id="versionInfo" style="text-align: center; font-size: 14px;"></div>
         <button class="btn" onclick="checkUpdate()" id="updateBtn" style="width: 100%;">
             检查更新
         </button>
@@ -826,14 +804,15 @@ function render() {
     ? year + '年 ' + (month + 1) + '月'
     : rng.start.slice(0, 7).replace('-', '年') + '月 ~ ' + rng.end.slice(0, 7).replace('-', '年') + '月';
 
-  document.getElementById('monthTitle').textContent = title;
+  const titleEl = document.getElementById('monthTitle');
+titleEl.innerHTML = \`\${title}<br><span style="font-size:22px;color:#007AFF;">\${todayStr}</span>\`;
 
   const wh = document.getElementById('weekHeader');
   wh.innerHTML = '';
   ["日", "一", "二", "三", "四", "五", "六"].forEach((d, i) =>
     wh.innerHTML += (i === 0 || i === 6
-      ? \`<div style="color:red;font-size:16px;">\${d}</div>\`
-      : \`<div style="font-size:16px;">\${d}</div>\`)
+      ? \`<div style="color:red;font-size:18px;">\${d}</div>\`
+      : \`<div style="font-size:18px;">\${d}</div>\`)
   );
 
   const cal = document.getElementById('calendar');
@@ -1322,92 +1301,89 @@ function restartScript() {
   });
 }
 
-// 版本检查函数
 async function checkUpdate() {
     const updateBtn = document.getElementById('updateBtn');
     const versionInfo = document.getElementById('versionInfo');
-    const authKey = {"X-Auth-Key": "tX3$9mGz@7vLq#F!b2R"};
+    const authKey = { "X-Auth-Key": "tX3$9mGz@7vLq#F!b2R" };
+    const remoteUrl = \`https://bing.0515364.xyz/js/js-115.js\`;
+
     updateBtn.textContent = '检查中...';
     updateBtn.disabled = true;
     versionInfo.innerHTML = '';
     versionInfo.style.color = '#666';
-    
-    const response =  await fetch('https://bing.0515364.xyz/js/Master.json', {
-        headers: authKey
-    });
-        
-    if (!response.ok) {
-        throw new Error('HTTP error! status: ' + response.status);
-    }
-        
-    const data = await response.json();
-    const appInfo = data['js-115'];
-    if (!appInfo) {
-        throw new Error('未找到js-115的应用信息');
-    }
-    const currentVersion = '${this.version}';
-    const latestVersion = appInfo.version;
-    updateBtn.textContent = '检查更新';
-    updateBtn.disabled = false;
-    updateBtn.style.width = '100%'; 
-    if (compareVersions(latestVersion, currentVersion) > 0) {
-        versionInfo.innerHTML = '有新版本可用: ' + appInfo.version;
-        versionInfo.style.color = 'green';
-        
-        if (appInfo.update) {
-            const notes = document.createElement('div');
-            notes.style.marginTop = '6px';
-            notes.style.fontSize = '14px';
-            notes.style.textAlign = 'center';
-            notes.style.color = '#666';
-            notes.innerHTML = '<strong>更新内容:</strong>' + appInfo.update.replace(/\\n/g, '<br>');
-            versionInfo.appendChild(notes);
-        }
-        
-        versionInfo.appendChild(updateBtn);
-        const newUpdateBtn = document.createElement('button');
-        newUpdateBtn.className = 'btn';
-        newUpdateBtn.style = 'background: #4CAF50; width: 100%; margin-top: 8px;'; 
-        newUpdateBtn.innerHTML = '立即更新';
 
-        newUpdateBtn.onclick = async () => {
-            const remoteScriptUrl = 'https://bing.0515364.xyz/' + appInfo.url;
-            const scriptName = '${this.name}';
-            await downloadToICloud(remoteScriptUrl, scriptName, authKey);
-        };
-        versionInfo.appendChild(newUpdateBtn);
-    } else {
-        versionInfo.innerHTML = '已是最新版本';
-        versionInfo.style.color = 'green';
-        if (appInfo.update) {
-            const notes = document.createElement('div');
-            notes.style.marginTop = '6px';
-            notes.style.fontSize = '12px';
-            notes.style.textAlign = 'center';
-            notes.style.color = '#666';
-            notes.innerHTML = '<strong>版本说明:</strong> ' + appInfo.update;
-            versionInfo.appendChild(notes);
-        }
-        updateBtn.style.marginTop = '10px';
+    try {
+        const response = await fetch(remoteUrl, { headers: authKey });
+        if (!response.ok) throw new Error('HTTP error! status: ' + response.status);
+        const remoteScript = await response.text();
+        const remoteHash = simpleHash(remoteScript);
+
+        window._result = JSON.stringify({ type: "get-local-hash" });
+
+        let localHash = await new Promise(resolve => {
+            let timer = setInterval(() => {
+                if (window._localHashResult) {
+                    clearInterval(timer);
+                    resolve(window._localHashResult);
+                    window._localHashResult = null;
+                }
+            }, 200);
+        });
+
+        updateBtn.disabled = false;
+        updateBtn.style.width = '100%';
         versionInfo.appendChild(updateBtn);
+
+        const statusDiv = document.createElement('div');
+        statusDiv.style.color = 'green';
+        if (remoteHash !== localHash) {
+            statusDiv.textContent = '有新版本可用';
+            updateBtn.textContent = '立即更新';
+            updateBtn.style.background = '#4CAF50';
+            updateBtn.style.color = '#fff';
+            updateBtn.onclick = async () => {
+                await downloadToICloud(remoteUrl, '出勤记录', authKey);
+            };
+        } else {
+            statusDiv.textContent = '已是最新版本';
+            updateBtn.textContent = '检查更新';
+            updateBtn.style.background = '';
+            updateBtn.style.color = '';
+            updateBtn.onclick = null;
+        }
+        versionInfo.appendChild(statusDiv);
+
+        const hashInfo = document.createElement('div');
+        hashInfo.style.fontSize = '12px';
+        hashInfo.style.textAlign = 'center';
+        hashInfo.innerHTML = \`本地: <code>\${localHash}</code> 远程: <code>\${remoteHash}</code>\`;
+        versionInfo.appendChild(hashInfo);
+
+    } catch (err) {
+        console.error(err);
+        updateBtn.textContent = '检查更新';
+        updateBtn.disabled = false;
+        versionInfo.innerHTML = '';
+        versionInfo.appendChild(updateBtn);
+
+        const errDiv = document.createElement('div');
+        errDiv.textContent = \`检查失败: \${err.message}\`;
+        errDiv.style.color = 'red';
+        versionInfo.appendChild(errDiv);
     }
 }
 
-// 版本比较
-function compareVersions(v1, v2) {
-    const parts1 = v1.split('.').map(Number);
-    const parts2 = v2.split('.').map(Number);
-    for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
-        const num1 = parts1[i] || 0;
-        const num2 = parts2[i] || 0;
-        
-        if (num1 > num2) return 1;
-        if (num1 < num2) return -1;
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
     }
-    return 0;
+    return Math.abs(hash).toString(16);
 }
 
-async function downloadToICloud(scriptUrl, scriptName, authKey) {
+function downloadToICloud(scriptUrl, scriptName, authKey) {
     window._result = JSON.stringify({
       type: "start-download",
       data: {
@@ -1417,7 +1393,7 @@ async function downloadToICloud(scriptUrl, scriptName, authKey) {
       }
     });
     const versionInfo = document.getElementById('versionInfo');
-    versionInfo.innerHTML += '<div style="color: #007AFF; margin-top: 8px;">[*] 正在更新...</div>';
+    versionInfo.innerHTML += '<div style="color: #007AFF; margin-top: 8px;">* 正在更新...</div>';
 }
 
 // 初始渲染
@@ -1441,7 +1417,6 @@ timer.schedule(async () => {
     await webView.evaluateJavaScript("window._result=null", false);
     const m = JSON.parse(res);
     
-  // 处理下载指令
     if (m.type === "start-download") {
       const { serverScriptUrl, scriptName, authKey } = m.data;
       const iCloudFm = FileManager.iCloud();
@@ -1460,6 +1435,24 @@ timer.schedule(async () => {
         await successAlert.schedule();
       return;
     }
+    
+    if (m.type === "get-local-hash") {
+  const fm = FileManager.iCloud();
+  let localHash = "0";
+  try {
+    const scriptName = Script.name(); 
+    const path = fm.joinPath(fm.documentsDirectory(), `${scriptName}.js`); 
+    if (fm.fileExists(path)) {
+      if (!fm.isFileDownloaded(path)) await fm.downloadFileFromiCloud(path);
+      const content = fm.readString(path);
+      localHash = simpleHash(content);
+    }
+  } catch (e) {
+    console.log("读取本地失败:" + e);
+  }
+  await webView.evaluateJavaScript(`window._localHashResult='${localHash}'`, false);
+  return;
+}
     
     if (m.type === "save-records") {
       records = m.records;
@@ -1491,3 +1484,13 @@ timer.schedule(async () => {
     await webView.evaluateJavaScript(`render()`, false);
   }
 });
+
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(16);
+}
