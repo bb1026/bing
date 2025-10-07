@@ -1355,9 +1355,9 @@ async function checkUpdate() {
         updateBtn.style.color = '';
         updateBtn.onclick = null;
     }
-
     versionInfo.appendChild(statusDiv);
-    hashInfo.innerHTML = \`本地: <code>\${result.localHash}</code> 远程: <code>\${result.remoteHash}</code>\`;
+    hashInfo.innerHTML = \`代码有变动是否需要更新\`;
+    hashInfo.style.color = 'red';
     versionInfo.appendChild(hashInfo);
 }
 
@@ -1412,9 +1412,8 @@ timer.schedule(async () => {
 
             const localPath = fm.joinPath(fm.documentsDirectory(), `${Script.name()}.js`);
             if (fm.fileExists(localPath)) {
-                if (!fm.isFileDownloaded(localPath)) await fm.downloadFileFromiCloud(localPath);
-                const localScript = fm.readString(localPath);
-                localHash = simpleHash(localScript);
+              const localScript = fm.readString(localPath);
+              localHash = simpleHash(localScript);
             }
         } catch (e) {
             error = e.message;
