@@ -1344,6 +1344,8 @@ async function checkUpdate() {
         updateBtn.textContent = '立即更新';
         updateBtn.style.background = '#4CAF50';
         updateBtn.style.color = '#fff';
+        hashInfo.innerHTML = \`代码有变动是否需要更新\`;
+        hashInfo.style.color = 'red';
         updateBtn.onclick = async () => {
             await downloadToICloud(result.remoteUrl, '出勤记录', result.authKey);
         };
@@ -1354,10 +1356,10 @@ async function checkUpdate() {
         updateBtn.style.background = '';
         updateBtn.style.color = '';
         updateBtn.onclick = null;
+        hashInfo.innerHTML = \`代码正常无需更新\`;
+        hashInfo.style.color = 'green';
     }
     versionInfo.appendChild(statusDiv);
-    hashInfo.innerHTML = \`代码有变动是否需要更新\`;
-    hashInfo.style.color = 'red';
     versionInfo.appendChild(hashInfo);
 }
 
