@@ -3,7 +3,6 @@
 // icon-color: deep-green; icon-glyph: briefcase;
 this.name = "出勤记录";
 this.widget_ID = "js-115";
-this.version = "v2.0";
 
 const fm = FileManager.local();
 const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
@@ -1162,7 +1161,6 @@ function saveBatchEdit() {
 
 function openSettings() {
   document.getElementById('settingsBox').style.display = 'block';
-  document.body.classList.add('modal-open');
   document.getElementById('modeSelect').value = raw.settings.dateRangeMode;
   ['fromDay','toDay'].forEach(id => {
     const sel = document.getElementById(id);
@@ -1176,7 +1174,6 @@ function openSettings() {
 
 function closeSettings() {
   document.getElementById('settingsBox').style.display = 'none';
-  document.body.classList.remove('modal-open');
 }
 
 function toggleCustom() {
@@ -1304,99 +1301,74 @@ function restartScript() {
   });
 }
 
-// 版本检查函数
 async function checkUpdate() {
     const updateBtn = document.getElementById('updateBtn');
     const versionInfo = document.getElementById('versionInfo');
-    const authKey = {"X-Auth-Key": "tX3$9mGz@7vLq#F!b2R"};
     updateBtn.textContent = '检查中...';
     updateBtn.disabled = true;
     versionInfo.innerHTML = '';
     versionInfo.style.color = '#666';
-    
-    const response =  await fetch('https://bing.0515364.xyz/js/Master.json', {
-        headers: authKey
+
+    window._result = JSON.stringify({ type: "check-update" });
+
+    let result = await new Promise(resolve => {
+        let timer = setInterval(() => {
+            if (window._updateResult) {
+                clearInterval(timer);
+                resolve(window._updateResult);
+                window._updateResult = null;
+            }
+        }, 200);
     });
-        
-    if (!response.ok) {
-        throw new Error('HTTP error! status: ' + response.status);
-    }
-        
-    const data = await response.json();
-    const appInfo = data['js-115'];
-    if (!appInfo) {
-        throw new Error('未找到js-115的应用信息');
-    }
-    const currentVersion = '${this.version}';
-    const latestVersion = appInfo.version;
-    updateBtn.textContent = '检查更新';
+
     updateBtn.disabled = false;
-    updateBtn.style.width = '100%'; 
-    if (compareVersions(latestVersion, currentVersion) > 0) {
-        versionInfo.innerHTML = '有新版本可用: ' + appInfo.version;
-        versionInfo.style.color = 'green';
-        
-        if (appInfo.update) {
-            const notes = document.createElement('div');
-            notes.style.marginTop = '6px';
-            notes.style.fontSize = '14px';
-            notes.style.textAlign = 'center';
-            notes.style.color = '#666';
-            notes.innerHTML = '<strong>更新内容:</strong>' + appInfo.update.replace(/\\n/g, '<br>');
-            versionInfo.appendChild(notes);
-        }
-        
-        versionInfo.appendChild(updateBtn);
-        const newUpdateBtn = document.createElement('button');
-        newUpdateBtn.className = 'btn';
-        newUpdateBtn.style = 'background: #4CAF50; width: 100%; margin-top: 8px;'; 
-        newUpdateBtn.innerHTML = '立即更新';
+    updateBtn.style.width = '100%';
+    versionInfo.appendChild(updateBtn);
 
-        newUpdateBtn.onclick = async () => {
-            const remoteScriptUrl = 'https://bing.0515364.xyz/' + appInfo.url;
-            const scriptName = '${this.name}';
-            await downloadToICloud(remoteScriptUrl, scriptName, authKey);
+    const statusDiv = document.createElement('div');
+    const hashInfo = document.createElement('div');
+    hashInfo.style.fontSize = '12px';
+    hashInfo.style.textAlign = 'center';
+
+    if (result.error) {
+        statusDiv.textContent = \`检查失败：\${result.error}\`;
+        statusDiv.style.color = 'red';
+        updateBtn.textContent = '检查更新';
+        versionInfo.appendChild(statusDiv);
+        return;
+    }
+
+    if (result.remoteHash !== result.localHash) {
+        statusDiv.textContent = '有新版本可用';
+        statusDiv.style.color = 'green';
+        updateBtn.textContent = '立即更新';
+        updateBtn.style.background = '#4CAF50';
+        updateBtn.style.color = '#fff';
+        updateBtn.onclick = async () => {
+            await downloadToICloud(result.remoteUrl, '出勤记录', result.authKey);
         };
-        versionInfo.appendChild(newUpdateBtn);
     } else {
-        versionInfo.innerHTML = '已是最新版本';
-        versionInfo.style.color = 'green';
-        if (appInfo.update) {
-            const notes = document.createElement('div');
-            notes.style.marginTop = '6px';
-            notes.style.fontSize = '12px';
-            notes.style.textAlign = 'center';
-            notes.style.color = '#666';
-            notes.innerHTML = '<strong>版本说明:</strong> ' + appInfo.update;
-            versionInfo.appendChild(notes);
-        }
-        updateBtn.style.marginTop = '10px';
-        versionInfo.appendChild(updateBtn);
+        statusDiv.textContent = '已是最新版本';
+        statusDiv.style.color = 'green';
+        updateBtn.textContent = '检查更新';
+        updateBtn.style.background = '';
+        updateBtn.style.color = '';
+        updateBtn.onclick = null;
     }
-}
 
-// 版本比较
-function compareVersions(v1, v2) {
-    const parts1 = v1.split('v').map(Number);
-    const parts2 = v2.split('v').map(Number);
-    for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
-        const num1 = parts1[i] || 0;
-        const num2 = parts2[i] || 0;
-        
-        if (num1 > num2) return 1;
-        if (num1 < num2) return -1;
-    }
-    return 0;
+    versionInfo.appendChild(statusDiv);
+    hashInfo.innerHTML = \`本地: <code>\${result.localHash}</code> 远程: <code>\${result.remoteHash}</code>\`;
+    versionInfo.appendChild(hashInfo);
 }
 
 function downloadToICloud(scriptUrl, scriptName, authKey) {
     window._result = JSON.stringify({
-      type: "start-download",
-      data: {
-        serverScriptUrl: scriptUrl,
-        scriptName: scriptName,
-        authKey: authKey
-      }
+        type: "start-download",
+        data: {
+            serverScriptUrl: scriptUrl,
+            scriptName: scriptName,
+            authKey: authKey
+        }
     });
     const versionInfo = document.getElementById('versionInfo');
     versionInfo.innerHTML += '<div style="color: #007AFF; margin-top: 8px;">* 正在更新...</div>';
@@ -1423,42 +1395,51 @@ timer.schedule(async () => {
     await webView.evaluateJavaScript("window._result=null", false);
     const m = JSON.parse(res);
     
-    if (m.type === "start-download") {
-      const { serverScriptUrl, scriptName, authKey } = m.data;
-      const iCloudFm = FileManager.iCloud();
-        const LOCAL_SCRIPT_PATH = iCloudFm.joinPath(
-          iCloudFm.documentsDirectory(),
-          `${scriptName}.js`
-        );
-        const request = new Request(serverScriptUrl);
-        request.headers = authKey;
-        const scriptContent = await request.loadString();
-        iCloudFm.writeString(LOCAL_SCRIPT_PATH, scriptContent);
-        const successAlert = new Notification();
-        successAlert.title = "✔️ 更新成功（iCloud）";
-        successAlert.body = `文件：${scriptName}.js\n已保存到iCloud`;
-        successAlert.openURL = `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`;
-        await successAlert.schedule();
-      return;
-    }
+    const authKey = { "X-Auth-Key": "tX3$9mGz@7vLq#F!b2R" };
+    const remoteUrl = `https://bing.0515364.xyz/js/js-115.js`;
+    const fm = FileManager.iCloud();
     
-    if (m.type === "get-local-hash") {
-  const fm = FileManager.iCloud();
-  let localHash = "0";
-  try {
-    const scriptName = Script.name(); 
-    const path = fm.joinPath(fm.documentsDirectory(), `${scriptName}.js`); 
-    if (fm.fileExists(path)) {
-      if (!fm.isFileDownloaded(path)) await fm.downloadFileFromiCloud(path);
-      const content = fm.readString(path);
-      localHash = simpleHash(content);
+    if (m.type === "check-update") {
+        let localHash = "0";
+        let remoteHash = "0";
+        let error = null;
+
+        try {
+            const req = new Request(remoteUrl);
+            req.headers = authKey;
+            const remoteScript = await req.loadString();
+            remoteHash = simpleHash(remoteScript);
+
+            const localPath = fm.joinPath(fm.documentsDirectory(), `${Script.name()}.js`);
+            if (fm.fileExists(localPath)) {
+                if (!fm.isFileDownloaded(localPath)) await fm.downloadFileFromiCloud(localPath);
+                const localScript = fm.readString(localPath);
+                localHash = simpleHash(localScript);
+            }
+        } catch (e) {
+            error = e.message;
+        }
+
+        const result = { localHash, remoteHash, error, authKey, remoteUrl };
+        await webView.evaluateJavaScript(`window._updateResult=${JSON.stringify(result)}`, false);
+        return;
     }
-  } catch (e) {
-    console.log("读取本地失败:" + e);
-  }
-  await webView.evaluateJavaScript(`window._localHashResult='${localHash}'`, false);
-  return;
-}
+
+    if (m.type === "start-download") {
+        const { serverScriptUrl, scriptName, authKey } = msg.data;
+        const localPath = fm.joinPath(fm.documentsDirectory(), `${scriptName}.js`);
+        const req = new Request(serverScriptUrl);
+        req.headers = authKey;
+        const content = await req.loadString();
+        fm.writeString(localPath, content);
+
+        const n = new Notification();
+        n.title = "更新成功";
+        n.body = `${scriptName}.js 已保存到 iCloud`;
+        n.openURL = `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`;
+        await n.schedule();
+        return;
+        };
     
     if (m.type === "save-records") {
       records = m.records;
@@ -1490,3 +1471,13 @@ timer.schedule(async () => {
     await webView.evaluateJavaScript(`render()`, false);
   }
 });
+
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(16);
+}
