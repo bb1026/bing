@@ -1344,8 +1344,10 @@ async function checkUpdate() {
         updateBtn.textContent = '立即更新';
         updateBtn.style.background = '#4CAF50';
         updateBtn.style.color = '#fff';
+        hashInfo.innerHTML = \`代码有变动是否需要更新\`;
+        hashInfo.style.color = 'red';
         updateBtn.onclick = async () => {
-            await downloadToICloud();
+            await downloadToICloud(result.remoteUrl, '出勤记录', result.authKey);
         };
     } else {
         statusDiv.textContent = '已是最新版本';
@@ -1356,14 +1358,17 @@ async function checkUpdate() {
         updateBtn.onclick = null;
     }
     versionInfo.appendChild(statusDiv);
-    hashInfo.innerHTML = \`代码有变动是否需要更新\`;
-    hashInfo.style.color = 'red';
     versionInfo.appendChild(hashInfo);
 }
 
-function downloadToICloud() {
+function downloadToICloud(scriptUrl, scriptName, authKey) {
     window._result = JSON.stringify({
-        type: "start-download"
+        type: "start-download",
+        data: {
+            serverScriptUrl: scriptUrl,
+            scriptName: scriptName,
+            authKey: authKey
+        }
     });
     const versionInfo = document.getElementById('versionInfo');
     versionInfo.innerHTML += '<div style="color: #007AFF; margin-top: 8px;">* 正在更新...</div>';
@@ -1414,22 +1419,23 @@ timer.schedule(async () => {
             error = e.message;
         }
 
-        const result = { localHash, remoteHash, error };
+        const result = { localHash, remoteHash, error, authKey, remoteUrl };
         await webView.evaluateJavaScript(`window._updateResult=${JSON.stringify(result)}`, false);
         return;
     }
 
     if (m.type === "start-download") {
-        const localPath = fm.joinPath(fm.documentsDirectory(), `${this.name}.js`);
-        const req = new Request(remoteUrl);
+        const { serverScriptUrl, scriptName, authKey } = msg.data;
+        const localPath = fm.joinPath(fm.documentsDirectory(), `${scriptName}.js`);
+        const req = new Request(serverScriptUrl);
         req.headers = authKey;
         const content = await req.loadString();
         fm.writeString(localPath, content);
 
         const n = new Notification();
         n.title = "更新成功";
-        n.body = `${this.name}.js 已保存到 iCloud`;
-        n.openURL = `scriptable:///run?scriptName=${encodeURIComponent(this.name)}`;
+        n.body = `${scriptName}.js 已保存到 iCloud`;
+        n.openURL = `scriptable:///run?scriptName=${encodeURIComponent(scriptName)}`;
         await n.schedule();
         return;
         };
