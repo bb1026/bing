@@ -846,7 +846,8 @@ titleEl.innerHTML = \`\${title}<br><span style="font-size:22px;color:#007AFF;">\
       border = isToday ? istd : "brown";
     } else if (((w === 0 || w === 6) || type === "holiday") && hrs === 0) {
       color = "#666";
-    } else if (hrs === 0 && temp < new Date(todayStr) && temp < new Date(todayStr)) {
+      border = isToday ? istd : "#91d5ff";
+    } else if (hrs === 0 && temp < new Date(todayStr)) {
       bg = "#e6f7ff";
       color = "#666";
       border = isToday ? istd : "#91d5ff";
