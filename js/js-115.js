@@ -844,17 +844,18 @@ titleEl.innerHTML = \`\${title}<br><span style="font-size:22px;color:#007AFF;">\
       bg = "#e6f7ff";
       color = isToday ? istd : "brown";
       border = isToday ? istd : "brown";
-    } else if (((w === 0 || w === 6) || type === "holiday") && hrs === 0) {
+    } else if (((w === 0 || w === 6) || type === "holiday") && hrs === 0 && temp < new Date(todayStr)) {
       color = "#666";
       border = isToday ? istd : "#91d5ff";
     } else if (hrs === 0 && temp < new Date(todayStr)) {
       bg = "#e6f7ff";
-      color = "#666";
+      color = "#333";
       border = isToday ? istd : "#91d5ff";
     } else if (hrs > 0) {
       bg = "#e6f7ff";
       border = isToday ? istd : "#91d5ff";
     } else {
+      color = "#666";
       border = isToday ? istd : "#ccc";
     }
 
