@@ -1385,8 +1385,43 @@ render();
   await webView.loadHTML(html);
   webView.present(true);
 }
-await loadHTML();
 
+if(config.runsInWidget){
+  const data = JSON.parse(fm.readString(recordsPath));
+
+  const week = d=>["日","一","二","三","四","五","六"][d],
+        fmt = d=>d.toISOString().slice(0,10),
+        parse = s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d);};
+
+  const today=new Date(),
+        monthName = `${today.getFullYear()}年${today.getMonth()+1}月`,
+        dates = Array.from({length:3},(_,i)=>{let d=new Date(today);d.setDate(today.getDate()-2+i);return d;}),
+        recent = dates.map(d=>{let k=fmt(d),r=data[k]||{};return {date:k,week:r.week||week(d.getDay()),hours:r.hours||0};});
+
+  let wd=0,sat=0,sun=0,total=0,month=today.getMonth();
+  for(const[k,r]of Object.entries(data)){
+    const d=parse(k); if(d.getMonth()!==month) continue;
+    const h=r.hours||0,day=d.getDay(); total+=h;
+    if(day===0)sun+=h; else if(day===6)sat+=h; else wd+=h;
+  }
+
+  const tRecent = recent.map(r=>`${r.date.slice(5)}(周${r.week}): ${r.hours}小时`).join("\n"),
+        tMonth = `工作日：${wd}小时\n星期六：${sat}小时\n星期日：${sun}小时\n总时间：${total}小时`;
+
+  const w = new ListWidget();
+  w.addText(tRecent).font=Font.boldSystemFont(14);
+  w.addText(`---${monthName}---`).font=Font.boldSystemFont(14);
+  w.addText(tMonth).font=Font.boldSystemFont(14);
+
+  const g = new LinearGradient(); g.colors=[new Color("#f8f8f8"),new Color("#e0e0e0")]; g.locations=[0,1];
+  w.backgroundGradient=g;
+
+  Script.setWidget(w);
+  Script.complete();
+} else {
+  await loadHTML();
+}
+    
 // Scriptable 后台监听 WebView 通信
 const timer = new Timer();
 timer.repeats = true;
