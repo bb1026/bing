@@ -1387,19 +1387,26 @@ render();
 }
 
 if(config.runsInWidget){
-  const data = JSON.parse(fm.readString(recordsPath));
-
   const week = d=>["日","一","二","三","四","五","六"][d],
-        fmt = d=>d.toISOString().slice(0,10),
+        fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,
         parse = s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d);};
+  
+  let targetDate;
+  if (args.widgetParameter) {
+    const s = args.widgetParameter;
+    const year = Number(s.slice(0,4));
+    const month = Number(s.slice(4,6)) - 1;
+    targetDate = new Date(year, month);
+  } else {
+    targetDate = new Date();
+  };
+  
+  const monthName = `${targetDate.getFullYear()}年${targetDate.getMonth()+1}月`,
+        dates = Array.from({length:3},(_,i)=>{let d=new Date();d.setDate(d.getDate()-(2-i));return d;}),
+        recent = dates.map(d=>{let k=fmt(d),r=records[k]||{};return {date:k,week:r.week||week(d.getDay()),hours:r.hours||0};});
 
-  const today=new Date(),
-        monthName = `${today.getFullYear()}年${today.getMonth()+1}月`,
-        dates = Array.from({length:3},(_,i)=>{let d=new Date(today);d.setDate(today.getDate()-2+i);return d;}),
-        recent = dates.map(d=>{let k=fmt(d),r=data[k]||{};return {date:k,week:r.week||week(d.getDay()),hours:r.hours||0};});
-
-  let wd=0,sat=0,sun=0,total=0,month=today.getMonth();
-  for(const[k,r]of Object.entries(data)){
+  let wd=0,sat=0,sun=0,total=0,month=targetDate.getMonth();
+  for(const[k,r]of Object.entries(records)){
     const d=parse(k); if(d.getMonth()!==month) continue;
     const h=r.hours||0,day=d.getDay(); total+=h;
     if(day===0)sun+=h; else if(day===6)sat+=h; else wd+=h;
@@ -1413,7 +1420,7 @@ if(config.runsInWidget){
   w.addText(`---${monthName}---`).font=Font.boldSystemFont(14);
   w.addText(tMonth).font=Font.boldSystemFont(14);
 
-  const g = new LinearGradient(); g.colors=[new Color("#f8f8f8"),new Color("#e0e0e0")]; g.locations=[0,1];
+  const g = new LinearGradient(); g.colors=[new Color("#789"),new Color("#987")]; g.locations=[0,1];
   w.backgroundGradient=g;
 
   Script.setWidget(w);
