@@ -3,7 +3,7 @@
 // icon-color: deep-green; icon-glyph: bus-alt;
 this.name = "BusGo";
 this.widget_ID = "js-109";
-this.version = "v2.7";
+this.version = "v2.8";
 
 let installation, showMRTLines, showLoadingAndFetchData;
 await CheckKu();
@@ -13,16 +13,8 @@ const myBusCodes = [
   { busstop: "Yishun Int", stopCode: "59009", busCodes: [/*"804", */ "800"] },
   { busstop: "🏠Blk 236", stopCode: "59241", busCodes: ["804"] },
   { busstop: "Boon Lay Int", stopCode: "22009", busCodes: ["246", "249"] },
-  {
-    busstop: "❤️Bef Jln Tukang(To Lakeside)",
-    stopCode: "21499",
-    busCodes: ["246"]
-  },
-  {
-    busstop: "⭐Bef Intl Rd(To Boon Lay)",
-    stopCode: "21491",
-    busCodes: ["246"]
-  },
+  { busstop: "❤️Bef Jln Tukang(To Lakeside)", stopCode: "21499", busCodes: ["246"] },
+  { busstop: "⭐Bef Intl Rd(To Boon Lay)", stopCode: "21491", busCodes: ["246"] },
   { busstop: "UTOC ENGRG", stopCode: "21321", busCodes: ["249"] }
   //   { busstop: "Opp Yishun Stn", stopCode: "59073", busCodes: ["858"] }
 ];
@@ -528,16 +520,12 @@ cleanbutton.onTap = async () => {
 nearbyButton.onTap = async () => {
   try {
     const loc = await Location.current();
-    console.log(loc);
-    await createTable(null, null, loc);
   } catch (error) {
-    console.error(`定位失败: ${error}`);
-    let failAlert = new Alert();
-    failAlert.title = Script.name();
-    failAlert.message = `定位失败: ${error}: \n请稍候再试！`;
-    failAlert.addCancelAction("取消");
-    const response = await failAlert.presentAlert();
-  }
+    console.log("获取位置失败，尝试IP定位");
+    const ipLoc = await new Request("http://ip-api.com/json/").loadJSON();
+    loc = { latitude: ipLoc.lat, longitude: ipLoc.lon };
+  };
+  await createTable(null, null, loc);
 };
 
 searchStopButton.onTap = async () => {
@@ -565,7 +553,6 @@ async function addBusArrivalRows(
   allowedBusCodes = null
 ) {
   const stopArrivalInfo = await getStopArrivalInfo(stopCode);
-
   let hasAllowedBus = false;
   const displayedBusCodes = new Set();
 
@@ -876,42 +863,44 @@ async function promptUserForInput(type) {
   return (await alert.present()) === 0 ? alert.textFieldValue(0) : null;
 }
 
-  async function CheckKu() {
+async function CheckKu() {
   const fm = FileManager.local();
   const path = fm.joinPath(fm.documentsDirectory(), "Ku.js");
   const url = "https://bing.0515364.xyz/js/Ku.js";
   let needDownload = false;
 
   try {
-    ({
-      installation, calendar
-    } = importModule("Ku"));
-    
-    if (typeof installation !== "function") {
-      console.log("数据库模块无效，准备重新下载");
+    if (!fm.fileExists(path) || !fm.readString(path).includes("installation")) {
+      console.log("数据库异常，准备重新下载");
+      notify("数据库异常", "本地数据库无效，准备重新下载");
       needDownload = true;
     }
   } catch {
     console.log("数据库异常，准备重新下载");
+    notify("数据库异常", "读取数据库出错，准备重新下载");
     needDownload = true;
   }
 
-    if (needDownload) {
-      const req = new Request(url);
-       req.headers = {
-            "X-Auth-Key": "scriptable-key"
-            };
-      try {
-        fm.writeString(path, await req.loadString());;
-        if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
-      console.log("数据库下载完成");
-
-    ({ installation, showMRTLines, showLoadingAndFetchData } = importModule("Ku"));
-    if (typeof installation !== "function") throw new Error("数据库模块无效");
-  } catch (error) {
-    console.error("请求失败:" + error.message);
-    }
+  async function notify(title, body) {
+    const n = new Notification();
+    n.title = title;
+    n.body = body;
+    await n.schedule();
   }
+
+  if (needDownload) {
+    const req = new Request(url);
+req.headers = { "X-Auth-Key": "scriptable-key" };
+fm.writeString(path, await req.loadString());
+
+if (fm.isFileStoredIniCloud(path)) await fm.downloadFileFromiCloud(path);
+    console.log("数据库下载完成");
+  }
+
+  ({ installation, showMRTLines, showLoadingAndFetchData } = importModule(
+    "Ku"
+  ));
+  if (typeof installation !== "function") throw new Error("数据库模块无效");
 }
 
 if (config.runsInWidget) {
@@ -928,7 +917,7 @@ if (config.runsInWidget) {
 
   const timer = new Timer();
   timer.repeats = true;
-  timer.timeInterval = 10000; //10秒刷新
+  timer.timeInterval = 20000; // 20秒刷新
   timer.schedule(() => {
     createTable(currentStopCode, currentBusCode, currentUseLocation);
   });
