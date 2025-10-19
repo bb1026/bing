@@ -519,13 +519,17 @@ cleanbutton.onTap = async () => {
 
 nearbyButton.onTap = async () => {
   try {
+    Location.setAccuracyToHundredMeters();
     const loc = await Location.current();
+    await createTable(null, null, loc);
   } catch (error) {
-    console.log("获取位置失败，尝试IP定位");
-    const ipLoc = await new Request("http://ip-api.com/json/").loadJSON();
-    loc = { latitude: ipLoc.lat, longitude: ipLoc.lon };
-  };
-  await createTable(null, null, loc);
+    console.error(`定位失败: ${error}`);
+    let failAlert = new Alert();
+    failAlert.title = Script.name();
+    failAlert.message = `定位失败: ${error}: \n请稍候再试！`;
+    failAlert.addCancelAction("取消");
+    const response = await failAlert.presentAlert();
+  }
 };
 
 searchStopButton.onTap = async () => {
