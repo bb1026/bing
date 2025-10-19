@@ -118,13 +118,13 @@
   },
   "js-109": {
     "name": "BusGo",
-    "version": "v2.7",
+    "version": "v2.8",
     "ID": "js-109",
     "argsID": "109",
     "small": false,
     "medium": false,
     "large": true,
-    "update": "可以查询新加坡巴士时间",
+    "update": "修复定位失败问题",
     "url": "js/js-109.js",
     "introduction": "查看巴士时间",
     "icon": "fa-bus"
