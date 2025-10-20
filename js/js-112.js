@@ -61,7 +61,9 @@ async function showFileList() {
   
   if (fileList.length > 0) {
     const clearAllRow = new UITableRow();
-    clearAllRow.addText("🗑️ 清除所有缓存", "此操作不可恢复");
+    const c = clearAllRow.addText("🗑️ 清除所有缓存", "此操作不可恢复");
+    c.titleColor = Color.red();
+    c.subtitleColor = Color.red();
     clearAllRow.onSelect = async () => {
       const alert = new Alert();
       alert.title = "确认清除";
