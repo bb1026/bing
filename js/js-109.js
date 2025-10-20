@@ -519,7 +519,6 @@ cleanbutton.onTap = async () => {
 
 nearbyButton.onTap = async () => {
   try {
-    Location.setAccuracyToHundredMeters();
     const loc = await Location.current();
     await createTable(null, null, loc);
   } catch (error) {
