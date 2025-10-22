@@ -1391,7 +1391,6 @@ if (config.runsInWidget) {
   const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const parse = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
 
-  // === 获取目标月份 ===
   let targetDate;
   if (args.widgetParameter) {
     const s = args.widgetParameter;
@@ -1428,7 +1427,6 @@ if (config.runsInWidget) {
     return { date: k, week: r.week || week(d.getDay()), hours: r.hours || 0 };
   });
 
-  // === 当前月统计 ===
   let wd=0, sat=0, sun=0, total=0, month=targetDate.getMonth();
   for (const [k,r] of Object.entries(records)) {
     const d=parse(k);
