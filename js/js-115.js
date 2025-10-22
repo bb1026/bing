@@ -1419,7 +1419,7 @@ if (config.runsInWidget) {
   if (config.widgetFamily === "large") daysToShow = 15;
 
   const dates = Array.from({ length: daysToShow }, (_, i) => {
-    let d = new Date(); d.setDate(d.getDate() - (daysToShow - 1 - i)); return d;
+    let d = new Date(); d.setDate(d.getDate() - 1 - (daysToShow - 1 - i)); return d;
   });
   const recent = dates.map(d => {
     const k = fmt(d);
