@@ -1403,15 +1403,10 @@ if (config.runsInWidget) {
   }
 
   const monthName = `${targetDate.getFullYear()}年${targetDate.getMonth()+1}月`;
-
-  // === 加载或生成 records.json ===
-  const fm = FileManager.local();
-  const recordsPath = fm.joinPath(fm.documentsDirectory(), "records.json");
-  let records = {};
+  
   if (fm.fileExists(recordsPath)) {
     records = JSON.parse(fm.readString(recordsPath));
   } else {
-    // 自动生成近 30 天的示例数据
     for (let i = 0; i < 30; i++) {
       const d = new Date();
       d.setDate(d.getDate() - i);
