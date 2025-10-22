@@ -186,7 +186,7 @@
     "version": "",
     "ID": "js-115",
     "argsID": "",
-    "small": false,
+    "small": true,
     "medium": false,
     "large": false,
     "update": "增加批量休假按钮，更新若干代码",
