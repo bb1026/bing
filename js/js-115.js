@@ -1386,11 +1386,12 @@ render();
   webView.present(true);
 }
 
-if(config.runsInWidget){
-  const week = d=>["日","一","二","三","四","五","六"][d],
-        fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,
-        parse = s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d);};
-  
+if (config.runsInWidget) {
+  const week = d => ["日","一","二","三","四","五","六"][d];
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const parse = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+
+  // === 获取目标月份 ===
   let targetDate;
   if (args.widgetParameter) {
     const s = args.widgetParameter;
@@ -1399,32 +1400,85 @@ if(config.runsInWidget){
     targetDate = new Date(year, month);
   } else {
     targetDate = new Date();
-  };
-  
-  const monthName = `${targetDate.getFullYear()}年${targetDate.getMonth()+1}月`,
-        dates = Array.from({length:3},(_,i)=>{let d=new Date();d.setDate(d.getDate()-(2-i));return d;}),
-        recent = dates.map(d=>{let k=fmt(d),r=records[k]||{};return {date:k,week:r.week||week(d.getDay()),hours:r.hours||0};});
+  }
 
-  let wd=0,sat=0,sun=0,total=0,month=targetDate.getMonth();
-  for(const[k,r]of Object.entries(records)){
-    const d=parse(k); if(d.getMonth()!==month) continue;
-    const h=r.hours||0,day=d.getDay(); total+=h;
+  const monthName = `${targetDate.getFullYear()}年${targetDate.getMonth()+1}月`;
+
+  // === 加载或生成 records.json ===
+  const fm = FileManager.local();
+  const recordsPath = fm.joinPath(fm.documentsDirectory(), "records.json");
+  let records = {};
+  if (fm.fileExists(recordsPath)) {
+    records = JSON.parse(fm.readString(recordsPath));
+  } else {
+    // 自动生成近 30 天的示例数据
+    for (let i = 0; i < 30; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const k = fmt(d);
+      records[k] = { hours: Math.floor(Math.random() * 4), week: week(d.getDay()) };
+    }
+  }
+
+  let daysToShow = 3;
+  if (config.widgetFamily === "medium") daysToShow = 5;
+  if (config.widgetFamily === "large") daysToShow = 15;
+
+  const dates = Array.from({ length: daysToShow }, (_, i) => {
+    let d = new Date(); d.setDate(d.getDate() - (daysToShow - 1 - i)); return d;
+  });
+  const recent = dates.map(d => {
+    const k = fmt(d);
+    const r = records[k] || {};
+    return { date: k, week: r.week || week(d.getDay()), hours: r.hours || 0 };
+  });
+
+  // === 当前月统计 ===
+  let wd=0, sat=0, sun=0, total=0, month=targetDate.getMonth();
+  for (const [k,r] of Object.entries(records)) {
+    const d=parse(k);
+    if (d.getMonth()!==month) continue;
+    const h=r.hours||0, day=d.getDay();
+    total+=h;
     if(day===0)sun+=h; else if(day===6)sat+=h; else wd+=h;
   }
 
-  const tRecent = recent.map(r=>`${r.date.slice(5)}(周${r.week}): ${r.hours}小时`).join("\n"),
-        tMonth = `工作日：${wd}小时\n星期六：${sat}小时\n星期日：${sun}小时\n总时间：${total}小时`;
+  const tRecent = recent.map(r=>`${r.date.slice(5)}(周${r.week}): ${r.hours}小时`).join("\n");
+  const tMonth = `工作日：${wd}小时\n星期六：${sat}小时\n星期日：${sun}小时\n总时间：${total}小时`;
 
   const w = new ListWidget();
-  w.addText(tRecent).font=Font.boldSystemFont(14);
-  w.addText(`---${monthName}---`).font=Font.boldSystemFont(14);
-  w.addText(tMonth).font=Font.boldSystemFont(14);
+  const g = new LinearGradient();
+  g.colors = [new Color("#9BACBD"), new Color("#C9B7A5")];
+  g.locations = [0,1];
+  w.backgroundGradient = g;
 
-  const g = new LinearGradient(); g.colors=[new Color("#789"),new Color("#987")]; g.locations=[0,1];
-  w.backgroundGradient=g;
+  if (config.widgetFamily === "small") {
+    w.addText(tRecent).font = Font.boldSystemFont(13);
+    w.addText(`${monthName}统计`).font = Font.boldSystemFont(13);
+    w.addText(tMonth).font = Font.boldSystemFont(13);
+  } 
+  else if (config.widgetFamily === "medium" || config.widgetFamily === "large") {
+    const stack = w.addStack();
+    stack.layoutHorizontally();
+
+    const left = stack.addStack();
+    left.layoutVertically();
+    left.addText(`最近${daysToShow}天`).font = Font.boldSystemFont(16);
+    left.addSpacer(4);
+    left.addText(tRecent).font = Font.systemFont(16);
+
+    stack.addSpacer(20);
+
+    const right = stack.addStack();
+    right.layoutVertically();
+    right.addText(`${monthName}统计`).font = Font.boldSystemFont(16);
+    right.addSpacer(4);
+    right.addText(tMonth).font = Font.systemFont(16);
+  }
 
   Script.setWidget(w);
   Script.complete();
+
 } else {
   await loadHTML();
 }
