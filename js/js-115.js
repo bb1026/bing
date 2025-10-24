@@ -1422,10 +1422,29 @@ if (config.runsInWidget) {
     let d = new Date(); d.setDate(d.getDate() - 1 - (daysToShow - 1 - i)); return d;
   });
   const recent = dates.map(d => {
-    const k = fmt(d);
-    const r = records[k] || {};
-    return { date: k, week: r.week || week(d.getDay()), hours: r.hours || 0 };
-  });
+  const k = fmt(d);
+  const r = records[k] || {};
+  let hours;
+
+  switch (r.type) {
+    case 'pmRest':
+      hours = '下午休';
+      break;
+    case 'amRest':
+      hours = '上午休';
+      break;
+    case 'medical':
+      hours = '病假';
+      break;
+    case 'holiday':
+      hours = '节假日';
+      break;
+    default:
+      hours = (r.hours || 0) + '小时';
+  }
+
+  return { date: k, week: r.week || week(d.getDay()), hours };
+});
 
   let wd=0, sat=0, sun=0, total=0, month=targetDate.getMonth();
   for (const [k,r] of Object.entries(records)) {
@@ -1436,8 +1455,8 @@ if (config.runsInWidget) {
     if(day===0)sun+=h; else if(day===6)sat+=h; else wd+=h;
   }
 
-  const tRecent = recent.map(r=>`${r.date.slice(5)}(周${r.week}): ${r.hours}小时`).join("\n");
-  const tMonth = `工作日：${wd}小时\n星期六：${sat}小时\n星期日：${sun}小时\n总时间：${total}小时`;
+  const tRecent = recent.map(r=>`${r.date.slice(5)}(周${r.week}): ${r.hours}`).join("\n");
+  const tMonth = `工作日：${wd}\n星期六：${sat}小时\n星期日：${sun}小时\n总时间：${total}小时`;
 
   const w = new ListWidget();
   const g = new LinearGradient();
