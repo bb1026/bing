@@ -446,11 +446,11 @@ label {
   </div>
   
   <div class="btn-row">
-    <button class="time-btn toggle-btn" data-type="holiday" onclick="toggleType(this)">节</button>
-    <button class="time-btn toggle-btn" data-type="rest" onclick="toggleType(this)">假</button>
-    <button class="time-btn toggle-btn" data-type="medical" onclick="toggleType(this)">MC</button>
-    <button class="time-btn toggle-btn" data-type="amRest" onclick="toggleType(this)">上</button>
-    <button class="time-btn toggle-btn" data-type="pmRest" onclick="toggleType(this)">下</button>
+    <button class="time-btn toggle-btn" data-type="holiday" onclick="toggleType(this)">节假日</button>
+    <button class="time-btn toggle-btn" data-type="rest" onclick="toggleType(this)">请假</button>
+    <button class="time-btn toggle-btn" data-type="medical" onclick="toggleType(this)">病假</button>
+    <button class="time-btn toggle-btn" data-type="amRest" onclick="toggleType(this)">上午休</button>
+    <button class="time-btn toggle-btn" data-type="pmRest" onclick="toggleType(this)">下午休</button>
   </div>
   
   <div style="display:flex;justify-content:flex-end;margin-top:10px">
