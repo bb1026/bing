@@ -1466,7 +1466,7 @@ if (config.runsInWidget) {
 
   if (config.widgetFamily === "small") {
     w.addText(tRecent).font = Font.boldSystemFont(13);
-    w.addText(`${monthName}统计`).font = Font.boldSystemFont(13);
+    w.addText(`${monthName}`).font = Font.boldSystemFont(13);
     w.addText(tMonth).font = Font.boldSystemFont(13);
   } 
   else if (config.widgetFamily === "medium" || config.widgetFamily === "large") {
@@ -1483,7 +1483,7 @@ if (config.runsInWidget) {
 
     const right = stack.addStack();
     right.layoutVertically();
-    right.addText(`${monthName}统计`).font = Font.boldSystemFont(16);
+    right.addText(`${monthName}`).font = Font.boldSystemFont(16);
     right.addSpacer(4);
     right.addText(tMonth).font = Font.systemFont(16);
   }
