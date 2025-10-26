@@ -1440,7 +1440,7 @@ if (config.runsInWidget) {
       hours = '节假日';
       break;
     default:
-      hours = (r.hours || 0) + '小时';
+      hours = (r.hours || 0) + ' 小时';
   }
 
   return { date: k, week: r.week || week(d.getDay()), hours };
@@ -1456,7 +1456,7 @@ if (config.runsInWidget) {
   }
 
   const tRecent = recent.map(r=>`${r.date.slice(5)}(周${r.week}): ${r.hours}`).join("\n");
-  const tMonth = `工作日：${wd}\n星期六：${sat}小时\n星期日：${sun}小时\n总时间：${total}小时`;
+  const tMonth = `工作日：${wd} 小时\n星期六：${sat} 小时\n星期日：${sun}小时\n总时间：${total} 小时`;
 
   const w = new ListWidget();
   const g = new LinearGradient();
@@ -1466,7 +1466,7 @@ if (config.runsInWidget) {
 
   if (config.widgetFamily === "small") {
     w.addText(tRecent).font = Font.boldSystemFont(13);
-    w.addText(`${monthName}`).font = Font.boldSystemFont(13);
+    w.addText(`༺${monthName}༻`).font = Font.boldSystemFont(13);
     w.addText(tMonth).font = Font.boldSystemFont(13);
   } 
   else if (config.widgetFamily === "medium" || config.widgetFamily === "large") {
@@ -1475,15 +1475,14 @@ if (config.runsInWidget) {
 
     const left = stack.addStack();
     left.layoutVertically();
-    left.addText(`最近${daysToShow}天`).font = Font.boldSystemFont(16);
+    left.addText(`----最近${daysToShow}天----`).font = Font.boldSystemFont(16);
     left.addSpacer(4);
     left.addText(tRecent).font = Font.systemFont(16);
-
     stack.addSpacer(20);
 
     const right = stack.addStack();
     right.layoutVertically();
-    right.addText(`${monthName}`).font = Font.boldSystemFont(16);
+    right.addText(`༺${monthName}༻`).font = Font.boldSystemFont(16);
     right.addSpacer(4);
     right.addText(tMonth).font = Font.systemFont(16);
   }
@@ -1495,7 +1494,7 @@ if (config.runsInWidget) {
   await loadHTML();
 }
     
-// Scriptable 后台监听 WebView 通信
+// Scriptable WebView 通信
 const timer = new Timer();
 timer.repeats = true;
 timer.timeInterval = 200;
