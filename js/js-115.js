@@ -805,7 +805,7 @@ function render() {
     : rng.start.slice(0, 7).replace('-', '年') + '月 ~ ' + rng.end.slice(0, 7).replace('-', '年') + '月';
 
   const titleEl = document.getElementById('monthTitle');
-titleEl.innerHTML = \`\${title}<br><span style="font-size:22px;color:#007AFF;">\${todayStr}</span>\`;
+titleEl.innerHTML = \`\${title}<br><span style="font-size:22px;color:#007AFF;">今日: \${todayStr}</span>\`;
 
   const wh = document.getElementById('weekHeader');
   wh.innerHTML = '';
@@ -1591,5 +1591,4 @@ function simpleHash(str) {
     hash = hash & hash;
   }
   return Math.abs(hash).toString(16);
-}  return Math.abs(hash).toString(16);
-}
+}}
