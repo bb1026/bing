@@ -1439,6 +1439,9 @@ if (config.runsInWidget) {
     case 'holiday':
       hours = '节假日';
       break;
+      case 'rest':
+      hours = '请假';
+      break;
     default:
       hours = (r.hours || 0) + ' 小时';
   }
@@ -1588,4 +1591,5 @@ function simpleHash(str) {
     hash = hash & hash;
   }
   return Math.abs(hash).toString(16);
+}  return Math.abs(hash).toString(16);
 }
