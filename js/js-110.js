@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v3.3";
+this.version = "v3.4";
 
 let installation, calendar;
 await CheckKu();
@@ -623,7 +623,7 @@ async function createCalendarWidget() {
           !dayEvents[1].calendar.title.includes("生日") &&
           !dayEvents[1].calendar.title.toLowerCase().includes("birthday")
         ) {
-          eventOutput += `\n${daysEvents[1].title}`;
+          eventOutput += `\n${dayEvents[1].title}`;
         }
 
         let displayContent = "";
@@ -681,7 +681,7 @@ async function createCalendarWidget() {
         ? (formatDate(nextEvent.startDate) + " " + nextEvent.title).length
         : 0;
 
-      if (currentTitleLength > 14 || !nextEvent || nextTitleLength > 14) {
+      if (!nextEvent || nextTitleLength > 14 || currentTitleLength > 14) {
         const singleRow = widget.addStack();
         singleRow.layoutHorizontally();
         singleRow.spacing = 16;
@@ -727,7 +727,7 @@ async function createCalendarWidget() {
       }
     }
     
-    widget.addSpacer();
+    widget.addSpacer()
 
     function addEventToStack(stack, event, title) {
       const eventStack = stack.addStack();
@@ -854,7 +854,7 @@ async function createCalendarWidget() {
 
         let lunar = calendar.solar2lunar(year, month, day);
         let event = eventMap[key]?.[0];
-        let lunarText = event
+        let lunarText = event && realLen(event.title) <= 10
           ? event.title
           : lunar.IDayCn === "初一"
           ? lunar.IMonthCn
@@ -973,6 +973,15 @@ async function createCalendarWidget() {
     : await table.present(true);
 }
 
+function realLen(str) {
+  let len = 0;
+  for (let ch of str) {
+    if (ch.charCodeAt(0) > 255) len += 2;
+    else len += 1;
+  }
+  return len;
+}
+
 await createCalendarWidget();
 
 async function CheckKu() {
@@ -1007,4 +1016,4 @@ async function CheckKu() {
       console.error("请求失败:" + error.message);
     }
   }
-}
+}}
