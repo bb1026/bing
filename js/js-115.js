@@ -1591,4 +1591,4 @@ function simpleHash(str) {
     hash = hash & hash;
   }
   return Math.abs(hash).toString(16);
-}}
+}}}
