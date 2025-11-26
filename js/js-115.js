@@ -122,7 +122,7 @@ body {
 }
 .salary-tag {
   position: fixed;
-  bottom: 100px;
+  bottom: 95px;
   right: 30px;
   transform: rotate(0deg);
   transform-origin: right bottom;
@@ -135,6 +135,9 @@ body {
   z-index: 100;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   white-space: nowrap;
+}
+#salaryTag {
+  white-space: pre-line;
 }
 #inputBox {
   display: none;
@@ -736,21 +739,28 @@ function computeStats() {
   
   function updateSalaryTag(visible) {
   const salary = calculateSalary();
-    salaryTag.textContent = \`总工资: $\${visible ? salary.total.toFixed(2) : '0000.00'}\`;
-  }
+  const totalHours = getTotalHours();
+  salaryTag.textContent =
+    \`总加班: \${totalHours} 小时\n总工资: $\${visible ? salary.total.toFixed(2) : '0000.00'}\`;
+}
   
   function getStatHTML(visible) {
   const { wday, wsat, wsun } = getOvertimeHours();
     return \`
-      工作日@\${visible ? (salary.hourlyRate * raw.settings.rateWeekday).toFixed(2) : '00.00'}: \${wday}小时 | $\${visible ? (wday * salary.hourlyRate * raw.settings.rateWeekday).toFixed(2) : '0.00'}<br>
-        星期六@\${visible ? (salary.hourlyRate * raw.settings.rateSaturday).toFixed(2) : '00.00'}: \${wsat}小时 | $\${visible ? (wsat * salary.hourlyRate * raw.settings.rateSaturday).toFixed(2) : '0.00'}<br>
-        星期日@\${visible ? (salary.hourlyRate * raw.settings.rateSunday).toFixed(2) : '00.00'}: \${wsun}小时 | $\${visible ? (wsun * salary.hourlyRate * raw.settings.rateSunday).toFixed(2) : '0.00'}<br>
+      工作日@\${(raw.settings.rateWeekday).toFixed(1)} \${visible ? (salary.hourlyRate * raw.settings.rateWeekday).toFixed(2) : '00.00'} {\${wday}小时}: $\${visible ? (wday * salary.hourlyRate * raw.settings.rateWeekday).toFixed(2) : '0.00'}<br>
+        星期六@\${(raw.settings.rateSaturday).toFixed(1)} \${visible ? (salary.hourlyRate * raw.settings.rateSaturday).toFixed(2) : '00.00'} {\${wsat}小时}: $\${visible ? (wsat * salary.hourlyRate * raw.settings.rateSaturday).toFixed(2) : '0.00'}<br>
+        星期日@\${(raw.settings.rateSunday).toFixed(1)} \${visible ? (salary.hourlyRate * raw.settings.rateSunday).toFixed(2) : '00.00'} {\${wsun}小时}: $\${visible ? (wsun * salary.hourlyRate * raw.settings.rateSunday).toFixed(2) : '0.00'}<br>
         基础薪资: $\${visible ? \`\${salary.base.toFixed(2)}\` : '0000.00'}<br>
         住房津贴: $\${visible ? \`\${salary.allowance.toFixed(2)}\` : '0.00'}<br>
         全勤奖金: $\${visible ? \`\${salary.attendance.toFixed(2)}\` : '0.00'}<br>
         其它项目: $\${visible ? \`\${salary.custom.toFixed(2)}\` : '0.00'}
     \`;
   }
+  
+function getTotalHours() {
+  const { wday, wsat, wsun } = getOvertimeHours();
+  return wday + wsat + wsun;
+}
   
 function getOvertimeHours() {
   const rng = computeRange(raw.currentYear, raw.currentMonth);
@@ -1591,4 +1601,4 @@ function simpleHash(str) {
     hash = hash & hash;
   }
   return Math.abs(hash).toString(16);
-}}}
+}
