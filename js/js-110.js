@@ -875,8 +875,9 @@ async function createCalendarWidget() {
           cell.titleColor = Color.gray();
           cell.subtitleColor = Color.lightGray();
         } else if (isToday) {
-          cell.titleColor = new Color("#FF6600");
-          cell.subtitleColor = new Color("#FF6600");
+          const blueColor = new Color("#0000FF");
+          cell.titleColor = blueColor;
+          cell.subtitleColor = blueColor;
         } else if (isWeekend) {
           cell.titleColor = Color.red();
           cell.subtitleColor = Color.red();
