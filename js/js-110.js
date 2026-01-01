@@ -3,7 +3,7 @@
 // icon-color: teal; icon-glyph: calendar-alt;
 this.name = "农历";
 this.widget_ID = "js-110";
-this.version = "v3.4";
+this.version = "v3.5";
 
 let installation, calendar;
 await CheckKu();
@@ -684,7 +684,6 @@ async function createCalendarWidget() {
       if (!nextEvent || nextTitleLength > 14 || currentTitleLength > 14) {
         const singleRow = widget.addStack();
         singleRow.layoutHorizontally();
-        singleRow.spacing = 16;
 
         const container = singleRow.addStack();
         container.size = new Size(320, 15);
@@ -697,7 +696,6 @@ async function createCalendarWidget() {
         if (nextEvent && nextTitleLength > 14) {
           const nextSingleRow = widget.addStack();
           nextSingleRow.layoutHorizontally();
-          nextSingleRow.spacing = 16;
 
           const nextContainer = nextSingleRow.addStack();
           nextContainer.size = new Size(320, 15);
@@ -710,7 +708,6 @@ async function createCalendarWidget() {
       } else {
         const row = widget.addStack();
         row.layoutHorizontally();
-        row.spacing = 16;
         row.topAlignContent();
 
         for (let j = 0; j < 2; j++) {
@@ -733,7 +730,7 @@ async function createCalendarWidget() {
       const eventStack = stack.addStack();
       eventStack.layoutHorizontally();
       eventStack.spacing = 4;
-      eventStack.setPadding(0, 10, 0, 10);
+      eventStack.setPadding(0, 10, 0, 0);
 
       const bullet = eventStack.addText("●");
       bullet.textColor = new Color("#" + event.calendar.color.hex);
@@ -970,8 +967,8 @@ async function createCalendarWidget() {
     ? widget.presentSmall()
     : widgetFamily === "medium"
     ? widget.presentMedium()
-//     : widget.presentLarge();
-    : await table.present(true);
+    : widget.presentLarge();
+//     : await table.present(true);
 }
 
 function realLen(str) {
@@ -1017,4 +1014,4 @@ async function CheckKu() {
       console.error("请求失败:" + error.message);
     }
   }
-}
+}}
