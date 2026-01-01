@@ -967,8 +967,8 @@ async function createCalendarWidget() {
     ? widget.presentSmall()
     : widgetFamily === "medium"
     ? widget.presentMedium()
-    : widget.presentLarge();
-//     : await table.present(true);
+//     : widget.presentLarge();
+    : await table.present(true);
 }
 
 function realLen(str) {
@@ -1014,4 +1014,4 @@ async function CheckKu() {
       console.error("请求失败:" + error.message);
     }
   }
-}}
+}
