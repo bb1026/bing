@@ -3,7 +3,7 @@
 // icon-color: green; icon-glyph: vector-square;
 this.name = "Ku";
 this.widget_ID = "js-999";
-this.version = "v4.6";
+this.version = "v4.7";
 
 function getUrls() {
   const Home_URL = "https://www.0515364.xyz/"
@@ -19,9 +19,26 @@ function getUrls() {
   };
 }
 
+// 新增：域名可访问性检查函数（检测BASE_URL是否能正常连通）
+async function checkDomainAccess(url) {
+  try {
+    const req = new Request(url);
+    req.method = "HEAD"; // 用HEAD请求，轻量检测，不获取正文
+    req.timeout = 5000; // 5秒超时，避免卡顿
+    const res = await req.load();
+    // 只要能返回响应（无论状态码），判定为域名可访问
+    return true;
+  } catch (error) {
+    console.log(`❌ 域名访问失败: ${url}`);
+    console.log(`❌ 失败原因: ${error.message}`);
+    return false;
+  }
+}
+
 function getRequest(url) {
   const req = new Request(url);
   req.headers = { "X-Auth-Key": getUrls().Auth_key };
+  req.timeout = 10000; // 给正常请求加10秒超时
   return req;
 }
 
@@ -29,6 +46,13 @@ async function installation(scriptID, thisVersion) {
   const LOCAL_VER = this.version;
   const localFm = FileManager.local();
   const iCloudFm = FileManager.iCloud();
+  
+  // 前置执行：域名访问检查，失败直接终止
+  const isDomainOk = await checkDomainAccess(BASE_URL);
+  if (!isDomainOk) {
+    console.log("❌ 核心域名不可用，安装/更新流程终止");
+    return;
+  }
 
   try {
     const remoteKuCode = await getRequest(getUrls().KU_SCRIPT_URL).loadString();
