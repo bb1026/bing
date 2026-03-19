@@ -43,7 +43,7 @@ function getRequest(url) {
 }
 
 async function installation(scriptID, thisVersion) {
-  const { BASE_URL } = getUrls();
+  const { BASE_URL, KU_SCRIPT_URL, MASTER_JSON_URL } = getUrls();
   const LOCAL_VER = this.version;
   const localFm = FileManager.local();
   const iCloudFm = FileManager.iCloud();
@@ -56,7 +56,7 @@ async function installation(scriptID, thisVersion) {
   }
 
   try {
-    const remoteKuCode = await getRequest(getUrls().KU_SCRIPT_URL).loadString();
+    const remoteKuCode = await getRequest(KU_SCRIPT_URL).loadString();
     const REMOTE_VER = remoteKuCode.match(
       /version\s*=\s*["']([^"']+)["']/
     )?.[1];
@@ -76,7 +76,7 @@ async function installation(scriptID, thisVersion) {
     }
 
     // 2. 检查脚本更新（存 iCloud）
-    const scriptList = await getRequest(getUrls().MASTER_JSON_URL).loadJSON();
+    const scriptList = await getRequest(MASTER_JSON_URL).loadJSON();
     console.log("✔️ 连接成功，检查更新");
 
     const remoteScriptInfo = scriptList[scriptID];
@@ -103,7 +103,7 @@ console.log(
     );
 
     console.log("[*] 开始下载脚本...");
-    const scriptContent = await getRequest(getUrls().BASE_URL + scriptList[scriptID].url).loadString();
+    const scriptContent = await getRequest(BASE_URL + scriptList[scriptID].url).loadString();
     console.log("[+] 脚本下载完成");
 
     console.log("[#] 开始写入脚本...");
