@@ -43,6 +43,7 @@ function getRequest(url) {
 }
 
 async function installation(scriptID, thisVersion) {
+  const { BASE_URL } = getUrls();
   const LOCAL_VER = this.version;
   const localFm = FileManager.local();
   const iCloudFm = FileManager.iCloud();
