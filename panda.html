@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
   <title>Panda Remit 实时汇率</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -16,37 +19,125 @@
       position: relative;
       overflow-x: hidden;
     }
+
     .container {
-      max-width: 600px;
+      max-width: 650px;
       margin: 0 auto;
       background: white;
       padding: 25px;
       border-radius: 15px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
-    h1 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
-    .calculator { margin-top: 20px; text-align: center; }
-    input[type="number"], select {
-      padding: 8px; border: 1px solid #ccc; border-radius: 5px;
-      width: 150px; height: 36px; margin: 10px 5px;
-      box-sizing: border-box; font-size: 16px;
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 5px;
     }
-    select { appearance: none; background-color: white; text-align: center; }
+
+    .top-rates {
+      text-align: center;
+      margin-top: 10px;
+      line-height: 2;
+      font-size: 16px;
+      color: #2c3e50;
+    }
+
+    .top-rate-item {
+      padding: 4px 0;
+    }
+
+    .top-rate-item b {
+      color: #007BFF;
+    }
+
+    .calculator {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    input[type="number"],
+    select {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 160px;
+      height: 38px;
+      margin: 10px 5px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    select {
+      appearance: none;
+      background-color: white;
+      text-align: center;
+    }
+
     .exchange-rate {
-      margin-top: 20px; text-align: center; padding: 10px;
-      background: #f8f9fa; border-radius: 8px;
+      margin-top: 20px;
+      text-align: center;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 10px;
     }
-    .source { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+
+    .source {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #666;
+    }
+
     .swap-btn {
-      padding: 5px 10px; font-size: 16px; cursor: pointer; border: none;
-      background: #007BFF; color: white; border-radius: 5px; margin: 10px;
+      padding: 8px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      margin: 10px;
       transition: all 0.3s;
     }
-    .swap-btn:hover { background: #0056b3; transform: scale(1.05); }
-    .panda-container { position: relative; width: 150px; height: 150px; margin: 0 auto 20px auto; cursor: default; }
-    .panda-logo { display: block; width: 100%; height: 100%; border-radius: 50%; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); object-fit: cover; transform-origin: center; }
-    .click-hint { text-align: center; color: #7f8c8d; font-size: 14px; margin-top: 5px; animation: pulse 2s infinite; }
-    @keyframes pulse { 0% {opacity:0.6;} 50% {opacity:1;} 100% {opacity:0.6;} }
+
+    .swap-btn:hover {
+      background: #0056b3;
+      transform: scale(1.05);
+    }
+
+    .panda-container {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 20px auto;
+      cursor: default;
+    }
+
+    .panda-logo {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      object-fit: cover;
+      transform-origin: center;
+    }
+
+    .click-hint {
+      text-align: center;
+      color: #7f8c8d;
+      font-size: 14px;
+      margin-top: 5px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
     .mini-panda {
       width: 40px;
       height: 40px;
@@ -58,176 +149,442 @@
       z-index: 9999;
       animation: float 3s ease-in-out infinite;
     }
+
     @keyframes float {
       0% { transform: translateY(0px); }
       50% { transform: translateY(-8px); }
       100% { transform: translateY(0px); }
     }
+
+    @media (max-width: 600px) {
+      input[type="number"],
+      select {
+        width: 140px;
+      }
+
+      .container {
+        padding: 18px;
+      }
+    }
   </style>
 </head>
+
 <body>
+
   <div class="container">
+
     <div class="panda-container">
-      <img src="https://bing.0515364.xyz/imgs/Panda_Remit.JPG" alt="Panda Remit Logo" class="panda-logo" id="pandaLogo">
+      <img
+        src="https://bing.0515364.xyz/imgs/Panda_Remit.JPG"
+        alt="Panda Remit Logo"
+        class="panda-logo"
+        id="pandaLogo"
+      />
     </div>
+
     <div class="click-hint">点击页面有惊喜！</div>
-    
+
     <h1>Panda Remit</h1>
-    <div class="exchange-rate" id="exchangeRate"><p>加载中...</p></div>
-    
-    <div class="calculator">
-      <input type="number" id="num1" value="100" oninput="updateResult('num1','num2','multiply')" onblur="removeLeadingZero('num1')">
-      <select id="fromCurrency"></select><br>
-      <input type="number" id="num2" oninput="updateResult('num2','num1','divide')" onblur="removeLeadingZero('num2')">
-      <select id="toCurrency"></select><br>
-      <button class="swap-btn" onclick="swapCurrencies()">↑ ↓ 切换货币</button>
+
+    <!-- 顶部热门汇率 -->
+    <div class="top-rates" id="topRates">
+      热门汇率加载中...
     </div>
-    <div class="source">数据来源 <a href="https://www.pandaremit.com/zh" target="_blank">熊猫汇款(Panda Remit)</a></div>
+
+    <!-- 当前选择汇率 -->
+    <div class="exchange-rate" id="exchangeRate">
+      <p>加载中...</p>
+    </div>
+
+    <!-- 汇率计算器 -->
+    <div class="calculator">
+
+      <input
+        type="number"
+        id="num1"
+        value="100"
+        oninput="updateResult('num1','num2','multiply')"
+        onblur="removeLeadingZero('num1')"
+      />
+
+      <select id="fromCurrency"></select>
+
+      <br />
+
+      <input
+        type="number"
+        id="num2"
+        oninput="updateResult('num2','num1','divide')"
+        onblur="removeLeadingZero('num2')"
+      />
+
+      <select id="toCurrency"></select>
+
+      <br />
+
+      <button class="swap-btn" onclick="swapCurrencies()">
+        ↑ ↓ 切换货币
+      </button>
+
+    </div>
+
+    <div class="source">
+      数据来源
+      <a href="https://www.pandaremit.com/zh" target="_blank">
+        熊猫汇款(Panda Remit)
+      </a>
+    </div>
+
   </div>
 
-<script>
-const currencyOptions = [
-  { value: "CNY", text: "CNY 中国" },
-  { value: "SGD", text: "SGD 新加坡" },
-  { value: "MYR", text: "MYR 马来西亚" },
-  { value: "HKD", text: "HKD 香港" },
-  { value: "USD", text: "USD 美国" },
-  { value: "JPY", text: "JPY 日本" },
-  { value: "THB", text: "THB 泰国" },
-  { value: "KRW", text: "KRW 韩国" }
-];
+  <script>
 
-function initCurrencySelect(id) {
-  const select = document.getElementById(id);
-  currencyOptions.forEach(option => {
-    let opt = document.createElement("option");
-    opt.value = option.value;
-    opt.textContent = option.text;
-    select.appendChild(opt);
-  });
-}
+    // 货币列表
+    const currencyOptions = [
+      { value: "CNY", text: "CNY 中国" },
+      { value: "SGD", text: "SGD 新加坡" },
+      { value: "MYR", text: "MYR 马来西亚" },
+      { value: "HKD", text: "HKD 相香港" },
+      { value: "USD", text: "USD 美国" },
+      { value: "JPY", text: "JPY 日本" },
+      { value: "THB", text: "THB 泰国" },
+      { value: "KRW", text: "KRW 韩国" },
+      { value: "EUR", text: "EUR 欧州" },
+      { value: "GBP", text: "GBP 英国" },
+      { value: "AUD", text: "AUD 澳大利亚" },
+      { value: "CAD", text: "CAD 加拿大" },
+      { value: "VND", text: "VND 越南" },
+      { value: "CAD", text: "CAD 加拿大元" },
+    ];
 
-document.addEventListener("DOMContentLoaded", function() {
-  initCurrencySelect("fromCurrency");
-  initCurrencySelect("toCurrency");
+    // 顶部热门汇率
+    const topRatePairs = [
+      ["SGD", "CNY"],
+      ["SGD", "JPY"],
+      ["SGD", "THB"],
+      ["SGD", "HKD"],
+      ["SGD", "MYR"]
+    ];
 
-  document.getElementById("fromCurrency").value = "SGD";
-  document.getElementById("toCurrency").value = "CNY";
+    // 初始化货币下拉
+    function initCurrencySelect(id) {
 
-  fetchExchangeRate();
+      const select = document.getElementById(id);
 
-  document.getElementById("fromCurrency").addEventListener("change", fetchExchangeRate);
-  document.getElementById("toCurrency").addEventListener("change", fetchExchangeRate);
+      currencyOptions.forEach(option => {
 
-  startSmoothRotation();
-});
+        let opt = document.createElement("option");
 
-// 交换货币
-function swapCurrencies() {
-  let fromCurrency = document.getElementById("fromCurrency");
-  let toCurrency = document.getElementById("toCurrency");
-  let tempValue = fromCurrency.value;
-  fromCurrency.value = toCurrency.value;
-  toCurrency.value = tempValue;
-  fetchExchangeRate();
-}
+        opt.value = option.value;
+        opt.textContent = option.text;
 
-// 汇率计算器逻辑
-function updateResult(inputId, outputId, operation) {
-  const inputElement = document.getElementById(inputId);
-  const outputElement = document.getElementById(outputId);
-  const exchangeRateElement = document.getElementById("exchangeRateValue");
-  if (!exchangeRateElement) return;
-  const inputNumber = parseFloat(inputElement.value) || 0;
-  const exchangeRate = parseFloat(exchangeRateElement.innerText);
-  if (!exchangeRate) { outputElement.value=""; return; }
-  let result;
-  if (operation==="multiply") result = (inputNumber*exchangeRate).toFixed(2);
-  else if (operation==="divide" && inputNumber!==0) result = (inputNumber/exchangeRate).toFixed(2);
-  else result="";
-  outputElement.value=result;
-}
-function removeLeadingZero(id) {
-  const el=document.getElementById(id);
-  el.value=el.value.replace(/^0+(?=\d)/,'')||"0";
-}
-
-// 获取汇率
-function fetchExchangeRate() {
-  const from=document.getElementById("fromCurrency").value;
-  const to=document.getElementById("toCurrency").value;
-  fetch(`https://prod.pandaremit.com/pricing/rate/${from}/${to}`)
-    .then(r=>r.json())
-    .then(data=>{
-      const rate=parseFloat(data.model.pandaRate).toFixed(4);
-      const c=data.model.code, t=data.model.target;
-      document.getElementById("exchangeRate").innerHTML=
-        `<p style="font-size:20px;font-weight:bold;">1 ${c} = <span id="exchangeRateValue">${rate}</span> ${t}</p>`;
-      updateResult('num1','num2','multiply');
-    })
-    .catch(()=>{
-      document.getElementById("exchangeRate").innerHTML="<p>获取汇率数据错误，请稍后再试。</p>";
-    });
-}
-
-// ========= 🐼 点击页面生成小熊猫 =========
-let clickCount = 0;
-
-document.addEventListener('click', function(e) {
-  // 避免点击输入框或按钮触发
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('a')) return;
-
-  createMiniPandaAt(e.clientX, e.clientY);
-  clickCount++;
-  if (clickCount > 5) {
-    const hint = document.querySelector('.click-hint');
-    if(hint) hint.textContent = `已创建 ${clickCount} 只小熊猫！`;
-  }
-});
-
-function createMiniPandaAt(x, y) {
-  const miniPanda = document.createElement('div');
-  miniPanda.className = 'mini-panda';
-  miniPanda.style.left = `${x - 20}px`;
-  miniPanda.style.top = `${y - 20}px`;
-  miniPanda.style.animationDelay = `${Math.random() * 2}s`;
-  document.body.appendChild(miniPanda);
-
-  setTimeout(() => {
-    miniPanda.style.transition = 'all 0.3s';
-    miniPanda.style.opacity = '0';
-    miniPanda.style.transform = 'scale(0.5)';
-    setTimeout(() => {
-      if (miniPanda.parentNode) miniPanda.parentNode.removeChild(miniPanda);
-    }, 300);
-  }, 2000);
-}
-
-// ========= 🐼 熊猫 Logo 旋转 =========
-const pandaLogo = document.getElementById('pandaLogo');
-let currentRotation = 0;
-let animationId = null;
-let lastTimestamp = 0;
-let rotationSpeed = 0.5;
-
-function startSmoothRotation() {
-  if (animationId) cancelAnimationFrame(animationId);
-  function animate(timestamp) {
-    if (!lastTimestamp) lastTimestamp = timestamp;
-    const elapsed = timestamp - lastTimestamp;
-    if (elapsed > 16) {
-      currentRotation = (currentRotation + rotationSpeed) % 360;
-      pandaLogo.style.transform = `rotate(${currentRotation}deg)`;
-      lastTimestamp = timestamp;
+        select.appendChild(opt);
+      });
     }
-    animationId = requestAnimationFrame(animate);
-  }
-  animationId = requestAnimationFrame(animate);
-}
 
-if ('connection' in navigator && navigator.connection.saveData === true) {
-  rotationSpeed = 0.3;
-}
-</script>
+    // 页面加载
+    document.addEventListener("DOMContentLoaded", function () {
+
+      initCurrencySelect("fromCurrency");
+      initCurrencySelect("toCurrency");
+
+      document.getElementById("fromCurrency").value = "SGD";
+      document.getElementById("toCurrency").value = "CNY";
+
+      fetchExchangeRate();
+      loadTopRates();
+
+      document
+        .getElementById("fromCurrency")
+        .addEventListener("change", fetchExchangeRate);
+
+      document
+        .getElementById("toCurrency")
+        .addEventListener("change", fetchExchangeRate);
+
+      startSmoothRotation();
+    });
+
+    // 获取顶部热门汇率
+    async function loadTopRates() {
+
+      const container = document.getElementById("topRates");
+
+      let html = "";
+
+      for (const [from, to] of topRatePairs) {
+
+        try {
+
+          const res = await fetch(
+            `https://prod.pandaremit.com/pricing/rate/${from}/${to}`
+          );
+
+          const data = await res.json();
+
+          if (data.model && data.model.pandaRate) {
+
+            const rate =
+              parseFloat(data.model.pandaRate).toFixed(4);
+
+            html += `
+              <div class="top-rate-item">
+                1 ${from} =
+                <b>${rate}</b>
+                ${to}
+              </div>
+            `;
+          }
+
+        } catch (e) {
+
+          console.log(`${from}/${to} 获取失败`);
+        }
+      }
+
+      container.innerHTML = html;
+    }
+
+    // 获取当前汇率
+    function fetchExchangeRate() {
+
+      const from =
+        document.getElementById("fromCurrency").value;
+
+      const to =
+        document.getElementById("toCurrency").value;
+
+      fetch(`https://prod.pandaremit.com/pricing/rate/${from}/${to}`)
+
+        .then(r => r.json())
+
+        .then(data => {
+
+          if (!data.model || !data.model.pandaRate) {
+
+            document.getElementById("exchangeRate").innerHTML =
+              "<p>当前不支持该货币兑换组合</p>";
+
+            return;
+          }
+
+          const rate =
+            parseFloat(data.model.pandaRate).toFixed(4);
+
+          document.getElementById("exchangeRate").innerHTML =
+            `
+            <p style="font-size:22px;font-weight:bold;">
+              1 ${from} =
+              <span id="exchangeRateValue">${rate}</span>
+              ${to}
+            </p>
+            `;
+
+          updateResult('num1', 'num2', 'multiply');
+        })
+
+        .catch(() => {
+
+          document.getElementById("exchangeRate").innerHTML =
+            "<p>获取汇率数据错误，请稍后再试。</p>";
+        });
+    }
+
+    // 更新计算结果
+    function updateResult(inputId, outputId, operation) {
+
+      const inputElement =
+        document.getElementById(inputId);
+
+      const outputElement =
+        document.getElementById(outputId);
+
+      const exchangeRateElement =
+        document.getElementById("exchangeRateValue");
+
+      if (!exchangeRateElement) return;
+
+      const inputNumber =
+        parseFloat(inputElement.value) || 0;
+
+      const exchangeRate =
+        parseFloat(exchangeRateElement.innerText);
+
+      if (!exchangeRate) {
+
+        outputElement.value = "";
+        return;
+      }
+
+      let result;
+
+      if (operation === "multiply") {
+
+        result =
+          (inputNumber * exchangeRate).toFixed(2);
+
+      } else if (
+        operation === "divide" &&
+        inputNumber !== 0
+      ) {
+
+        result =
+          (inputNumber / exchangeRate).toFixed(2);
+
+      } else {
+
+        result = "";
+      }
+
+      outputElement.value = result;
+    }
+
+    // 去掉前导0
+    function removeLeadingZero(id) {
+
+      const el = document.getElementById(id);
+
+      el.value =
+        el.value.replace(/^0+(?=\d)/, '') || "0";
+    }
+
+    // 切换货币
+    function swapCurrencies() {
+
+      let fromCurrency =
+        document.getElementById("fromCurrency");
+
+      let toCurrency =
+        document.getElementById("toCurrency");
+
+      let tempValue = fromCurrency.value;
+
+      fromCurrency.value = toCurrency.value;
+      toCurrency.value = tempValue;
+
+      fetchExchangeRate();
+    }
+
+    // ===== 点击页面生成小熊猫 =====
+
+    let clickCount = 0;
+
+    document.addEventListener('click', function (e) {
+
+      if (
+        e.target.tagName === 'INPUT' ||
+        e.target.tagName === 'SELECT' ||
+        e.target.tagName === 'BUTTON' ||
+        e.target.tagName === 'A' ||
+        e.target.closest('a')
+      ) return;
+
+      createMiniPandaAt(e.clientX, e.clientY);
+
+      clickCount++;
+
+      if (clickCount > 5) {
+
+        const hint =
+          document.querySelector('.click-hint');
+
+        if (hint) {
+
+          hint.textContent =
+            `已创建 ${clickCount} 只小熊猫！`;
+        }
+      }
+    });
+
+    function createMiniPandaAt(x, y) {
+
+      const miniPanda =
+        document.createElement('div');
+
+      miniPanda.className = 'mini-panda';
+
+      miniPanda.style.left = `${x - 20}px`;
+      miniPanda.style.top = `${y - 20}px`;
+
+      miniPanda.style.animationDelay =
+        `${Math.random() * 2}s`;
+
+      document.body.appendChild(miniPanda);
+
+      setTimeout(() => {
+
+        miniPanda.style.transition = 'all 0.3s';
+        miniPanda.style.opacity = '0';
+        miniPanda.style.transform = 'scale(0.5)';
+
+        setTimeout(() => {
+
+          if (miniPanda.parentNode) {
+
+            miniPanda.parentNode.removeChild(miniPanda);
+          }
+
+        }, 300);
+
+      }, 2000);
+    }
+
+    // ===== Panda Logo 旋转 =====
+
+    const pandaLogo =
+      document.getElementById('pandaLogo');
+
+    let currentRotation = 0;
+    let animationId = null;
+    let lastTimestamp = 0;
+    let rotationSpeed = 0.5;
+
+    function startSmoothRotation() {
+
+      if (animationId) {
+
+        cancelAnimationFrame(animationId);
+      }
+
+      function animate(timestamp) {
+
+        if (!lastTimestamp) {
+
+          lastTimestamp = timestamp;
+        }
+
+        const elapsed =
+          timestamp - lastTimestamp;
+
+        if (elapsed > 16) {
+
+          currentRotation =
+            (currentRotation + rotationSpeed) % 360;
+
+          pandaLogo.style.transform =
+            `rotate(${currentRotation}deg)`;
+
+          lastTimestamp = timestamp;
+        }
+
+        animationId =
+          requestAnimationFrame(animate);
+      }
+
+      animationId =
+        requestAnimationFrame(animate);
+    }
+
+    // 省流量模式
+    if (
+      'connection' in navigator &&
+      navigator.connection.saveData === true
+    ) {
+
+      rotationSpeed = 0.3;
+    }
+
+  </script>
+
 </body>
 </html>
