@@ -1,16 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
   <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJGT6TL1SB"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
-      gtag('config', 'G-DJGT6TL1SB');
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>Bing的网站</title>
@@ -75,13 +65,7 @@
         const device = getDeviceType();
         const vh = window.innerHeight + "px";
 
-        if (device === 'mobile') {
-          frame.style.height = vh;
-        } else if (device === 'tablet') {
-          frame.style.height = vh;
-        } else {
-          frame.style.height = vh;
-        }
+        frame.style.height = vh;
       }
 
       function submitForm() {
@@ -117,14 +101,15 @@
               .replace(/&/g, '&amp;')
               .replace(/</g, '&lt;')
               .replace(/>/g, '&gt;');
+
           const displayHTML = `
               <pre style="white-space:pre-wrap;word-break:break-word;font-family:monospace;font-size:14px;padding:10px;">
 ${encoded}
               </pre>`;
 
-            const iframe = document.getElementById("pageFrame");
-            iframe.srcdoc = displayHTML;
-            adjustIframeSize();
+          const iframe = document.getElementById("pageFrame");
+          iframe.srcdoc = displayHTML;
+          adjustIframeSize();
         })
         .catch(err => {
           console.error("加载 iframe 页面失败：", err);
@@ -132,7 +117,7 @@ ${encoded}
         });
     }
 
-      // 初始化大小调整
+    // 初始化大小调整
     window.addEventListener('load', adjustIframeSize);
     window.addEventListener('resize', adjustIframeSize);
 
