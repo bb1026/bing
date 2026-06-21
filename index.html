@@ -34,10 +34,12 @@
       }
     </style>
   </head>
+
   <body>
     <div id="keyInputContainer">
       <input type="text" autocomplete="off" id="keyInput" onkeydown="checkKey(event)" placeholder="请输入访问密钥" />
     </div>
+
     <iframe id="pageFrame"></iframe>
 
     <script>
@@ -62,9 +64,7 @@
 
       function adjustIframeSize() {
         const frame = document.getElementById("pageFrame");
-        const device = getDeviceType();
         const vh = window.innerHeight + "px";
-
         frame.style.height = vh;
       }
 
@@ -73,57 +73,69 @@
         const pageFrame = document.getElementById("pageFrame");
 
         fetch('/js/multiple_content.json')
-        .then(response => {
-          if (!response.ok) throw new Error('无法加载 JSON');
-          return response.json();
-        })
-        .then(data => {
-          if (data.hasOwnProperty(key)) {
-            document.getElementById("keyInput").value = "";
-            fetchWithAuthAndInjectIframe(data[key]);
-          } else {
-            pageFrame.srcdoc = '<div style="text-align:center;margin-top:40px;font-size:18px;">❌ 暗号不对</div>';
-          }
-        })
-        .catch(error => {
-          console.error('加载 JSON 出错:', error.message || error);
-        });
-    }
+          .then(response => {
+            if (!response.ok) throw new Error('无法加载 JSON');
+            return response.json();
+          })
+          .then(data => {
+            if (data.hasOwnProperty(key)) {
+              document.getElementById("keyInput").value = "";
+              fetchWithAuthAndInjectIframe(data[key]);
+            } else {
+              pageFrame.srcdoc =
+                '<div style="text-align:center;margin-top:40px;font-size:18px;">❌ 暗号不对</div>';
+            }
+          })
+          .catch(error => {
+            console.error('加载 JSON 出错:', error.message || error);
+          });
+      }
 
-    function fetchWithAuthAndInjectIframe(url) {
-      fetch(url)
-        .then(res => {
-          if (!res.ok) throw new Error('页面加载失败');
-          return res.text();
-        })
-        .then(html => {
-          const encoded = html
+      function fetchWithAuthAndInjectIframe(url) {
+        let fullUrl;
+
+        try {
+          fullUrl = new URL(url, location.origin).href;
+        } catch (e) {
+          console.error("URL 解析失败：", e);
+          return;
+        }
+
+        fetch(fullUrl)
+          .then(res => {
+            if (!res.ok) throw new Error('页面加载失败');
+            return res.text();
+          })
+          .then(html => {
+            const encoded = html
               .replace(/&/g, '&amp;')
               .replace(/</g, '&lt;')
               .replace(/>/g, '&gt;');
 
-          const displayHTML = `
-              <pre style="white-space:pre-wrap;word-break:break-word;font-family:monospace;font-size:14px;padding:10px;">
+            const displayHTML = `
+<pre style="white-space:pre-wrap;word-break:break-word;font-family:monospace;font-size:14px;padding:10px;">
 ${encoded}
-              </pre>`;
+</pre>`;
 
-          const iframe = document.getElementById("pageFrame");
-          iframe.srcdoc = displayHTML;
-          adjustIframeSize();
-        })
-        .catch(err => {
-          console.error("加载 iframe 页面失败：", err);
-          document.getElementById("pageFrame").srcdoc = '<div style="text-align:center;margin-top:40px;font-size:18px;">🚫 页面加载失败</div>';
-        });
-    }
+            const iframe = document.getElementById("pageFrame");
+            iframe.srcdoc = displayHTML;
 
-    // 初始化大小调整
-    window.addEventListener('load', adjustIframeSize);
-    window.addEventListener('resize', adjustIframeSize);
+            adjustIframeSize();
+          })
+          .catch(err => {
+            console.error("加载 iframe 页面失败：", err);
+            document.getElementById("pageFrame").srcdoc =
+              '<div style="text-align:center;margin-top:40px;font-size:18px;">🚫 页面加载失败</div>';
+          });
+      }
 
-    // 禁止双击和缩放
-    document.addEventListener('gesturestart', e => e.preventDefault());
-    document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
-  </script>
-</body>
+      // 初始化大小调整
+      window.addEventListener('load', adjustIframeSize);
+      window.addEventListener('resize', adjustIframeSize);
+
+      // 禁止双击和缩放
+      document.addEventListener('gesturestart', e => e.preventDefault());
+      document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
+    </script>
+  </body>
 </html>
