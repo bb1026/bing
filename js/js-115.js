@@ -9,7 +9,7 @@ const settingsPath = fm.joinPath(fm.documentsDirectory(), "settings.json");
 const recordsPath = fm.joinPath(fm.documentsDirectory(), "records.json");
 
 const defaultSettings = {
-  baseSalary: 2200,
+  baseSalary: 2318.80,
   Housing_allowance: 250,
   attendance: 50,
   rateWeekday: 1.5,
@@ -1396,126 +1396,120 @@ render();
 }
 
 if (config.runsInWidget) {
-  const week = d => ["日","一","二","三","四","五","六"][d];
-const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const parse = s => { 
-  const [y,m,d]=s.split("-").map(Number); 
-  return new Date(y,m-1,d); 
-};
+  const week = d => ["日","一","二","三","四","五","六"][d.getDay()];
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const parse = s => { 
+    const [y,m,d]=s.split("-").map(Number); 
+    return new Date(y,m-1,d); 
+  };
 
-let targetDate;
-if (args.widgetParameter) {
-  const s = args.widgetParameter;
-  const year = Number(s.slice(0,4));
-  const month = Number(s.slice(4,6)) - 1;
-  targetDate = new Date(year, month);
-} else {
-  targetDate = new Date();
-}
+  let targetDate;
+  if (args.widgetParameter) {
+    const s = args.widgetParameter;
+    const year = Number(s.slice(0,4));
+    const month = Number(s.slice(4,6)) - 1;
+    targetDate = new Date(year, month, 1);
+  } else {
+    targetDate = new Date();
+  }
+  const targetYear = targetDate.getFullYear();
+  const targetMonth = targetDate.getMonth();
+  const monthName = `${targetYear}年${targetMonth+1}月`;
 
-const targetYear = targetDate.getFullYear();
-const targetMonth = targetDate.getMonth();
-const monthName = `${targetYear}年${targetMonth+1}月`;
+  const now = new Date();
+  let cutoffY = targetYear, cutoffM = targetMonth, cutoffD;
+  if (now.getFullYear() === targetYear && now.getMonth() === targetMonth) {
+    cutoffD = now.getDate(); 
+  } else {
+    cutoffD = new Date(targetYear, targetMonth+1, 0).getDate();
+  }
 
-let records = {};
-if (fm.fileExists(recordsPath)) {
-  records = JSON.parse(fm.readString(recordsPath));
-} else {
-  // 初始化模拟数据：改为目标月前后30天，而非实时今天
-  const base = new Date(targetYear, targetMonth, 15);
-  for (let i = 0; i < 30; i++) {
-    const d = new Date(base);
-    d.setDate(d.getDate() - i);
+  let records = {};
+  try {
+    if (fm && fm.fileExists(recordsPath)) {
+      records = JSON.parse(fm.readString(recordsPath));
+    }
+  } catch(e) {
+    console.log("读取记录失败，使用空记录");
+  }
+
+  let wd=0, sat=0, sun=0, total=0;
+  for (const [k,r] of Object.entries(records)) {
+    const d=parse(k);
+    const ry = d.getFullYear();
+    const rm = d.getMonth();
+    const rd = d.getDate();
+    // 不在目标年月 或者 日期超过截止日 → 跳过不计入
+    if (ry !== targetYear || rm !== targetMonth || rd > cutoffD) continue;
+
+    const h = Number(r.hours||0);
+    const day = d.getDay();
+    total += h;
+    if(day === 0) sun += h;
+    else if(day === 6) sat += h;
+    else wd += h;
+  }
+  
+  let daysToShow = 3;
+  if (config.widgetFamily === "medium") daysToShow = 5;
+  if (config.widgetFamily === "large") daysToShow = 15;
+
+  const cutoffDate = new Date(cutoffY, cutoffM, cutoffD);
+  const dates = Array.from({ length: daysToShow }, (_, i) => {
+    const d = new Date(cutoffDate);
+    d.setDate(cutoffDate.getDate() - i);
+    return d;
+  });
+
+  const recent = dates.map(d => {
     const k = fmt(d);
-    records[k] = { hours: Math.floor(Math.random() * 4), week: week(d.getDay()) };
+    const r = records[k] || {};
+    let hours;
+    switch (r.type) {
+      case 'pmRest': hours = '下午休'; break;
+      case 'amRest': hours = '上午休'; break;
+      case 'medical': hours = '病假'; break;
+      case 'holiday': hours = '节假日'; break;
+      case 'rest': hours = '请假'; break;
+      default: hours = (r.hours || 0) + ' 小时';
+    }
+    return { date: k, week: week(d), hours };
+  });
+
+  const tRecent = recent.map(r=>`${r.date.slice(5)}(周${r.week}): ${r.hours}`).join("\n");
+  const tMonth = `统计至${cutoffY}-${String(cutoffM+1).padStart(2,'0')}-${String(cutoffD).padStart(2,'0')}\n工作日：${wd} 小时\n周六：${sat} 小时\n周日：${sun} 小时\n合计：${total} 小时`;
+
+  const w = new ListWidget();
+  const g = new LinearGradient();
+  g.colors = [new Color("#9BACBD"), new Color("#C9B7A5")];
+  g.locations = [0,1];
+  w.backgroundGradient = g;
+
+  if (config.widgetFamily === "small") {
+    w.addText(tRecent).font = Font.boldSystemFont(13);
+    w.addText(`༺${monthName}༻`).font = Font.boldSystemFont(13);
+    w.addText(tMonth).font = Font.boldSystemFont(13);
+  } 
+  else {
+    const stack = w.addStack();
+    stack.layoutHorizontally();
+
+    const left = stack.addStack();
+    left.layoutVertically();
+    left.addText(`-----最近${daysToShow}天-----`).font = Font.boldSystemFont(16);
+    left.addSpacer(4);
+    left.addText(tRecent).font = Font.systemFont(16);
+    stack.addSpacer(20);
+
+    const right = stack.addStack();
+    right.layoutVertically();
+    right.addText(`༺${monthName}༻`).font = Font.boldSystemFont(16);
+    right.addSpacer(4);
+    right.addText(tMonth).font = Font.systemFont(16);
   }
-}
 
-let daysToShow = 3;
-if (config.widgetFamily === "medium") daysToShow = 5;
-if (config.widgetFamily === "large") daysToShow = 15;
-
-const lastDayOfTargetMonth = new Date(targetYear, targetMonth + 1, 0);
-const dates = Array.from({ length: daysToShow }, (_, i) => {
-  const d = new Date(lastDayOfTargetMonth);
-  d.setDate(lastDayOfTargetMonth.getDate() - i);
-  return d;
-});
-
-const recent = dates.map(d => {
-  const k = fmt(d);
-  const r = records[k] || {};
-  let hours;
-
-  switch (r.type) {
-    case 'pmRest':
-      hours = '下午休';
-      break;
-    case 'amRest':
-      hours = '上午休';
-      break;
-    case 'medical':
-      hours = '病假';
-      break;
-    case 'holiday':
-      hours = '节假日';
-      break;
-    case 'rest':
-      hours = '请假';
-      break;
-    default:
-      hours = (r.hours || 0) + ' 小时';
-  }
-
-  return { date: k, week: r.week || week(d.getDay()), hours };
-});
-
-let wd=0, sat=0, sun=0, total=0;
-for (const [k,r] of Object.entries(records)) {
-  const d=parse(k);
-  if (d.getFullYear() !== targetYear || d.getMonth() !== targetMonth) continue;
-  const h=r.hours||0, day=d.getDay();
-  total+=h;
-  if(day===0)sun+=h; 
-  else if(day===6)sat+=h; 
-  else wd+=h;
-}
-
-const tRecent = recent.map(r=>`${r.date.slice(5)}(周${r.week}): ${r.hours}`).join("\n");
-const tMonth = `工作日：${wd} 小时\n星期六：${sat} 小时\n星期天：${sun}小时\n总时间：${total} 小时`;
-
-const w = new ListWidget();
-const g = new LinearGradient();
-g.colors = [new Color("#9BACBD"), new Color("#C9B7A5")];
-g.locations = [0,1];
-w.backgroundGradient = g;
-
-if (config.widgetFamily === "small") {
-  w.addText(tRecent).font = Font.boldSystemFont(13);
-  w.addText(`༺${monthName}༻`).font = Font.boldSystemFont(13);
-  w.addText(tMonth).font = Font.boldSystemFont(13);
-} 
-else if (config.widgetFamily === "medium" || config.widgetFamily === "large") {
-  const stack = w.addStack();
-  stack.layoutHorizontally();
-
-  const left = stack.addStack();
-  left.layoutVertically();
-  left.addText(`-----最近${daysToShow}天-----`).font = Font.boldSystemFont(16);
-  left.addSpacer(4);
-  left.addText(tRecent).font = Font.systemFont(16);
-  stack.addSpacer(20);
-
-  const right = stack.addStack();
-  right.layoutVertically();
-  right.addText(`༺${monthName}༻`).font = Font.boldSystemFont(16);
-  right.addSpacer(4);
-  right.addText(tMonth).font = Font.systemFont(16);
-}
-
-Script.setWidget(w);
-Script.complete();
-
+  Script.setWidget(w);
+  Script.complete();
 } else {
   await loadHTML();
 }
@@ -1614,4 +1608,4 @@ function simpleHash(str) {
     hash = hash & hash;
   }
   return Math.abs(hash).toString(16);
-}}
+}}}
