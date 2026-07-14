@@ -1417,12 +1417,13 @@ if (config.runsInWidget) {
   const monthName = `${targetYear}年${targetMonth+1}月`;
 
   const now = new Date();
-  let cutoffY = targetYear, cutoffM = targetMonth, cutoffD;
-  if (now.getFullYear() === targetYear && now.getMonth() === targetMonth) {
-    cutoffD = now.getDate(); 
-  } else {
-    cutoffD = new Date(targetYear, targetMonth+1, 0).getDate();
-  }
+  let cutoffY, cutoffM, cutoffD;
+// 截止日期固定为昨天（今日减一天）
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  cutoffY = yesterday.getFullYear();
+  cutoffM = yesterday.getMonth();
+  cutoffD = yesterday.getDate();
 
   let records = {};
   try {
