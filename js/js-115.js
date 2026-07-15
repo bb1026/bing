@@ -1418,13 +1418,16 @@ if (config.runsInWidget) {
 
   const now = new Date();
   let cutoffY, cutoffM, cutoffD;
-// 截止日期固定为昨天（今日减一天）
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  cutoffY = yesterday.getFullYear();
-  cutoffM = yesterday.getMonth();
-  cutoffD = yesterday.getDate();
+/*
+// 截止日 = 今天
+if (now.getFullYear() === targetYear && now.getMonth() === targetMonth) {
+  cutoffD = now.getDate(); 
+} else {
+  cutoffD = new Date(targetYear, targetMonth+1, 0).getDate();
+}
+*/
 
+// 截止日 = 今天往前推1天
   let records = {};
   try {
     if (fm && fm.fileExists(recordsPath)) {
