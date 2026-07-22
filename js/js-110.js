@@ -192,9 +192,12 @@ async function sendNotificationIfNeeded(today, events) {
   const lunar = WidgetUtils.getLunarData(today);
   const dateStr = formatDate(today);
   const lunarStr = `${lunar.IMonthCn}${lunar.IDayCn}`;
-  //   const eventStr = todayEvents.join("、");
 
-  const body = [dateStr, lunarStr, term, todayEvents].filter(Boolean).join(" ");
+  // 过滤空值后去重
+  const tempArr = [dateStr, lunarStr, term, ...todayEvents].filter(Boolean);
+  // 数组去重
+  const uniqueArr = [...new Set(tempArr)];
+  const body = uniqueArr.join(" ");
 
   // 发送通知并记录
   const notification = new Notification();
