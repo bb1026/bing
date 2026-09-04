@@ -3,7 +3,7 @@
 // icon-color: deep-brown; icon-glyph: sync;
 this.name = "Panda Remit";
 this.widget_ID = "js-102";
-this.version = "v2.9";
+this.version = "v3.0";
 
 let installation, searchCurrency, currencyData, getUrls;
 await CheckKu();
@@ -16,26 +16,9 @@ const Moneycode = args.widgetParameter
   : "CNY";
 const rateurl = "https://prod.pandaremit.com/pricing/rate/SGD/" + Moneycode;
 const picurl = getUrls().BASE_URL + "imgs/Panda_Remit.JPG";
-const feeurl = "https://prod.pandaremit.com/web/ratefee/fee";
 
 async function fetchRateData() {
   const response = await new Request(rateurl).loadJSON();
-  return response;
-}
-
-async function fetchFeeData(targetCurrency, code) {
-  const request = new Request(feeurl);
-  request.method = "POST";
-  request.headers = {
-    "Content-Type": "application/json"
-  };
-  request.body = JSON.stringify({
-    targetCurrency: targetCurrency,
-    userId: "1093727",
-    sourceAmount: "2000",
-    sourceCurrency: code
-  });
-  const response = await request.loadJSON();
   return response;
 }
 
@@ -61,7 +44,9 @@ async function createWidget() {
   const imageStack = titleStack.addStack();
   const img = await getImage();
   const pic = imageStack.addImage(img);
-  pic.imageSize = new Size(50, 50);
+  pic.imageSize = new Size(45, 45);
+  pic.cornerRadius = 25;
+  titleStack.addSpacer(4);
 
   const textStack = titleStack.addStack();
   textStack.layoutVertically();
@@ -89,11 +74,6 @@ async function createWidget() {
     result.fromCurrency = fromCurrency;
     result.toCurrency = toCurrency;
 
-    const feeResponse = await fetchFeeData(targetCurrency, code);
-    if (feeResponse.suc) {
-      const fee = (feeResponse.model.fee * 1).toString();
-      const defaultFee = (feeResponse.model.defaultFee * 1).toString();
-
       const ratecode = textStack.addText(`${code} → ${targetCurrency}`);
       ratecode.font = Font.boldSystemFont(15);
 
@@ -120,8 +100,7 @@ async function createWidget() {
           minute: "numeric"
         })}`
       );
-      t.font = Font.systemFont(12);
-    }
+      t.font = Font.systemFont(14);
   }
   return { widget, result };
 }
@@ -183,8 +162,8 @@ if (config.runsInAccessoryWidget) {
   Script.setWidget(widget);
 } else if (config.runsInApp) {
   const { widget, result } = await createWidget();
-//   widget.presentSmall();
-  await showwebview();
+  widget.presentSmall();
+//   await showwebview();
 } else {
   const { widget, result } = await createWidget();
   Script.setShortcutOutput(result);
@@ -226,4 +205,5 @@ async function CheckKu() {
     console.error("请求失败:" + error.message);
     }
   }
+}
 }
