@@ -102,6 +102,7 @@ async function createWidget() {
       );
       t.font = Font.systemFont(14);
   }
+  widget.url = "PandaRemit://";
   return { widget, result };
 }
 
@@ -162,8 +163,8 @@ if (config.runsInAccessoryWidget) {
   Script.setWidget(widget);
 } else if (config.runsInApp) {
   const { widget, result } = await createWidget();
-  widget.presentSmall();
-//   await showwebview();
+//  widget.presentSmall();
+  await showwebview();
 } else {
   const { widget, result } = await createWidget();
   Script.setShortcutOutput(result);
